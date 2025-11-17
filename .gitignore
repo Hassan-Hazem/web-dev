@@ -1,0 +1,30 @@
+# ⚙️ Node.js/Backend
+
+# Dependencies
+/node_modules
+/npm-debug.log
+/yarn-error.log
+
+# Production/Build
+/dist
+/build
+/temp
+/logs
+
+# Environment Variables & Secrets
+.env
+.env.*
+.DS_Store
+
+# ⚛️ React/Frontend (if in a subdirectory, adjust paths)
+
+# Build artifacts
+/client/build
+/client/dist
+
+# Node dependencies for the client
+/client/node_modules
+
+# 💻 Operating System
+.DS_Store
+Thumbs.db
