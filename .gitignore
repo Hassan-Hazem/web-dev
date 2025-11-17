@@ -1,7 +1,7 @@
 # ⚙️ Node.js/Backend
 
 # Dependencies
-/node_modules
+Backend/node_modules
 /npm-debug.log
 /yarn-error.log
 
@@ -9,7 +9,7 @@
 /dist
 /build
 /temp
-/logs
+Backend/logs
 
 # Environment Variables & Secrets
 .env
