@@ -1,30 +1,60 @@
-# ⚙️ Node.js/Backend
+# ------------------------------------
+# ⚙️ Dependencies and Build Artifacts
+# ------------------------------------
 
-# Dependencies
-Backend/node_modules
-/npm-debug.log
-/yarn-error.log
+# Global Dependencies (ignores node_modules anywhere unless explicitly unignored)
+# This handles node_modules in Backend/ and Frontend/
+node_modules/
 
-# Production/Build
+# Root-level build output (if any)
 /dist
 /build
 /temp
+
+# Backend Build and Logs (Express/Node.js)
+Backend/dist
+Backend/build
 Backend/logs
 
-# Environment Variables & Secrets
+# Frontend Build (React/Vite)
+# Vite's default output directory is 'dist'
+Frontend/dist
+Frontend/build
+
+# ------------------------------------
+# 🔒 Environment Variables & Secrets
+# ------------------------------------
+
+# .env files (local configurations and secrets)
 .env
 .env.*
-.DS_Store
+# Common local config for Vite/React
+*.local
 
-# ⚛️ React/Frontend (if in a subdirectory, adjust paths)
+# ------------------------------------
+# 💻 Logs & Debugging Files
+# ------------------------------------
 
-# Build artifacts
-/client/build
-/client/dist
+# General log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Node dependencies for the client
-/client/node_modules
+# ------------------------------------
+# 💡 IDE & Operating System Files
+# ------------------------------------
 
-# 💻 Operating System
+# VS Code specific files
+.vscode/
+# Keep extensions.json so teammates can install recommended extensions
+!.vscode/extensions.json
+
+# JetBrains IDEs (IntelliJ, WebStorm, etc.)
+.idea/
+
+# macOS and Windows files
 .DS_Store
 Thumbs.db
