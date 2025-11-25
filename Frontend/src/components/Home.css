@@ -1,0 +1,87 @@
+.home-main {
+  margin-top: 64px;
+  margin-left: 250px;
+  margin-right: 300px;
+  padding: 32px 24px 24px 24px;
+  min-height: calc(100vh - 64px);
+  background: #f6f7f8;
+}
+
+.trending-section {
+  margin-bottom: 32px;
+}
+
+.trending-section h2 {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.trending-cards {
+  display: flex;
+  gap: 18px;
+}
+
+.trending-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  min-width: 260px;
+}
+
+.trending-card img {
+  width: 80px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-right: 14px;
+}
+
+.trending-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.trending-title {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.trending-subreddit {
+  font-size: 0.95rem;
+  color: #888;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.filter-btn {
+  background: #eaeaea;
+  color: #333;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+  background: #ff4500;
+  color: #fff;
+}
+
+.feed-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
