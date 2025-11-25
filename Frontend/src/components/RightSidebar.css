@@ -1,16 +1,19 @@
 .right-sidebar {
-  position: fixed;
+  position: sticky;
   top: 64px;
   right: 0;
-  width: 300px;
-  height: calc(100vh - 64px);
+  width: 320px;
+  height: fit-content;
+  max-height: calc(100vh - 64px);
   background: #f6f7f8;
   padding: 32px 16px 16px 16px;
   border-left: 1px solid #eaeaea;
-  z-index: 99;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
+  align-self: flex-start;
+  overflow-y: auto;
 }
 
 .community-card {

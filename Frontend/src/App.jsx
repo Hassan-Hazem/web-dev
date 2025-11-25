@@ -3,12 +3,14 @@ import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import RightSidebar from "./components/RightSidebar";
 import Home from "./components/Home";
+import TrendingCarousel from "./components/TrendingCarousel";
 import "./App.css";
 
 function App() {
   return (
     <div>
       <Navbar />
+      <TrendingCarousel />
       <div className="app-body">
         <Sidebar />
         <Home />

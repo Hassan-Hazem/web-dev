@@ -2,12 +2,6 @@ import React from "react";
 import "./Home.css";
 import PostCard from "./PostCard";
 
-const trending = [
-  { title: "Scarlett Johansson to star in new ‘Exorcist’", img: "https://via.placeholder.com/120x80", subreddit: "r/horror" },
-  { title: "Tornado strikes near Houston", img: "https://via.placeholder.com/120x80", subreddit: "r/tornado" },
-  { title: "Judge orders James Comey case dismissed", img: "https://via.placeholder.com/120x80", subreddit: "r/politics" },
-];
-
 const posts = [
   {
     id: 1,
@@ -41,20 +35,6 @@ const posts = [
 export default function Home() {
   return (
     <main className="home-main">
-      <section className="trending-section">
-        <h2>Trending</h2>
-        <div className="trending-cards">
-          {trending.map((item, idx) => (
-            <div className="trending-card" key={idx}>
-              <img src={item.img} alt={item.title} />
-              <div className="trending-info">
-                <span className="trending-title">{item.title}</span>
-                <span className="trending-subreddit">{item.subreddit}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
       <div className="filter-bar">
         <button className="filter-btn active">Best</button>
         <button className="filter-btn">Hot</button>
