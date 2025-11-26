@@ -1,0 +1,44 @@
+.auth-subtext {
+  font-size: 0.9375rem;
+  color: #1c1c1c;
+  line-height: 1.5;
+  margin-bottom: 32px;
+  text-align: left;
+}
+
+.back-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #1c1c1c;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.back-btn:hover {
+  background: #f6f7f8;
+}
+
+.username-feedback {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+.username-feedback.success {
+  color: #46d160;
+}
+
+.username-feedback svg {
+  width: 16px;
+  height: 16px;
+}
