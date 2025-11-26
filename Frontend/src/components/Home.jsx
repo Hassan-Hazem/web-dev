@@ -1,6 +1,8 @@
 import React from "react";
 import "./Home.css";
 import PostCard from "./PostCard";
+import TrendingCarousel from "./TrendingCarousel";
+import RightSidebar from "./RightSidebar";
 
 const posts = [
   {
@@ -35,16 +37,24 @@ const posts = [
 export default function Home() {
   return (
     <main className="home-main">
-      <div className="filter-bar">
-        <button className="filter-btn active">Best</button>
-        <button className="filter-btn">Hot</button>
-        <button className="filter-btn">New</button>
+      <TrendingCarousel />
+      <div className="home-grid">
+        <div className="feed-column">
+          <div className="filter-bar">
+            <button className="filter-btn active">Best</button>
+            <button className="filter-btn">Hot</button>
+            <button className="filter-btn">New</button>
+          </div>
+          <section className="feed-section">
+            {posts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
+          </section>
+        </div>
+        <div className="sidebar-column">
+          <RightSidebar />
+        </div>
       </div>
-      <section className="feed-section">
-        {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
-      </section>
     </main>
   );
 }

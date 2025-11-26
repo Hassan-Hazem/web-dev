@@ -10,11 +10,9 @@ function App() {
   return (
     <div>
       <Navbar />
-      <TrendingCarousel />
       <div className="app-body">
         <Sidebar />
         <Home />
-        <RightSidebar />
       </div>
     </div>
   );

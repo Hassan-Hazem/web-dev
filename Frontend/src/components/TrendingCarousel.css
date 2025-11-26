@@ -1,13 +1,12 @@
 /* Trending Carousel Styles */
 .trending-carousel-section {
-  position: fixed;
-  top: 64px;
-  left: 250px;
-  right: 0;
+  width: 100%;
+  max-width: 100%;
   background: #f6f7f8;
-  padding: 20px 24px;
-  z-index: 98;
+  padding: 20px 24px 16px 24px;
   border-bottom: 1px solid #eaeaea;
+  margin-bottom: 0;
+  overflow: hidden;
 }
 
 .trending-carousel {
@@ -19,6 +18,8 @@
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
+  max-width: 100%;
+  flex-wrap: nowrap;
 }
 
 .trending-carousel::-webkit-scrollbar {
