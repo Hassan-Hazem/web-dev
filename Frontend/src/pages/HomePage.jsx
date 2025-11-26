@@ -1,8 +1,8 @@
 import React from "react";
 import "./HomePage.css";
-import PostCard from "../components/PostCard";
-import TrendingCarousel from "../components/TrendingCarousel";
-import RightSidebar from "../components/RightSidebar";
+import PostCard from "../components/react/PostCard";
+import TrendingCarousel from "../components/react/TrendingCarousel";
+import RightSidebar from "../components/react/RightSidebar";
 
 const posts = [
   {

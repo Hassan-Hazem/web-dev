@@ -1,5 +1,5 @@
 import React from "react";
-import "./RightSidebar.css";
+import "../css/RightSidebar.css";
 
 const communities = [
   { name: "r/AskMen", members: "7,088,368" },

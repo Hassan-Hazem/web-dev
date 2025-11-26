@@ -1,5 +1,5 @@
 import React from "react";
-import "./TrendingCarousel.css";
+import "../css/TrendingCarousel.css";
 
 const trendingCarouselData = [
   { 

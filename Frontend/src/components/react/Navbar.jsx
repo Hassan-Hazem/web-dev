@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import "./Navbar.css";
-import redditLogo from "../assets/images/reddit_logo.png";
+import "../css/Navbar.css";
+import redditLogo from "../../assets/images/reddit_logo.png";
 import AuthModal from "./AuthModal";
 
 export default function Navbar() {
