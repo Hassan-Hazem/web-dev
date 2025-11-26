@@ -83,6 +83,7 @@
   display: flex;
   gap: 12px;
   margin-bottom: 24px;
+  margin-top: 24px;
 }
 
 .filter-btn {

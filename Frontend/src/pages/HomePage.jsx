@@ -1,8 +1,8 @@
 import React from "react";
-import "./Home.css";
-import PostCard from "./PostCard";
-import TrendingCarousel from "./TrendingCarousel";
-import RightSidebar from "./RightSidebar";
+import "./HomePage.css";
+import PostCard from "../components/PostCard";
+import TrendingCarousel from "../components/TrendingCarousel";
+import RightSidebar from "../components/RightSidebar";
 
 const posts = [
   {
@@ -34,7 +34,7 @@ const posts = [
   },
 ];
 
-export default function Home() {
+export default function HomePage() {
   return (
     <main className="home-main">
       <TrendingCarousel />

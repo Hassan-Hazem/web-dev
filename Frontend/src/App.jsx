@@ -1,9 +1,7 @@
 import React from "react";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
-import RightSidebar from "./components/RightSidebar";
-import Home from "./components/Home";
-import TrendingCarousel from "./components/TrendingCarousel";
+import HomePage from "./pages/HomePage";
 import "./App.css";
 
 function App() {
@@ -12,7 +10,7 @@ function App() {
       <Navbar />
       <div className="app-body">
         <Sidebar />
-        <Home />
+        <HomePage />
       </div>
     </div>
   );
