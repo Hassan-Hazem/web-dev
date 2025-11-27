@@ -49,13 +49,14 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }) {
           </svg>
         </button>
         {view === "login" ? (
-          <Login onSwitchToSignup={handleSwitchToSignup} />
+          <Login onSwitchToSignup={handleSwitchToSignup} closeModal={onClose} />
         ) : (
           <Signup
             step={signupStep}
             onSwitchToLogin={handleSwitchToLogin}
             onContinue={handleSignupContinue}
             setSignupStep={setSignupStep}
+            closeModal={onClose}
           />
         )}
       </div>

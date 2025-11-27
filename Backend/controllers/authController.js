@@ -15,7 +15,7 @@ const generateToken = (id) => {
 };
 
 export const register = async (req, res) => {
-
+console.log("Register request body:", req.body);
   const { error } = registerSchema.validate(req.body);
   
   if (error) {
@@ -61,7 +61,7 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-
+console.log("Login request body:", req.body);
   const { error } = loginSchema.validate(req.body);
 
   if (error) {

@@ -2,15 +2,19 @@ import React, { useState } from "react";
 import "../css/Navbar.css";
 import redditLogo from "../../assets/images/reddit_logo.png";
 import AuthModal from "./AuthModal";
+import { useAuth } from "../../context/authContext";
 
 export default function Navbar() {
+  const { user, logout } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authView, setAuthView] = useState("login");
 
-  const handleLoginClick = () => {
+  const openLoginModal = () => {
     setAuthView("login");
     setIsAuthModalOpen(true);
   };
+
+  const closeModal = () => setIsAuthModalOpen(false);
 
   return (
     <>
@@ -33,12 +37,37 @@ export default function Navbar() {
         </div>
         <div className="navbar-right">
           <button className="get-app-btn">Get App</button>
-          <button className="login-btn" onClick={handleLoginClick}>Log In</button>
+          {!user && (
+            <button className="login-btn" onClick={openLoginModal}>Log In</button>
+          )}
+          {user && (
+            <div className="user-section" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div className="user-avatar" style={{width:32,height:32,borderRadius:"50%",background:"#ff4500",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:600,fontSize:"0.85rem"}}>
+                {user.username ? user.username.charAt(0).toUpperCase() : "U"}
+              </div>
+              <span className="user-name" style={{fontWeight:500}}>{user.username}</span>
+              <button
+                className="logout-btn"
+                onClick={logout}
+                style={{
+                  background: "#eaeaea",
+                  color: "#333",
+                  border: "none",
+                  borderRadius: 20,
+                  padding: "6px 16px",
+                  fontWeight: 500,
+                  cursor: "pointer"
+                }}
+              >
+                Log Out
+              </button>
+            </div>
+          )}
         </div>
       </nav>
       <AuthModal
         isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
+        onClose={closeModal}
         initialView={authView}
       />
     </>

@@ -1,0 +1,17 @@
+{
+  "name": "web-dev",
+  "version": "1.0.0",
+  "description": "Reddit Clone - Full Stack Application",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd Backend && npm run dev",
+    "dev:frontend": "cd Frontend && npm run dev",
+    "start:backend": "cd Backend && npm start",
+    "start:frontend": "cd Frontend && npm run preview",
+    "install:all": "npm install && cd Backend && npm install && cd ../Frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

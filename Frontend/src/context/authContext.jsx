@@ -21,6 +21,7 @@ export const AuthProvider = ({ children }) => {
 
   // --- Register Action ---
   const register = async (username, email, password) => {
+    setLoading(true);
     try {
       const data = await registerUser({ username, email, password });
       
@@ -30,33 +31,37 @@ export const AuthProvider = ({ children }) => {
       
       setToken(data.token);
       setUser(data);
+      setLoading(false);
       return { success: true };
     } catch (error) {
-      console.error("Registration Error:", error.response?.data?.message);
+      console.error("Registration Error:", error.response?.data?.message || error.message);
+      setLoading(false);
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Registration failed' 
+        message: error.response?.data?.message || error.message || 'Registration failed' 
       };
     }
   };
 
-  // --- Login Action ---
+
   const login = async (loginIdentifier, password) => {
+    setLoading(true);
     try {
       const data = await loginUser({ loginIdentifier, password });
 
-      // Save data
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data));
 
       setToken(data.token);
       setUser(data);
+      setLoading(false);
       return { success: true };
     } catch (error) {
-      console.error("Login Error:", error.response?.data?.message);
+      console.error("Login Error:", error.response?.data?.message || error.message);
+      setLoading(false);
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Login failed' 
+        message: error.response?.data?.message || error.message || 'Login failed' 
       };
     }
   };
