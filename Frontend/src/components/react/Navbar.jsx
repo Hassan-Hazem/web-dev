@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import "../css/Navbar.css";
 import redditLogo from "../../assets/images/reddit_logo.png";
 import AuthModal from "./AuthModal";
+import CreatePostModal from "./CreatePostModal";
 import { useAuth } from "../../context/authContext";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [authView, setAuthView] = useState("login");
 
   const openLoginModal = () => {
@@ -15,6 +17,14 @@ export default function Navbar() {
   };
 
   const closeModal = () => setIsAuthModalOpen(false);
+  const openCreatePost = () => {
+    if (!user) {
+      openLoginModal();
+    } else {
+      setIsCreatePostOpen(true);
+    }
+  };
+  const closeCreatePost = () => setIsCreatePostOpen(false);
 
   return (
     <>
@@ -36,6 +46,10 @@ export default function Navbar() {
           </div>
         </div>
         <div className="navbar-right">
+          <button className="create-post-btn" onClick={openCreatePost}>
+            <span className="plus-icon">+</span>
+            Create
+          </button>
           <button className="get-app-btn">Get App</button>
           {!user && (
             <button className="login-btn" onClick={openLoginModal}>Log In</button>
@@ -69,6 +83,10 @@ export default function Navbar() {
         isOpen={isAuthModalOpen}
         onClose={closeModal}
         initialView={authView}
+      />
+      <CreatePostModal
+        isOpen={isCreatePostOpen}
+        onClose={closeCreatePost}
       />
     </>
   );
