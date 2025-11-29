@@ -1,0 +1,163 @@
+.auth-form-container {
+  padding: 60px 40px 40px;
+}
+
+.auth-header {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #1c1c1c;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.auth-legal-text {
+  font-size: 0.875rem;
+  color: #7c7c7c;
+  line-height: 1.5;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.auth-link {
+  color: #0079d3;
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.google-btn {
+  width: 100%;
+  padding: 14px 20px;
+  background: #fff;
+  border: 1px solid #d7dadc;
+  border-radius: 24px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1c1c1c;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: background 0.2s;
+  margin-bottom: 24px;
+}
+
+.google-btn:hover {
+  background: #f6f7f8;
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  margin: 32px 0;
+  color: #7c7c7c;
+  font-size: 0.875rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #edeff1;
+}
+
+.auth-divider span {
+  padding: 0 16px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: #f6f7f8;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  font-size: 1rem;
+  color: #1c1c1c;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.auth-input:focus {
+  background: #fff;
+  border-color: #1c1c1c;
+}
+
+.auth-input::placeholder {
+  color: #7c7c7c;
+}
+
+.forgot-password-link {
+  font-size: 0.875rem;
+  color: #0079d3;
+  text-decoration: none;
+  align-self: flex-start;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+}
+
+.auth-submit-btn {
+  width: 100%;
+  padding: 14px 20px;
+  background: #ff4500;
+  border: none;
+  border-radius: 24px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: background 0.2s;
+}
+
+.auth-submit-btn:hover:not(.disabled) {
+  background: #ff5414;
+}
+
+.auth-submit-btn.disabled {
+  background: #d7dadc;
+  cursor: not-allowed;
+}
+
+.auth-footer-text {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.875rem;
+  color: #7c7c7c;
+}
+
+.auth-switch-link {
+  color: #0079d3;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0;
+}
+
+.auth-switch-link:hover {
+  text-decoration: underline;
+}
