@@ -1,0 +1,79 @@
+.right-sidebar {
+  position: sticky;
+  top: 64px;
+  width: 312px;
+  height: calc(100vh - 64px);
+  background: #f6f7f8;
+  padding: 24px 16px 16px 16px;
+  border-left: 1px solid #eaeaea;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  overflow-y: auto;
+  align-self: flex-start;
+}
+
+.community-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.community-card h3 {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 18px;
+  color: #333;
+}
+
+.community-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+  width: 100%;
+}
+
+.community-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.community-icon {
+  width: 32px;
+  height: 32px;
+  background: #ff4500;
+  border-radius: 50%;
+  margin-right: 10px;
+  display: inline-block;
+}
+
+.community-name {
+  font-weight: 500;
+  color: #333;
+  margin-right: 8px;
+}
+
+.community-members {
+  font-size: 0.95rem;
+  color: #888;
+}
+
+.see-more-btn {
+  background: #eaeaea;
+  color: #333;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 8px;
+}
