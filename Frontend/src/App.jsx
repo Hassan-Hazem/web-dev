@@ -25,62 +25,6 @@ function App() {
           </Routes>
         </div>
       </div>
-=======
-    <Router>
-      <div>
-        <Navbar />
-        <div className="app-body">
-          <Sidebar />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/popular" element={<PopularPage />} />
-            <Route path="/explore" element={<ExplorePage />} />
-          </Routes>
-        </div>
-      </div>
->>>>>>> Stashed changes
-=======
-    <Router>
-      <div>
-        <Navbar />
-        <div className="app-body">
-          <Sidebar />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/popular" element={<PopularPage />} />
-            <Route path="/explore" element={<ExplorePage />} />
-          </Routes>
-        </div>
-      </div>
->>>>>>> Stashed changes
-=======
-    <Router>
-      <div>
-        <Navbar />
-        <div className="app-body">
-          <Sidebar />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/popular" element={<PopularPage />} />
-            <Route path="/explore" element={<ExplorePage />} />
-          </Routes>
-        </div>
-      </div>
->>>>>>> Stashed changes
-=======
-    <Router>
-      <div>
-        <Navbar />
-        <div className="app-body">
-          <Sidebar />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/popular" element={<PopularPage />} />
-            <Route path="/explore" element={<ExplorePage />} />
-          </Routes>
-        </div>
-      </div>
->>>>>>> Stashed changes
     </Router>
   );
 }
