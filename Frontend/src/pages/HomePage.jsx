@@ -1,60 +1,75 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "./HomePage.css";
-import PostCard from "../components/react/PostCard";
-import TrendingCarousel from "../components/react/TrendingCarousel";
-import RightSidebar from "../components/react/RightSidebar";
-
-const posts = [
-  {
-    id: 1,
-    title: "What kind of question is that?",
-    author: "funnyvideos",
-    subreddit: "r/funnyvideos",
-    votes: 123,
-    comments: 45,
-    image: "https://via.placeholder.com/400x200",
-  },
-  {
-    id: 2,
-    title: "Check out this amazing sunset!",
-    author: "naturelover",
-    subreddit: "r/pics",
-    votes: 98,
-    comments: 12,
-    image: "https://via.placeholder.com/400x200",
-  },
-  {
-    id: 3,
-    title: "My new gaming setup",
-    author: "gamer123",
-    subreddit: "r/gaming",
-    votes: 76,
-    comments: 30,
-    image: "https://via.placeholder.com/400x200",
-  },
-];
 
 export default function HomePage() {
   return (
-    <main className="home-main">
-      <TrendingCarousel />
-      <div className="home-grid">
-        <div className="feed-column">
-          <div className="filter-bar">
-            <button className="filter-btn active">Best</button>
-            <button className="filter-btn">Hot</button>
-            <button className="filter-btn">New</button>
+    <main className="homepage-main">
+      <div className="hero-section">
+        <div className="hero-content">
+          <h1 className="hero-title">Welcome to Our Community</h1>
+          <p className="hero-subtitle">
+            Discover, share, and connect with people around the world. 
+            Join millions of users sharing their stories, ideas, and passions.
+          </p>
+          <div className="hero-buttons">
+            <Link to="/popular" className="btn-primary">
+              Explore Popular Posts
+            </Link>
+            <button className="btn-secondary">Learn More</button>
           </div>
-          <section className="feed-section">
-            {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </section>
         </div>
-        <div className="sidebar-column">
-          <RightSidebar />
+        <div className="hero-image">
+          <div className="floating-card card-1">
+            <div className="card-icon">🔥</div>
+            <div className="card-text">Trending Topics</div>
+          </div>
+          <div className="floating-card card-2">
+            <div className="card-icon">💬</div>
+            <div className="card-text">Active Discussions</div>
+          </div>
+          <div className="floating-card card-3">
+            <div className="card-icon">⭐</div>
+            <div className="card-text">Top Communities</div>
+          </div>
         </div>
       </div>
+
+      <section className="features-section">
+        <h2 className="section-title">Why Join Our Community?</h2>
+        <div className="features-grid">
+          <div className="feature-card">
+            <div className="feature-icon">📱</div>
+            <h3>Stay Connected</h3>
+            <p>Follow your favorite topics and never miss an update from the communities you love.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">🌟</div>
+            <h3>Share Your Voice</h3>
+            <p>Post content, engage in discussions, and make your voice heard by millions.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">🎯</div>
+            <h3>Discover Content</h3>
+            <p>Explore trending posts, popular communities, and personalized recommendations.</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">🤝</div>
+            <h3>Build Community</h3>
+            <p>Connect with like-minded people and grow your network across diverse topics.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="cta-section">
+        <div className="cta-content">
+          <h2>Ready to Get Started?</h2>
+          <p>Join our community today and be part of something amazing</p>
+          <Link to="/popular" className="btn-cta">
+            View Popular Posts
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }

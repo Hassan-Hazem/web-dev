@@ -1,24 +1,35 @@
 import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import "../css/Sidebar.css";
 
 export default function Sidebar() {
   const [resourcesOpen, setResourcesOpen] = useState(false);
+  const location = useLocation();
 
   return (
     <aside className="sidebar">
       <nav className="sidebar-nav">
-        <a href="#" className="sidebar-link">
+        <Link 
+          to="/" 
+          className={`sidebar-link ${location.pathname === "/" ? "active" : ""}`}
+        >
           <span className="sidebar-icon home" />
           Home
-        </a>
-        <a href="#" className="sidebar-link">
+        </Link>
+        <Link 
+          to="/popular" 
+          className={`sidebar-link ${location.pathname === "/popular" ? "active" : ""}`}
+        >
           <span className="sidebar-icon popular" />
           Popular
-        </a>
-        <a href="#" className="sidebar-link">
+        </Link>
+        <Link 
+          to="/explore" 
+          className={`sidebar-link ${location.pathname === "/explore" ? "active" : ""}`}
+        >
           <span className="sidebar-icon explore" />
           Explore
-        </a>
+        </Link>
         <div className="sidebar-section">
           <button
             className="accordion-btn"
