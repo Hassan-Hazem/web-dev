@@ -1,19 +1,29 @@
 /* Explore Page Styles */
 .explore-main {
   margin-left: 250px;
-  margin-top: -64px; /* pull up under fixed navbar */
-  padding-top: 64px; /* add padding so content shows below navbar */
+  /* Removed padding-top because .app-body already has margin-top: 64px */
   background: white;
-  min-height: calc(100vh);
-  overflow-y: auto;
+  min-height: calc(100vh - 64px);
+  /* Removed overflow-x: hidden to ensure sticky works relative to window */
+  position: relative;
   color: #1c1c1c;
+  /* Ensure the main container doesn't exceed viewport width */
+  width: calc(100% - 250px);
+  box-sizing: border-box;
 }
 
 /* Header */
 .explore-header {
-  padding: 12px 40px 16px;
+  padding: 24px 40px 16px;
   background: white;
   border-bottom: 1px solid #edeff1;
+  position: sticky;
+  top: 64px;
+  z-index: 50;
+  margin: 0;
+  /* Ensure header stays within container width */
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .explore-header h1 {
@@ -40,6 +50,9 @@
   overflow-x: auto;
   padding-bottom: 8px;
   padding-top: 4px;
+  /* Prevent scroll chaining and ensure it fits */
+  max-width: 100%;
+  overscroll-behavior-x: contain;
 }
 
 .categories-bar::-webkit-scrollbar {
