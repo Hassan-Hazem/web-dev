@@ -1,35 +1,24 @@
 .popular-main {
-  margin-top: -64px;
   margin-left: 250px;
-  margin-right: 0;
-  padding: 0;
   padding-top: 64px;
-  min-height: calc(100vh - 64px);
   background: #f6f7f8;
-  flex: 1;
-  max-width: calc(100vw - 250px);
-  overflow-x: hidden;
+  width: calc(100vw - 250px);
 }
 
 .popular-grid {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 312px;
   gap: 24px;
-  align-items: flex-start;
   padding: 24px;
-  width: 100%;
-  /* No extra right padding needed with sticky sidebar */
+  margin-top: 16px;
 }
 
 .feed-column {
-  flex: 1;
   min-width: 0;
-  max-width: calc(100% - 336px);
 }
 
 .sidebar-column {
-  width: 312px;
-  flex-shrink: 0;
-  min-height: 1px; /* placeholder so layout reserves space */
+  /* Container for sticky sidebar */
 }
 
 .trending-section {
@@ -87,6 +76,12 @@
   gap: 12px;
   margin-bottom: 24px;
   margin-top: 24px;
+  position: sticky;
+  top: 64px; /* stick below fixed navbar */
+  z-index: 50; /* above content and sidebar */
+  background: #f6f7f8; /* match page bg to avoid visual jump */
+  padding: 12px 0; /* space for shadow area when sticking */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
 .filter-btn {
@@ -112,5 +107,5 @@
   gap: 24px;
   width: 100%;
   position: relative;
-  z-index: 10; /* Above sidebar, below navbar/carousel */
+  z-index: 7; /* Slightly above sidebar (6) to avoid overlap when needed */
 }

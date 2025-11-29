@@ -1,8 +1,6 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
+  height: 100%;
 }
 
 .logo {
@@ -33,18 +31,9 @@
   }
 }
 
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-=======
 .app-body {
   display: flex;
   flex-direction: row;
   margin-top: 64px;
   min-height: calc(100vh - 64px);
-  align-items: flex-start;
->>>>>>> main
 }
