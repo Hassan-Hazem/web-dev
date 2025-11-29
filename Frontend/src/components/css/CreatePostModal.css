@@ -9,6 +9,11 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  transition: background 0.2s;
+}
+
+.modal-overlay.dragging {
+  background: rgba(0, 121, 211, 0.1);
 }
 
 .create-post-modal {
@@ -197,6 +202,12 @@
 .upload-area:hover {
   border-color: #0079d3;
   background: #fff;
+}
+
+.upload-area.dragging {
+  border-color: #0079d3;
+  background: #e7f3ff;
+  border-width: 3px;
 }
 
 .upload-icon {
