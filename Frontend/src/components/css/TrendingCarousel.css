@@ -8,6 +8,8 @@
   margin-bottom: 0;
   margin-top: 0;
   overflow: hidden;
+  position: relative;
+  z-index: 15; /* Above sidebar; posts can still overlay when needed */
 }
 
 .trending-carousel {

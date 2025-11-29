@@ -17,6 +17,7 @@
   align-items: flex-start;
   padding: 24px;
   width: 100%;
+  /* No extra right padding needed with sticky sidebar */
 }
 
 .feed-column {
@@ -28,6 +29,7 @@
 .sidebar-column {
   width: 312px;
   flex-shrink: 0;
+  min-height: 1px; /* placeholder so layout reserves space */
 }
 
 .trending-section {
@@ -109,4 +111,6 @@
   flex-direction: column;
   gap: 24px;
   width: 100%;
+  position: relative;
+  z-index: 10; /* Above sidebar, below navbar/carousel */
 }
