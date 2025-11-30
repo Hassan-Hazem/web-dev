@@ -1,32 +1,52 @@
 import React, { useState } from "react";
 import "../css/Signup.css";
-import { useAuth } from "../../context/authContext";
 
-export default function Signup({ step, onSwitchToLogin, onContinue, setSignupStep, closeModal }) {
-  const { register, loading } = useAuth();
+export default function Signup({ 
+  step, 
+  onSwitchToLogin, 
+  onContinue, 
+  onRegistrationComplete,
+  setSignupStep 
+}) {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleStep1Submit = (e) => {
-    e.preventDefault();
+  const handleStep1Submit = () => {
     if (email && !loading) {
       setError("");
       onContinue();
     }
   };
 
-  const handleStep2Submit = async (e) => {
-    e.preventDefault();
+  const handleStep2Submit = async () => {
     if (!username || !password || loading) return;
     setError("");
+    setLoading(true);
     
-    const result = await register(username, email, password);
-    if (result.success) {
-      if (closeModal) closeModal();
-    } else {
-      setError(result.message || "Registration failed. Please try again.");
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Registration successful, move to verification
+        onRegistrationComplete(email);
+      } else {
+        setError(data.message || "Registration failed. Please try again.");
+      }
+    } catch (err) {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,27 +96,32 @@ export default function Signup({ step, onSwitchToLogin, onContinue, setSignupSte
             {error}
           </div>
         )}
-        <form onSubmit={handleStep1Submit} className="auth-form">
+        
+        <div className="auth-form">
           <div className="form-group">
             <input
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => { setEmail(e.target.value); if(error) setError(""); }}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && email && !loading) {
+                  handleStep1Submit();
+                }
+              }}
               className="auth-input"
-              required
               disabled={loading}
             />
           </div>
 
           <button
-            type="submit"
+            onClick={handleStep1Submit}
             className={`auth-submit-btn ${(!email || loading) ? "disabled" : ""}`}
             disabled={!email || loading}
           >
             {loading ? "Please wait..." : "Continue"}
           </button>
-        </form>
+        </div>
 
         <p className="auth-footer-text">
           Already a redditor?{" "}
@@ -129,6 +154,7 @@ export default function Signup({ step, onSwitchToLogin, onContinue, setSignupSte
         Reddit is anonymous, so your username is what you'll go by here. Choose
         wisely—because once you get a name, you can't change it.
       </p>
+      
       {error && (
         <div
           className="auth-error"
@@ -137,7 +163,8 @@ export default function Signup({ step, onSwitchToLogin, onContinue, setSignupSte
           {error}
         </div>
       )}
-      <form onSubmit={handleStep2Submit} className="auth-form">
+      
+      <div className="auth-form">
         <div className="form-group">
           <input
             type="text"
@@ -145,7 +172,6 @@ export default function Signup({ step, onSwitchToLogin, onContinue, setSignupSte
             value={username}
             onChange={(e) => { setUsername(e.target.value); if(error) setError(""); }}
             className="auth-input"
-            required
             disabled={loading}
           />
           {username && username.length >= 3 && (
@@ -170,20 +196,24 @@ export default function Signup({ step, onSwitchToLogin, onContinue, setSignupSte
             placeholder="Password"
             value={password}
             onChange={(e) => { setPassword(e.target.value); if(error) setError(""); }}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' && username && password && !loading) {
+                handleStep2Submit();
+              }
+            }}
             className="auth-input"
-            required
             disabled={loading}
           />
         </div>
 
         <button
-          type="submit"
+          onClick={handleStep2Submit}
           className={`auth-submit-btn ${(!username || !password || loading) ? "disabled" : ""}`}
           disabled={!username || !password || loading}
         >
           {loading ? "Registering..." : "Continue"}
         </button>
-      </form>
+      </div>
     </div>
   );
 }

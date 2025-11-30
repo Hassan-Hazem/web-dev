@@ -1,5 +1,5 @@
+import "dotenv/config";
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import connectDB from "./config/database.js";
@@ -8,7 +8,7 @@ import connectDB from "./config/database.js";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
 
-dotenv.config();
+
 
 connectDB();
 

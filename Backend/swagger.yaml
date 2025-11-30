@@ -15,7 +15,8 @@ components:
       bearerFormat: JWT
 
   schemas:
-    User:
+    # Full User object with Token (Used for Login & Verify Success)
+    UserWithToken:
       type: object
       properties:
         _id:
@@ -33,6 +34,24 @@ components:
           description: JWT Access Token
           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
+    # Registration Response (No Token, just Message)
+    RegistrationResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "654321abcdef1234567890"
+        username:
+          type: string
+          example: "CoolRedditor"
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        message:
+          type: string
+          example: "Registration successful. A verification code has been sent to your email."
+
     Error:
       type: object
       properties:
@@ -42,12 +61,13 @@ components:
 
 tags:
   - name: Auth
-    description: Authentication endpoints (Login & Register)
+    description: Authentication endpoints (Login, Register, Verification)
 
 paths:
   /api/auth/register:
     post:
       summary: Register a new user
+      description: Creates a user account and sends a verification email. Does NOT return a login token.
       tags:
         - Auth
       requestBody:
@@ -75,19 +95,67 @@ paths:
                   minLength: 6
                   example: "securePassword123"
       responses:
-        '201':
-          description: User registered successfully
+        "201":
+          description: User registered successfully (Verification Pending)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '400':
+                $ref: "#/components/schemas/RegistrationResponse"
+        "400":
           description: Validation error or User already exists
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-        '500':
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Server error (e.g. Email failed to send)
+
+  /api/auth/verify-email:
+    post:
+      summary: Verify email address
+      description: Validates the 6-digit code sent to the email and returns the login token.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - code
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "newuser@example.com"
+                code:
+                  type: string
+                  description: The 6-digit verification code
+                  example: "123456"
+      responses:
+        "200":
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/UserWithToken"
+                  - type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Email successfully verified."
+        "400":
+          description: Invalid code or missing fields
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: User not found
+        "500":
           description: Server error
 
   /api/auth/login:
@@ -113,23 +181,30 @@ paths:
                   type: string
                   example: "securePassword123"
       responses:
-        '200':
+        "200":
           description: Login successful
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '400':
+                $ref: "#/components/schemas/UserWithToken"
+        "400":
           description: Validation error (Missing fields)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          description: Invalid credentials
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Invalid credentials OR Email not verified
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-        '500':
+                $ref: "#/components/schemas/Error"
+              examples:
+                WrongPassword:
+                  value:
+                    message: "Invalid credentials"
+                Unverified:
+                  value:
+                    message: "Please verify your email before logging in."
+        "500":
           description: Server error
