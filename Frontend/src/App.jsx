@@ -7,11 +7,13 @@ import HomePage from "./pages/HomePage";
 import PopularPage from "./pages/PopularPage";
 import ExplorePage from "./pages/ExplorePage";
 import "./App.css";
+import Interests from "./components/react/Interests";
 
 
 function App() {
-
   return (
+
+    
 
     <Router>
       <div>
@@ -23,8 +25,10 @@ function App() {
             <Route path="/popular" element={<PopularPage />} />
             <Route path="/explore" element={<ExplorePage />} />
           </Routes>
+          
         </div>
       </div>
+    
     </Router>
   );
 }

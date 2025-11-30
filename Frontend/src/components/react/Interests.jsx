@@ -54,14 +54,15 @@ export default function Interests({ onComplete, onSkip }) {
     <div style={{
       padding: "60px 40px 40px",
       maxHeight: "90vh",
-      overflowY: "auto"
+      overflowY: "auto",
+      position: "relative" // keep absolute children (Skip) inside, away from modal close X
     }}>
       <button 
         onClick={onSkip}
         style={{
           position: "absolute",
           top: "16px",
-          right: "16px",
+          left: "16px",
           background: "none",
           border: "none",
           color: "#7c7c7c",
@@ -99,29 +100,33 @@ export default function Interests({ onComplete, onSkip }) {
       </p>
 
       {/* Category Tabs */}
-      <div style={{
+      <div className="hide-scrollbar" style={{
         display: "flex",
         gap: "12px",
         marginBottom: "24px",
         borderBottom: "1px solid #edeff1",
-        overflowX: "auto"
+        overflowX: "auto",
+        paddingBottom: "8px"
       }}>
         {Object.keys(interestsData).map(category => (
           <button
             key={category}
             onClick={() => setActiveCategory(category)}
             style={{
-              background: "none",
-              border: "none",
-              padding: "12px 16px",
+              background: activeCategory === category ? "#ffffff" : "transparent",
+              border: activeCategory === category ? "2px solid #0079d3" : "1px solid rgba(128,128,128,0.3)",
+              padding: "10px 14px",
+              borderRadius: "12px",
               fontSize: "0.9375rem",
-              fontWeight: "600",
+              fontWeight: 700,
               color: activeCategory === category ? "#0079d3" : "#7c7c7c",
-              borderBottom: activeCategory === category ? "2px solid #0079d3" : "2px solid transparent",
               cursor: "pointer",
               whiteSpace: "nowrap",
-              transition: "color 0.2s"
+              transition: "background 0.2s, color 0.2s, border-color 0.2s",
+              outline: "none",
+              boxShadow: "none"
             }}
+            onFocus={(e) => { e.target.style.outline = "none"; e.target.style.boxShadow = "none"; }}
           >
             {category === "Popular" && "🎯 "}
             {category === "Places & Travel" && "🌍 "}
@@ -143,27 +148,30 @@ export default function Interests({ onComplete, onSkip }) {
             key={interest}
             onClick={() => toggleInterest(interest)}
             style={{
-              background: selectedInterests.includes(interest) ? "#0079d3" : "#f6f7f8",
+              background: selectedInterests.includes(interest) ? "#0079d3" : "rgba(26,26,27,0.06)",
               color: selectedInterests.includes(interest) ? "#fff" : "#1c1c1c",
-              border: selectedInterests.includes(interest) ? "1px solid #0079d3" : "1px solid transparent",
+              border: selectedInterests.includes(interest) ? "2px solid #0079d3" : "1px solid rgba(128,128,128,0.3)",
               borderRadius: "20px",
               padding: "8px 16px",
               fontSize: "0.875rem",
-              fontWeight: "500",
+              fontWeight: selectedInterests.includes(interest) ? 700 : 500,
               cursor: "pointer",
               transition: "all 0.2s",
-              whiteSpace: "nowrap"
+              whiteSpace: "nowrap",
+              outline: "none",
+              boxShadow: selectedInterests.includes(interest) ? "0 0 0 2px rgba(0,121,211,0.18)" : "none"
             }}
             onMouseEnter={(e) => {
               if (!selectedInterests.includes(interest)) {
-                e.target.style.background = "#eaecef";
+                e.target.style.background = "rgba(26,26,27,0.12)";
               }
             }}
             onMouseLeave={(e) => {
               if (!selectedInterests.includes(interest)) {
-                e.target.style.background = "#f6f7f8";
+                e.target.style.background = "rgba(26,26,27,0.06)";
               }
             }}
+            onFocus={(e) => { e.target.style.outline = "none"; e.target.style.boxShadow = selectedInterests.includes(interest) ? "0 0 0 2px rgba(0,121,211,0.18)" : "none"; }}
           >
             {interest}
           </button>
