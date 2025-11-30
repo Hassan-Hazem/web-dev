@@ -2,25 +2,57 @@ import React, { useState } from "react";
 import "../css/AuthModal.css";
 import Login from "./Login";
 import Signup from "./Signup";
+import VerifyEmail from "./VerifyEmail";
+import Interests from "./Interests";
 
 export default function AuthModal({ isOpen, onClose, initialView = "login" }) {
   const [view, setView] = useState(initialView);
   const [signupStep, setSignupStep] = useState(1);
+  const [registrationEmail, setRegistrationEmail] = useState("");
+  const [userData, setUserData] = useState(null);
 
   if (!isOpen) return null;
 
   const handleSwitchToLogin = () => {
     setView("login");
     setSignupStep(1);
+    setRegistrationEmail("");
   };
 
   const handleSwitchToSignup = () => {
     setView("signup");
     setSignupStep(1);
+    setRegistrationEmail("");
   };
 
   const handleSignupContinue = () => {
     setSignupStep(2);
+  };
+
+  const handleRegistrationComplete = (email) => {
+    setRegistrationEmail(email);
+    setView("verify");
+  };
+
+  const handleVerificationComplete = (data) => {
+    setUserData(data);
+    setView("interests");
+  };
+
+  const handleInterestsComplete = (interests) => {
+    console.log("Selected interests:", interests);
+    // Here you can save interests to backend if needed
+    // For now, we'll just close the modal and complete the flow
+    window.location.reload(); // Reload to update the auth state
+  };
+
+  const handleInterestsSkip = () => {
+    window.location.reload(); // Reload to update the auth state
+  };
+
+  const handleBackToSignup = () => {
+    setView("signup");
+    setSignupStep(1);
   };
 
   const handleBackdropClick = (e) => {
@@ -48,15 +80,34 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }) {
             />
           </svg>
         </button>
-        {view === "login" ? (
+        
+        {view === "login" && (
           <Login onSwitchToSignup={handleSwitchToSignup} closeModal={onClose} />
-        ) : (
+        )}
+        
+        {view === "signup" && (
           <Signup
             step={signupStep}
             onSwitchToLogin={handleSwitchToLogin}
             onContinue={handleSignupContinue}
+            onRegistrationComplete={handleRegistrationComplete}
             setSignupStep={setSignupStep}
             closeModal={onClose}
+          />
+        )}
+        
+        {view === "verify" && (
+          <VerifyEmail
+            email={registrationEmail}
+            onVerified={handleVerificationComplete}
+            onBack={handleBackToSignup}
+          />
+        )}
+        
+        {view === "interests" && (
+          <Interests
+            onComplete={handleInterestsComplete}
+            onSkip={handleInterestsSkip}
           />
         )}
       </div>

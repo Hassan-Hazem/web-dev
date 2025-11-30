@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { loginUser, registerUser } from '../api/authApi';
+import { loginUser } from '../api/authApi';
 
 const AuthContext = createContext();
 
@@ -11,49 +11,47 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-   
     const storedUser = localStorage.getItem('user');
-    if (token && storedUser) {
-        setUser(JSON.parse(storedUser));
+    const storedToken = localStorage.getItem('token');
+    
+    if (storedToken && storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setToken(storedToken);
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        // Clear invalid data
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        setUser(null);
+        setToken(null);
+      }
     }
     setLoading(false);
-  }, [token]);
+  }, []);
 
-  // --- Register Action ---
-  const register = async (username, email, password) => {
-    setLoading(true);
-    try {
-      const data = await registerUser({ username, email, password });
-      
-      // Save data
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data));
-      
-      setToken(data.token);
-      setUser(data);
-      setLoading(false);
-      return { success: true };
-    } catch (error) {
-      console.error("Registration Error:", error.response?.data?.message || error.message);
-      setLoading(false);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || error.message || 'Registration failed' 
-      };
-    }
-  };
-
-
+  // Login Action
   const login = async (loginIdentifier, password) => {
     setLoading(true);
     try {
       const data = await loginUser({ loginIdentifier, password });
 
+      // Save token and user data
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data));
+      localStorage.setItem('user', JSON.stringify({
+        _id: data._id,
+        username: data.username,
+        email: data.email
+      }));
 
       setToken(data.token);
-      setUser(data);
+      setUser({
+        _id: data._id,
+        username: data.username,
+        email: data.email
+      });
+      
       setLoading(false);
       return { success: true };
     } catch (error) {
@@ -66,7 +64,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // --- Logout Action ---
+  // Logout Action
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -75,7 +73,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
       {!loading && children}
     </AuthContext.Provider>
   );
