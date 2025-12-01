@@ -1,23 +1,32 @@
+/* Overlay drawer container (matches Reddit header height) */
 .sidebar {
   position: fixed;
   top: 64px;
   left: 0;
-  width: 250px;
   height: calc(100vh - 64px);
-  background: #f6f7f8;
+  width: 264px;
+  background: #fff;
+  border-right: 1px solid #eaeaea;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  transform: translateX(0);
+  transition: transform 200ms cubic-bezier(.4,0,.2,1);
+  z-index: 90;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  border-right: 1px solid #eaeaea;
-  padding: 24px 0 16px 0;
-  z-index: 99;
+}
+
+/* Hidden (collapsed) state */
+.sidebar.collapsed {
+  transform: translateX(-100%);
+  pointer-events: none;
 }
 
 .sidebar-nav {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-left: 32px;
+  padding: 16px 0 16px 24px;
 }
 
 .sidebar-link {
@@ -128,4 +137,37 @@
   color: #888;
   text-decoration: none;
   margin: 0 4px;
+}
+
+/* Clickable backdrop shown when sidebar is open */
+.sidebar-backdrop {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 80;
+}
+
+/* On desktop sizes keep site interactive: hide the dim backdrop */
+@media (min-width: 1024px) {
+  .sidebar-backdrop {
+    display: none;
+  }
+
+  /* Keep sidebar fixed on desktop to avoid overlap; content naturally fills space */
+  .sidebar {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    transform: translateX(0);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    z-index: 90;
+  }
+
+  .sidebar.collapsed {
+    transform: translateX(-100%);
+    pointer-events: none;
+  }
 }
