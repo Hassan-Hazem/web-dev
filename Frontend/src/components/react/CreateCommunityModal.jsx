@@ -1,0 +1,227 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "../css/CreateCommunityModal.css"; // Import the CSS
+
+export default function CreateCommunityModal({ onClose }) {
+  const navigate = useNavigate();
+
+  const [step, setStep] = useState(1);
+  const [selectedInterests, setSelectedInterests] = useState([]);
+  const [communityName, setCommunityName] = useState("");
+  const [communityType, setCommunityType] = useState("public");
+  const [isAdult, setIsAdult] = useState(false);
+
+  // Categories with topics (grouped) — used to render chips grouped like Reddit categories
+  const CATEGORIES = [
+    {
+      id: 'technology',
+      name: 'Technology',
+      emoji: '💻',
+      topics: ['AI & ML','Web Development','Mobile Development','DevOps','Cybersecurity','Blockchain','Cloud Computing']
+    },
+    {
+      id: 'science',
+      name: 'Science',
+      emoji: '🔬',
+      topics: ['Physics','Biology','Chemistry','Astronomy','Earth Science','Neuroscience','Environmental Science']
+    },
+    {
+      id: 'arts',
+      name: 'Arts & Media',
+      emoji: '🎨',
+      topics: ['Photography','Music','Film & TV','Painting','Graphic Design','Literature','Theater']
+    },
+    {
+      id: 'gaming',
+      name: 'Gaming',
+      emoji: '🎮',
+      topics: ['PC Gaming','Console Gaming','Mobile Gaming','Esports','Game Development','Retro Games','VR/AR']
+    },
+    {
+      id: 'lifestyle',
+      name: 'Lifestyle',
+      emoji: '✨',
+      topics: ['Health & Fitness','Food & Cooking','Travel','Personal Finance','Home & Garden','Fashion','Relationships']
+    },
+    {
+      id: 'education',
+      name: 'Education',
+      emoji: '📚',
+      topics: ['STEM Education','Language Learning','Study Tips','Educational Tech','Research','Teaching Resources','Remote Learning']
+    },
+    {
+      id: 'business',
+      name: 'Business & Entrepreneurship',
+      emoji: '💼',
+      topics: ['Startups','Marketing','Product Management','Finance','E-commerce','Freelancing','HR & People Ops']
+    }
+  ];
+
+  const toggleInterest = (interest) => {
+    setSelectedInterests((prev) =>
+      prev.includes(interest)
+        ? prev.filter((i) => i !== interest)
+        : [...prev, interest]
+    );
+  };
+
+  const createCommunity = () => {
+    if (!communityName.trim()) return alert("Enter a community name.");
+
+    navigate(`/community/${communityName.toLowerCase()}`);
+    onClose();
+  };
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-card">
+        <button onClick={onClose} className="modal-close">×</button>
+
+        {/* Step 1: Topics (choose topics first) */}
+        {step === 1 && (
+          <div className="modal-step">
+            <h2 className="modal-title">Choose Topics</h2>
+            <p className="modal-desc">Select topics related to your community (optional).</p>
+
+            <div>
+              {CATEGORIES.map((cat) => (
+                <div key={cat.id} className="category-section">
+                  <h3 className="category-title">{cat.emoji} {cat.name}</h3>
+                  <div className="interests-grid topics-grid">
+                    {cat.topics.map((topic) => (
+                      <button
+                        key={topic}
+                        className={`interest-btn ${selectedInterests.includes(topic) ? "selected" : ""}`}
+                        onClick={() => toggleInterest(topic)}
+                        type="button"
+                      >
+                        {topic}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{display:'flex', justifyContent:'space-between', gap:12, marginTop:18}}>
+              <button onClick={onClose} className="btn btn-secondary">Cancel</button>
+              <div style={{marginLeft:'auto', display:'flex', gap:12}}>
+                <button onClick={() => setStep(2)} className="btn btn-primary">Next</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Community type (after topics) */}
+        {step === 2 && (
+          <div className="modal-step">
+            <h2 className="modal-title">What kind of community is this?</h2>
+            <p className="modal-desc">Decide who can view and contribute in your community. Only public communities show up in search.</p>
+
+            <div className="type-options">
+              <label className={`type-option ${communityType === 'public' ? 'selected' : ''}`} onClick={() => setCommunityType('public')}>
+                <div style={{display:'flex', alignItems:'center', gap:12}}>
+                  <span className="type-icon">🌐</span>
+                  <div className="type-option-label">
+                    <span className="type-option-name">Public</span>
+                    <span className="type-option-desc">Anyone can view, post, and comment to this community</span>
+                  </div>
+                </div>
+                <input
+                  className="type-radio"
+                  type="radio"
+                  name="communityType"
+                  checked={communityType === 'public'}
+                  onChange={() => setCommunityType('public')}
+                />
+              </label>
+
+              <label className={`type-option ${communityType === 'restricted' ? 'selected' : ''}`} onClick={() => setCommunityType('restricted')}>
+                <div style={{display:'flex', alignItems:'center', gap:12}}>
+                  <span className="type-icon">👁️</span>
+                  <div className="type-option-label">
+                    <span className="type-option-name">Restricted</span>
+                    <span className="type-option-desc">Anyone can view, but only approved users can contribute</span>
+                  </div>
+                </div>
+                <input
+                  className="type-radio"
+                  type="radio"
+                  name="communityType"
+                  checked={communityType === 'restricted'}
+                  onChange={() => setCommunityType('restricted')}
+                />
+              </label>
+
+              <label className={`type-option ${communityType === 'private' ? 'selected' : ''}`} onClick={() => setCommunityType('private')}>
+                <div style={{display:'flex', alignItems:'center', gap:12}}>
+                  <span className="type-icon">🔒</span>
+                  <div className="type-option-label">
+                    <span className="type-option-name">Private</span>
+                    <span className="type-option-desc">Only approved users can view and contribute</span>
+                  </div>
+                </div>
+                <input
+                  className="type-radio"
+                  type="radio"
+                  name="communityType"
+                  checked={communityType === 'private'}
+                  onChange={() => setCommunityType('private')}
+                />
+              </label>
+            </div>
+
+            <hr style={{margin: '18px 0', border: 'none', borderTop: '1px solid #e6e7eb'}} />
+
+            <div className="adult-option">
+              <div style={{display:'flex', alignItems:'center', gap:12}}>
+                <span className="type-icon">🔞</span>
+                <div>
+                  <div className="type-option-name">Mature (18+)</div>
+                  <div className="type-option-desc">Users must be over 18 to view and contribute</div>
+                </div>
+              </div>
+              <input
+                type="checkbox"
+                checked={isAdult}
+                onChange={() => setIsAdult(!isAdult)}
+              />
+            </div>
+
+            <div style={{display:'flex', justifyContent:'space-between', gap:12, marginTop:18}}>
+              <button onClick={() => setStep(1)} className="btn btn-secondary">Back</button>
+              <button onClick={() => setStep(3)} className="btn btn-primary">Next</button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Name & Description */}
+        {step === 3 && (
+          <div className="modal-step">
+            <h2 className="modal-title">Tell us about your community</h2>
+
+            <label className="modal-label">Community Name</label>
+            <input
+              className="modal-input"
+              placeholder="ex: technology"
+              value={communityName}
+              onChange={(e) => setCommunityName(e.target.value)}
+            />
+
+            <label className="modal-label">Description (optional)</label>
+            <textarea
+              className="modal-input"
+              placeholder="Write a short description for your community"
+              rows={4}
+            />
+
+            <div style={{display:'flex', justifyContent:'space-between', gap:12, marginTop:18}}>
+              <button onClick={() => setStep(2)} className="btn btn-secondary">Back</button>
+              <button onClick={createCommunity} className="btn btn-primary">Create</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
