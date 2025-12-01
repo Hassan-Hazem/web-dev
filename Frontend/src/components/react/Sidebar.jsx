@@ -30,6 +30,14 @@ export default function Sidebar() {
           <span className="sidebar-icon explore" />
           Explore
         </Link>
+        <Link 
+        to="/create-community" 
+        className={`sidebar-link ${location.pathname === "/create-community" ? "active" : ""}`}
+        >
+        <span className="sidebar-icon create" />
+        Start a community
+       </Link>
+
         <div className="sidebar-section">
           <button
             className="accordion-btn"
