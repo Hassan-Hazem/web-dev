@@ -18,9 +18,9 @@ function App() {
   return (
     <Router>
       <div>
-        <Navbar toggleSidebar={toggleSidebar} />
+        <Navbar />
         <div className="app-body">
-          <Sidebar isSidebarOpen={isSidebarOpen} />
+          <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
           {isSidebarOpen && (
             <div className="sidebar-backdrop" onClick={closeSidebar} />
           )}

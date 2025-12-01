@@ -11,7 +11,8 @@
   transform: translateX(0);
   transition: transform 200ms cubic-bezier(.4,0,.2,1);
   z-index: 90;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: visible;
   display: flex;
   flex-direction: column;
 }
@@ -20,6 +21,47 @@
 .sidebar.collapsed {
   transform: translateX(-100%);
   pointer-events: none;
+}
+
+/* Right-edge toggle that moves with the sidebar */
+.sidebar-edge-toggle {
+  position: fixed;
+  top: 76px;
+  left: 244px; /* 264px sidebar - 20px overlap */
+  width: 40px;
+  height: 40px;
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: left 200ms cubic-bezier(.4,0,.2,1), background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  z-index: 101; /* above navbar and everything */
+}
+
+.sidebar-edge-toggle svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.sidebar-edge-toggle svg line {
+  stroke: #1c1c1c;
+}
+
+
+/* When sidebar is collapsed, move button to left edge */
+.sidebar-edge-toggle[data-sidebar-open="false"] {
+  left: -20px;
+}
+
+.sidebar-edge-toggle:hover {
+  background: #f6f7f8;
+  border-color: #dcdcdc;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.12);
 }
 
 .sidebar-nav {

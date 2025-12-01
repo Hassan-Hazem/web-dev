@@ -5,7 +5,7 @@ import AuthModal from "./AuthModal";
 import CreatePostModal from "./CreatePostModal";
 import { useAuth } from "../../context/authContext";
 
-export default function Navbar({ toggleSidebar }) {
+export default function Navbar() {
   const { user, logout } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
@@ -30,17 +30,6 @@ export default function Navbar({ toggleSidebar }) {
     <>
       <nav className="navbar">
         <div className="navbar-left">
-          <button
-            className="sidebar-toggle-btn"
-            onClick={toggleSidebar}
-            aria-label="Toggle sidebar"
-          >
-            <span className="hamburger-icon">
-              <span></span>
-              <span></span>
-              <span></span>
-            </span>
-          </button>
           <div className="reddit-logo">
             <img src={redditLogo} alt="Reddit" className="reddit-icon" />
             <span className="reddit-text">reddit</span>
