@@ -37,3 +37,17 @@
   margin-top: 64px;
   min-height: calc(100vh - 64px);
 }
+
+/* Ensure content area can expand fully when sidebar is hidden */
+.app-body > :not(.sidebar) {
+  flex: 1 1 auto;
+}
+
+/* Utility: hide scrollbars but keep scrolling */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;    /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
