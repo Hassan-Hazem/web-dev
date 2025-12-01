@@ -4,9 +4,8 @@
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   min-height: calc(100vh - 48px);
   overflow-y: auto;
-  margin-left: 250px;
-  margin-top: -64px;
-  padding-top: 64px;
+  margin-left: 0;
+  padding-top: 0;
 }
 
 /* Hero Section */

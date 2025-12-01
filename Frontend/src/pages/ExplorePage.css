@@ -1,14 +1,16 @@
 /* Explore Page Styles */
 .explore-main {
-  margin-left: 250px;
+  margin-left: 0;
   /* Light Reddit page background */
   background: #dae0e6;
   min-height: calc(100vh - 64px);
-  /* Removed overflow-x: hidden to ensure sticky works relative to window */
+  padding-top: 0;
+  /* Prevent page-level horizontal scrollbar while keeping sticky working */
+  overflow-x: hidden;
   position: relative;
   color: #1c1c1c;
   /* Ensure the main container doesn't exceed viewport width */
-  width: calc(100% - 250px);
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -18,7 +20,7 @@
   background: #ffffff;
   border-bottom: 1px solid #ccc;
   position: sticky;
-  top: 64px;
+  top: 0;
   z-index: 50;
   margin: 0;
   /* Ensure header stays within container width */

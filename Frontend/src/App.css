@@ -31,6 +31,7 @@
   }
 }
 
+
 .app-body {
   display: flex;
   flex-direction: row;
@@ -38,9 +39,27 @@
   min-height: calc(100vh - 64px);
 }
 
-/* Ensure content area can expand fully when sidebar is hidden */
+.sidebar {
+  flex-shrink: 0;
+}
+
 .app-body > :not(.sidebar) {
   flex: 1 1 auto;
+}
+
+.main-content {
+  flex: 1 1 auto;
+  transition: margin-left 200ms cubic-bezier(.4,0,.2,1);
+  margin-left: 0;
+  width: 100%;
+}
+
+/* On desktop, shift content when sidebar is open */
+@media (min-width: 1024px) {
+  .main-content.sidebar-open {
+    margin-left: 264px;
+    width: calc(100% - 264px);
+  }
 }
 
 /* Utility: hide scrollbars but keep scrolling */

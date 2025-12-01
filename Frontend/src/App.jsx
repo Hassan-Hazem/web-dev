@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/react/Navbar";
 import Sidebar from "./components/react/Sidebar";
@@ -11,24 +11,28 @@ import Interests from "./components/react/Interests";
 
 
 function App() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
+  const closeSidebar = () => setIsSidebarOpen(false);
+
   return (
-
-    
-
     <Router>
       <div>
         <Navbar />
         <div className="app-body">
-          <Sidebar />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/popular" element={<PopularPage />} />
-            <Route path="/explore" element={<ExplorePage />} />
-          </Routes>
-          
+          <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+          {isSidebarOpen && (
+            <div className="sidebar-backdrop" onClick={closeSidebar} />
+          )}
+          <main className={`main-content ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/popular" element={<PopularPage />} />
+              <Route path="/explore" element={<ExplorePage />} />
+            </Routes>
+          </main>
         </div>
       </div>
-    
     </Router>
   );
 }
