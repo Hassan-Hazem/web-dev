@@ -10,7 +10,13 @@
   justify-content: space-between;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   z-index: 100;
-  padding: 0 32px;
+  padding: 0 20px;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .navbar-left .reddit-logo {
@@ -31,6 +37,37 @@
   font-weight: bold;
   color: #ff4500;
   letter-spacing: 1px;
+}
+
+.sidebar-toggle-btn {
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  padding: 0;
+  margin: 0;
+}
+.sidebar-toggle-btn:hover {
+  background: #f6f7f8;
+  border-color: #dcdcdc;
+}
+.hamburger-icon {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.hamburger-icon span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #1c1c1c;
+  border-radius: 2px;
 }
 
 .navbar-center {

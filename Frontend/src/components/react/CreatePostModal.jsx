@@ -9,6 +9,7 @@ export default function CreatePostModal({ isOpen, onClose }) {
   const [link, setLink] = useState("");
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [pollOptions, setPollOptions] = useState(["", ""]);
+  const [isDragging, setIsDragging] = useState(false);
 
   if (!isOpen) return null;
 
@@ -19,6 +20,34 @@ export default function CreatePostModal({ isOpen, onClose }) {
 
   const handleUploadClick = () => {
     document.getElementById("file-upload-input").click();
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    const imageVideoFiles = files.filter(file => 
+      file.type.startsWith('image/') || file.type.startsWith('video/')
+    );
+    
+    if (imageVideoFiles.length > 0) {
+      setPostType("image");
+      setSelectedFiles(imageVideoFiles);
+    }
   };
 
   const removeFile = (index) => {
@@ -66,7 +95,13 @@ export default function CreatePostModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div 
+      className={`modal-overlay ${isDragging ? 'dragging' : ''}`}
+      onClick={onClose}
+      onDragOver={postType === "image" ? handleDragOver : undefined}
+      onDragLeave={postType === "image" ? handleDragLeave : undefined}
+      onDrop={postType === "image" ? handleDrop : undefined}
+    >
       <div className="create-post-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Create a post</h2>
@@ -156,7 +191,13 @@ export default function CreatePostModal({ isOpen, onClose }) {
                 onChange={handleFileSelect}
                 style={{ display: "none" }}
               />
-              <div className="upload-area" onClick={handleUploadClick}>
+              <div 
+                className={`upload-area ${isDragging ? 'dragging' : ''}`}
+                onClick={handleUploadClick}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
                 <span className="upload-icon">📷</span>
                 <p>Drag and drop images or videos</p>
                 <button type="button" className="upload-btn">Upload</button>

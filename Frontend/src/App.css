@@ -31,9 +31,42 @@
   }
 }
 
+
 .app-body {
   display: flex;
   flex-direction: row;
   margin-top: 64px;
   min-height: calc(100vh - 64px);
+}
+
+.sidebar {
+  flex-shrink: 0;
+}
+
+.app-body > :not(.sidebar) {
+  flex: 1 1 auto;
+}
+
+.main-content {
+  flex: 1 1 auto;
+  transition: margin-left 200ms cubic-bezier(.4,0,.2,1);
+  margin-left: 0;
+  width: 100%;
+}
+
+/* On desktop, shift content when sidebar is open */
+@media (min-width: 1024px) {
+  .main-content.sidebar-open {
+    margin-left: 264px;
+    width: calc(100% - 264px);
+  }
+}
+
+/* Utility: hide scrollbars but keep scrolling */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;    /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }
