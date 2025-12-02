@@ -257,4 +257,26 @@
   .filter-emoji {
     margin-right: 6px;
   }
-    
+
+  .login-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh; 
+    text-align: center;
+    background: #f6f7f8; 
+    color: #333;
+    padding: 20px;
+  }
+  
+  .login-message h2 {
+    font-size: 2rem;
+    margin-bottom: 12px;
+  }
+  
+  .login-message p {
+    font-size: 1.2rem;
+    color: #555;
+  }
+  
