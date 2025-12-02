@@ -1,0 +1,245 @@
+/* --------------------------
+   Adjust this value if your
+   left sidebar width is different
+   -------------------------- */
+:root {
+  --left-sidebar-width: 250px;
+  --page-gutter: 32px;
+}
+
+/* Top-level page background (fills under the fixed sidebar) */
+.community-page {
+  background: #f6f7f8;
+  min-height: 100vh;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #1a1a1b;
+  position: relative;
+  /* no margin here — we use content-wrap to shift everything */
+}
+
+/* This wrapper ensures none of the community area can go under the fixed left sidebar.
+   It explicitly reserves the left sidebar width so banner/header never flow behind it. */
+.content-wrap {
+  margin-left: var(--left-sidebar-width);
+  width: calc(100% - var(--left-sidebar-width));
+  box-sizing: border-box;
+  padding-top: 48px; /* space under global top navbar (if any) */
+}
+
+/* Banner — now constrained to the right of the sidebar */
+.community-banner {
+  height: 160px;
+  width: calc(100% - (var(--page-gutter) * 2));
+  margin: 0 var(--page-gutter);
+  background: linear-gradient(180deg, #e9eef0, #d7dfe2);
+  background-size: cover;
+  background-position: center;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.02);
+}
+
+/* Banner edit input hidden & floating edit button */
+.banner-input { display: none; }
+.banner-edit {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border: 1px solid #e6e9ec;
+  cursor: pointer;
+  font-size: 14px;
+  color: #6b7280;
+  box-shadow: 0 4px 10px rgba(15,15,15,0.06);
+}
+
+/* Header area directly below banner */
+.community-header {
+  background: white;
+  margin: 16px var(--page-gutter) 0 var(--page-gutter);
+  padding: 48px 24px 12px 24px; /* big top padding so the icon overlaps banner */
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  border-radius: 8px;
+  border: 1px solid rgba(17,24,39,0.04);
+  position: relative;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+}
+
+/* the round community icon that overlaps banner+header */
+.community-icon {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid white;
+  position: absolute;
+  left: calc(var(--page-gutter) + 8px);
+  top: -44px; /* this creates the overlap half-on-banner half-on-header */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  z-index: 4;
+}
+
+.community-icon-text {
+  font-weight: 800;
+  font-size: 28px;
+  color: #111827;
+}
+
+/* left side container: we offset margin-left to give space for the absolute icon */
+.community-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: 120px; /* gives room for icon so text doesn't overlap it */
+}
+
+/* title + subtile */
+.community-meta { display:flex; flex-direction:column; gap:6px; }
+.community-name {
+  font-size: 28px;
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+.community-sub {
+  color: #6b7280;
+  font-size: 13px;
+  display:flex;
+  gap: 8px;
+  align-items:center;
+}
+
+/* actions to the right */
+.community-actions {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.btn {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #111827;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+}
+
+.btn.create-post {
+  background: #ff4500;
+  color: #fff;
+  padding: 10px 18px;
+  font-weight: 800;
+}
+
+.btn.more {
+  width: 44px;
+  height: 44px;
+  background: white;
+  border: 1px solid #e6e9ec;
+  border-radius: 50%;
+}
+
+/* sort bar */
+.sort-bar {
+  display:flex;
+  align-items:center;
+  margin: 12px var(--page-gutter);
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(17,24,39,0.05);
+}
+.sort-left { display:flex; gap:12px; align-items:center; }
+
+/* page content: posts + sidebar */
+.community-content {
+  display:flex;
+  gap: 24px;
+  margin: 18px var(--page-gutter) 40px var(--page-gutter);
+}
+
+/* posts column */
+.posts-column { flex:1 1 68%; display:flex; flex-direction:column; gap:16px; }
+
+/* empty state */
+.empty-state {
+  margin: 0;
+  padding: 48px 28px;
+  background: white;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid rgba(17,24,39,0.04);
+  box-shadow: 0 2px 10px rgba(16,24,40,0.03);
+}
+.empty-state h2 {
+  font-size: 32px;
+  margin: 0 0 8px 0;
+  font-weight: 800;
+}
+
+/* post card */
+.post-card {
+  background: white;
+  border-radius: 8px;
+  padding: 14px;
+  border: 1px solid rgba(17,24,39,0.04);
+}
+
+/* sidebar */
+.community-sidebar {
+  width: 310px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+/* generic sidebar card */
+.sidebar-card {
+  background: white;
+  border-radius: 8px;
+  padding: 14px;
+  border: 1px solid rgba(17,24,39,0.04);
+  box-shadow: 0 2px 8px rgba(16,24,40,0.03);
+}
+
+/* smaller controls */
+.stats-card { display:flex; justify-content:space-between; text-align:center; padding:12px; gap:12px; }
+.stat { flex:1; }
+.stat-num { font-weight: 800; color:#0b61d5; font-size:18px; }
+.stat-label { color:#6b7280; font-size:12px; }
+
+/* moderators card */
+.mods-card h3 { margin: 0 0 10px 0; font-size:12px; color:#6b7280; letter-spacing:0.6px; }
+.message-mods { width:100%; background:#f2f4f6; border:1px solid #e6e9ec; border-radius:999px; padding:10px; font-weight:700; display:flex; gap:8px; align-items:center; }
+.invite-mod { margin:12px 0; color:#0b61d5; font-weight:700; cursor:pointer; }
+.mod-list { display:flex; flex-direction:column; gap:10px; margin-bottom:12px; }
+.mod-item { display:flex; gap:10px; align-items:center; }
+.mod-avatar { width:36px; height:36px; background:#e6f4ea; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; }
+
+/* responsive */
+@media (max-width: 1100px) {
+  .community-content { flex-direction:column; }
+  .community-sidebar { width:100%; order:2; }
+  .posts-column { order:1; }
+}
+
+@media (max-width: 900px) {
+  :root { --left-sidebar-width: 0px; }
+  .content-wrap { margin-left: 0; width: 100%; padding-top: 12px; }
+  .community-banner { width: calc(100% - 32px); margin: 0 16px; }
+  .community-header { margin: 8px 16px 0 16px; padding: 28px 16px 12px 16px; }
+  .community-left { margin-left: 96px; }
+}
