@@ -2,13 +2,12 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 import connectDB from "./config/database.js";
 
 // --- Swagger Imports ---
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
-
-
 
 connectDB();
 
@@ -39,7 +38,7 @@ app.use(
 
 // --- Routes ---
 app.use("/api/auth", authRoutes);
-
+app.use("/api/upload", uploadRoutes);
 // --- Server Startup ---
 const PORT = process.env.PORT || 5000;
 
