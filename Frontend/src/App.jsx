@@ -5,7 +5,12 @@ import Sidebar from "./components/react/Sidebar";
 import HomePage from "./pages/HomePage";
 import PopularPage from "./pages/PopularPage";
 import ExplorePage from "./pages/ExplorePage";
+
+
 import CommunityPage from "./pages/CommunityPage";
+import UserProfilePage from "./pages/UserProfilePage";
+
+
 
 import "./App.css";
 import Interests from "./components/react/Interests";
@@ -20,6 +25,8 @@ function App() {
       <div>
         <Navbar />
         <div className="app-body">
+
+          
           {/* Sidebar from main branch */}
           <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
@@ -34,7 +41,7 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/popular" element={<PopularPage />} />
               <Route path="/explore" element={<ExplorePage />} />
-
+ <Route path="/user/:username" element={<UserProfilePage />} />
               {/* The route from YOUR branch */}
               <Route path="/community/:name" element={<CommunityPage />} />
             </Routes>
