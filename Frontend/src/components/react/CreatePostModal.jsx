@@ -189,7 +189,7 @@ export default function CreatePostModal({ isOpen, onClose }) {
                 accept="image/*,video/*"
                 multiple
                 onChange={handleFileSelect}
-                style={{ display: "none" }}
+                className="hidden-file-input"
               />
               <div 
                 className={`upload-area ${isDragging ? 'dragging' : ''}`}

@@ -68,6 +68,14 @@ export default function Navbar() {
           )}
 
           {user && (
+            <div className="user-section">
+              <div className="user-avatar">
+                {user.username ? user.username.charAt(0).toUpperCase() : "U"}
+              </div>
+              <span className="user-name">{user.username}</span>
+              <button
+                className="logout-btn"
+                onClick={logout}
             <div
               className="user-section"
               style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}

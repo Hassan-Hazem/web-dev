@@ -161,3 +161,11 @@
 .auth-switch-link:hover {
   text-decoration: underline;
 }
+
+/* Extracted inline error style from Login.jsx */
+.auth-error {
+  color: #d93025;
+  margin-bottom: 12px;
+  text-align: center;
+  font-size: 0.875rem;
+}

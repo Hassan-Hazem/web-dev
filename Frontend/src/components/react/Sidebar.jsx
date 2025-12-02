@@ -144,11 +144,22 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar }) {
         onClick={toggleSidebar}
         data-sidebar-open={isSidebarOpen}
       >
-        <svg width="22" height="22" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <line x1="7" y1="4" x2="7" y2="18" stroke="#333" stroke-width="2.5" stroke-linecap="round" />
-          <line x1="11" y1="4" x2="11" y2="18" stroke="#333" stroke-width="2.5" stroke-linecap="round" />
-          <line x1="15" y1="4" x2="15" y2="18" stroke="#333" stroke-width="2.5" stroke-linecap="round" />
+        {/* SVG hamburger (primary) */}
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          aria-hidden="true"
+          className="hamburger-svg"
+        >
+          <path d="M3 5 H17" stroke="#000" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M3 10 H17" stroke="#000" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M3 15 H17" stroke="#000" strokeWidth="2.5" strokeLinecap="round" />
         </svg>
+        {/* CSS hamburger fallback (in case svg is overridden) */}
+        <span className="hamburger-fallback" aria-hidden="true" />
       </button>
       <aside className={`sidebar ${isSidebarOpen ? 'open' : 'collapsed'}`} data-open={isSidebarOpen}>
         <nav className="sidebar-nav">

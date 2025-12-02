@@ -46,10 +46,46 @@
   display: block;
   width: 20px;
   height: 20px;
+  color: #000;
 }
 
 .sidebar-edge-toggle svg line {
-  stroke: #1c1c1c;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+/* Fallback CSS hamburger: shows if SVG fails (hidden normally) */
+.sidebar-edge-toggle .hamburger-fallback {
+  position: absolute;
+  width: 18px;
+  height: 12px;
+  display: block;
+}
+.sidebar-edge-toggle .hamburger-fallback,
+.sidebar-edge-toggle .hamburger-fallback::before,
+.sidebar-edge-toggle .hamburger-fallback::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #000;
+  border-radius: 2px;
+}
+.sidebar-edge-toggle .hamburger-fallback { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.sidebar-edge-toggle .hamburger-fallback::before { top: -6px; }
+.sidebar-edge-toggle .hamburger-fallback::after { top: 6px; }
+
+/* If for any reason the SVG is not visible, show fallback */
+.sidebar-edge-toggle .hamburger-svg { display: none; }
+.sidebar-edge-toggle svg[width="0"],
+.sidebar-edge-toggle svg[height="0"],
+.sidebar-edge-toggle svg[hidden] {
+  display: none;
+}
+.sidebar-edge-toggle svg[hidden] + .hamburger-fallback,
+.sidebar-edge-toggle svg[style*="display: none"] + .hamburger-fallback {
+  display: block;
 }
 
 

@@ -89,12 +89,7 @@ export default function Signup({
         </div>
 
         {error && step === 1 && (
-          <div
-            className="auth-error"
-            style={{ color: "#d93025", marginBottom: 12, textAlign: "center", fontSize: "0.875rem" }}
-          >
-            {error}
-          </div>
+          <div className="auth-error">{error}</div>
         )}
         
         <div className="auth-form">
@@ -156,12 +151,7 @@ export default function Signup({
       </p>
       
       {error && (
-        <div
-          className="auth-error"
-          style={{ color: "#d93025", marginBottom: 12, textAlign: "center", fontSize: "0.875rem" }}
-        >
-          {error}
-        </div>
+        <div className="auth-error">{error}</div>
       )}
       
       <div className="auth-form">
