@@ -1,0 +1,254 @@
+.right-sidebar {
+    width: 320px;
+    position: sticky;
+    top: 80px;
+    font-family: Arial, sans-serif;
+    z-index: 2;
+  }
+  
+  .rs-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #d7d8da;
+    overflow: hidden;
+  }
+  
+  .rs-cover.large {
+    height: 140px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 34px; 
+    transition: transform 0.12s ease;
+  }
+  
+  .rs-cover.large::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.25));
+    pointer-events: none;
+  }
+  
+  .rs-cover-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 4;
+  }
+  
+  .rs-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.9);
+    color: #0b1416;
+    padding: 6px 10px;
+    border-radius: 18px;
+    border: 1px solid rgba(11,20,22,0.08);
+    cursor: pointer;
+    font-size: 13px;
+  }
+
+  .rs-add-btn:hover {
+     transform: translateY(-1px); 
+    }
+  
+  .rs-avatar {
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    background: white;
+    color: #0b1416;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    bottom: -30px;
+    left: 16px;
+    font-size: 24px;
+    z-index: 5;
+    border: 3px solid white;
+  }
+  
+  .rs-username {
+    position: absolute;
+    bottom: 8px;
+    left: 96px;
+    color: white;
+    font-weight: 700;
+    z-index: 5;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  }
+  
+  hr {
+     border: none; 
+     border-top: 1px solid #e5e5e5; 
+     margin: 0; 
+    }
+  
+  .rs-section {
+     padding: 12px 16px; 
+     display: flex; flex-direction: 
+     column; gap: 8px; 
+    }
+
+  .rs-section-title {
+     font-size: 13px; 
+     font-weight: 600; 
+     color: #1c1c1c; 
+     margin-bottom: 6px; 
+    }
+  
+  .rs-info-row { 
+    display:flex; justify-content: 
+    space-between; font-size: 13px; 
+    color: #4e4e4e; 
+   }
+
+  .rs-info-label {
+     color: #7a7a7a; 
+    }
+
+  .rs-info-value {
+     font-weight: 600; 
+    }
+  
+  .rs-badges { 
+    display:flex; 
+    gap:6px; 
+    flex-wrap:wrap; 
+}
+
+  .rs-badge { 
+    background:#f6f7f8; 
+    padding:4px 6px; 
+    border-radius:8px; 
+    font-size:12px; 
+}
+  
+  .rs-button { 
+    background: #f6f7f8; 
+    border: none; 
+    padding: 6px 10px; 
+    border-radius: 8px; 
+    cursor:pointer; 
+    font-size:12px; 
+    color: black
+}
+
+  .rs-button:hover { 
+    background:#e1e3e6; 
+}
+  
+  .rs-setting-row {
+     display:flex; 
+     justify-content:space-between; 
+     align-items:center; 
+     font-size:13px; 
+     background:#fff;
+      padding:6px 0; 
+    }
+  
+  .rs-trophy { 
+    background:#f6f7f8; 
+    padding:4px 6px; 
+    border-radius:8px; 
+    font-size:12px; 
+}
+  
+  .upload-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index: 1000;
+  }
+  
+  .upload-modal {
+    width: 360px;
+    background: white;
+    border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  }
+  
+  .upload-modal h3 {
+     margin:0 0 10px 0; 
+     font-size:18px; 
+    }
+  
+  .upload-dropbox {
+    border: 2px dashed #c6d9ff;
+    border-radius: 10px;
+    padding: 20px;
+    text-align:center;
+    background: #fbfdff;
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .upload-dropbox .drop-text {
+     font-weight: 600; 
+     color: #0b1416; 
+    }
+
+  .upload-dropbox .browse {
+     color: #0066ff; 
+     text-decoration: underline; 
+     cursor: pointer; 
+     font-weight:700; 
+    }
+  
+  .formats { 
+    font-size: 12px; 
+    color: #555; 
+    margin-top: 8px; 
+}
+  
+  .preview-img {
+     margin-top:10px; 
+     max-width:100%; 
+     max-height:120px; 
+     border-radius:6px; 
+     object-fit:cover; 
+    }
+  
+  .upload-actions {
+     display:flex; 
+     justify-content:flex-end; 
+     gap:8px; margin-top:12px; 
+    }
+
+  .cancel-btn { 
+    background:#ececec; 
+    border:none; 
+    padding:8px 12px; 
+    border-radius:8px; 
+    cursor:pointer; 
+    }
+
+  .save-btn {
+     background:#0079D3; 
+     color:white; border:none; 
+     padding:8px 12px; 
+     border-radius:8px; 
+     cursor:pointer; 
+    }
+
+  .save-btn:hover {
+     background:#0062b0;
+     }
+  
+  @media (max-width: 980px) {
+    .right-sidebar { width: 280px; }
+    .rs-avatar { left: 12px; }
+    .rs-username { left: 86px; }
+  }
+  

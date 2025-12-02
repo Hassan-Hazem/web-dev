@@ -6,6 +6,9 @@ import Sidebar from "./components/react/Sidebar";
 import HomePage from "./pages/HomePage";
 import PopularPage from "./pages/PopularPage";
 import ExplorePage from "./pages/ExplorePage";
+import UserProfilePage from "./pages/UserProfilePage";
+
+
 import "./App.css";
 import Interests from "./components/react/Interests";
 
@@ -24,6 +27,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/popular" element={<PopularPage />} />
             <Route path="/explore" element={<ExplorePage />} />
+            <Route path="/user/:username" element={<UserProfilePage />} />
           </Routes>
           
         </div>
