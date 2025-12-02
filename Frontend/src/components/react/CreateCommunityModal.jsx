@@ -8,6 +8,7 @@ export default function CreateCommunityModal({ onClose }) {
   const [step, setStep] = useState(1);
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [communityName, setCommunityName] = useState("");
+  const [description, setDescription] = useState("");
   const [communityType, setCommunityType] = useState("public");
   const [isAdult, setIsAdult] = useState(false);
 
@@ -68,7 +69,41 @@ export default function CreateCommunityModal({ onClose }) {
   const createCommunity = () => {
     if (!communityName.trim()) return alert("Enter a community name.");
 
-    navigate(`/community/${communityName.toLowerCase()}`);
+    const safeName = communityName.trim().replace(/\s+/g, '-').toLowerCase();
+
+    // Build community object to save in recents
+    const newCommunity = {
+      name: safeName,
+      displayName: communityName.trim(),
+      description: description.trim(),
+      type: communityType,
+      isAdult,
+      topics: selectedInterests,
+      createdAt: new Date().toISOString(),
+    };
+
+    try {
+      const raw = localStorage.getItem('recents');
+      let recents = raw ? JSON.parse(raw) : [];
+
+      // Remove existing with same name if present
+      recents = recents.filter((c) => c.name !== newCommunity.name);
+
+      // Add to front
+      recents.unshift(newCommunity);
+
+      // Keep only latest 6
+      recents = recents.slice(0, 6);
+
+      localStorage.setItem('recents', JSON.stringify(recents));
+
+      // Notify other components in this window/tab
+      window.dispatchEvent(new Event('recentsUpdated'));
+    } catch (err) {
+      console.error('Failed saving recents', err);
+    }
+
+    navigate(`/community/${safeName}`);
     onClose();
   };
 
@@ -213,6 +248,8 @@ export default function CreateCommunityModal({ onClose }) {
               className="modal-input"
               placeholder="Write a short description for your community"
               rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
 
             <div style={{display:'flex', justifyContent:'space-between', gap:12, marginTop:18}}>

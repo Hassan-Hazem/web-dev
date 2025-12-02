@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
 import "../css/Sidebar.css";
@@ -9,6 +9,33 @@ export default function Sidebar() {
   const [openModal, setOpenModal] = useState(false); // <— NEW
   const location = useLocation();
   const { user } = useAuth(); // Get auth state
+  const [recents, setRecents] = useState([]);
+  const [recentsOpen, setRecentsOpen] = useState(false);
+
+  useEffect(() => {
+    const loadRecents = () => {
+      try {
+        const raw = localStorage.getItem('recents');
+        const parsed = raw ? JSON.parse(raw) : [];
+        setRecents(parsed);
+      } catch (err) {
+        console.error('Failed to load recents', err);
+        setRecents([]);
+      }
+    };
+
+    loadRecents();
+
+    // Listen to updates from modal or other tabs
+    const onRecentsUpdated = () => loadRecents();
+    window.addEventListener('recentsUpdated', onRecentsUpdated);
+    window.addEventListener('storage', onRecentsUpdated);
+
+    return () => {
+      window.removeEventListener('recentsUpdated', onRecentsUpdated);
+      window.removeEventListener('storage', onRecentsUpdated);
+    };
+  }, []);
 
   return (
     <>
@@ -51,6 +78,34 @@ export default function Sidebar() {
               <span className="sidebar-icon create" />
               Start a community
             </Link>
+          )}
+
+          {/* Recents (collapsible like Resources) - only show when logged in */}
+          {user && recents && recents.length > 0 && (
+            <div className="sidebar-section">
+              <button
+                className="accordion-btn"
+                onClick={() => setRecentsOpen(!recentsOpen)}
+              >
+                Recents
+                <span className={`accordion-arrow ${recentsOpen ? "open" : ""}`} />
+              </button>
+
+              {recentsOpen && (
+                <div className="accordion-content">
+                  {recents.map((c) => (
+                    <Link
+                      key={c.name}
+                      to={`/community/${c.name}`}
+                      className={`sidebar-link recent-item ${location.pathname === `/community/${c.name}` ? 'active' : ''}`}
+                    >
+                      <span className="sidebar-icon recent" />
+                      {c.displayName || c.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
 
 
