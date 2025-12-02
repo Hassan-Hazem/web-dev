@@ -34,12 +34,7 @@ export default function Login({ onSwitchToSignup, closeModal }) {
       </p>
 
       {error && (
-        <div
-          className="auth-error"
-          style={{ color: "#d93025", marginBottom: 12, textAlign: "center", fontSize: "0.875rem" }}
-        >
-          {error}
-        </div>
+        <div className="auth-error">{error}</div>
       )}
 
       <button className="google-btn" type="button" disabled={loading}>

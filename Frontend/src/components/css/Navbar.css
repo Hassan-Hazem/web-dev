@@ -149,3 +149,37 @@
   font-weight: 500;
   cursor: pointer;
 }
+
+/* User section extracted from inline styles */
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ff4500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.user-name {
+  font-weight: 500;
+}
+
+.logout-btn {
+  background: #eaeaea;
+  color: #333;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-weight: 500;
+  cursor: pointer;
+}

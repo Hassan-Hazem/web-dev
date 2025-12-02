@@ -391,3 +391,8 @@
   background: #ccc;
   cursor: not-allowed;
 }
+
+/* Hidden input used for file upload */
+.hidden-file-input {
+  display: none;
+}
