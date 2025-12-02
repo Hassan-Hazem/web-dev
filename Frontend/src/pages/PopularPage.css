@@ -13,6 +13,7 @@
   gap: 24px;
   padding: 24px;
   margin-top: 16px;
+  align-items: start; /* prevent grid stretch that blocks sticky */
 }
 
 .feed-column {
@@ -21,6 +22,7 @@
 
 .sidebar-column {
   /* Container for sticky sidebar */
+  align-self: start; /* required for sticky to work in grid */
 }
 
 .trending-section {
