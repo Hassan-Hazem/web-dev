@@ -41,7 +41,7 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/popular" element={<PopularPage />} />
               <Route path="/explore" element={<ExplorePage />} />
- <Route path="/user/:username" element={<UserProfilePage />} />
+              <Route path="/user/:username" element={<UserProfilePage />} />
               {/* The route from YOUR branch */}
               <Route path="/community/:name" element={<CommunityPage />} />
             </Routes>

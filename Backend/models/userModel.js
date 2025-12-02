@@ -43,6 +43,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "", 
     },
+    coverPictureUrl: {
+      type: String,
+      default: "",
+    },
+    interests: [{
+      type: String,
+      trim: true,
+    }],
     karma: {
       type: Number,
       default: 0,
