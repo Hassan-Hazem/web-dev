@@ -68,53 +68,21 @@ export default function Navbar() {
           )}
 
           {user && (
-            <div className="user-section">
+            <div
+              className="user-section"
+              onClick={goToProfile}
+            >
               <div className="user-avatar">
                 {user.username ? user.username.charAt(0).toUpperCase() : "U"}
               </div>
-              <span className="user-name">{user.username}</span>
-              <button
-                className="logout-btn"
-                onClick={logout}
-            <div
-              className="user-section"
-              style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}
-              onClick={goToProfile} 
-            >
-              <div
-                className="user-avatar"
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: "50%",
-                  background: "#ff4500",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#fff",
-                  fontWeight: 600,
-                  fontSize: "0.85rem",
-                }}
-              >
-                {user.username ? user.username.charAt(0).toUpperCase() : "U"}
-              </div>
-              <span className="user-name" style={{ fontWeight: 500 }}>
+              <span className="user-name">
                 {user.username}
               </span>
               <button
                 className="logout-btn"
                 onClick={(e) => {
-                  e.stopPropagation(); 
+                  e.stopPropagation();
                   logout();
-                }}
-                style={{
-                  background: "#eaeaea",
-                  color: "#333",
-                  border: "none",
-                  borderRadius: 20,
-                  padding: "6px 16px",
-                  fontWeight: 500,
-                  cursor: "pointer",
                 }}
               >
                 Log Out
