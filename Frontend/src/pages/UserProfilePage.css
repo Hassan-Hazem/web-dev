@@ -5,15 +5,13 @@
     font-family: Arial, sans-serif;
   }
   
-  .profile-layout {
-    display: flex;
-    justify-content: center;
-    gap: 24px;
-    padding: 24px;
-    margin-left: 240px; 
-  }
-  
-  .profile-main {
+.profile-layout {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 24px;
+  margin-left: 0;
+}  .profile-main {
     width: 640px;
     display: flex;
     flex-direction: column;
