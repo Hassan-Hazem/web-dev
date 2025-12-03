@@ -6,12 +6,12 @@
   background: #f6f7f8;
   padding: 24px 16px 16px 16px;
   border-left: 1px solid #eaeaea;
-  z-index: 55; /* above filter bar (50) but below navbar */
+  z-index: 40; /* below posts (60) so posts appear on top when scrolling */
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-/* ... rest of the file ... */
+
 
 .community-card {
   background: #fff;
