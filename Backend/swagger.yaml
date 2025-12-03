@@ -15,7 +15,7 @@ components:
       bearerFormat: JWT
 
   schemas:
-    # Full User object with Token (Used for Login & Verify Success)
+    # --- Auth Schemas ---
     UserWithToken:
       type: object
       properties:
@@ -34,7 +34,6 @@ components:
           description: JWT Access Token
           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
-    # Registration Response (No Token, just Message)
     RegistrationResponse:
       type: object
       properties:
@@ -59,84 +58,153 @@ components:
           type: string
           example: "Invalid credentials"
 
+    # --- User Schemas ---
+    UserProfilePublic:
+      type: object
+      properties:
+        _id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        bio:
+          type: string
+        profilePictureUrl:
+          type: string
+        coverPictureUrl:
+          type: string
+        interests:
+          type: array
+          items:
+            type: string
+        karma:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+
+    # In swagger.yaml components/schemas
+    UserMe:
+      type: object
+      properties:
+        _id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        profilePictureUrl:
+          type: string
+        coverPictureUrl:
+          type: string
+          description: URL for the profile banner
+        bio:
+          type: string
+          description: User biography
+        karma:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation date (Cake Day)
+        isVerified:
+          type: boolean
+        interests:
+          type: array
+          items:
+            type: string
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        bio:
+          type: string
+          example: "I love coding and coffee."
+        profilePictureUrl:
+          type: string
+          example: "https://res.cloudinary.com/demo/image/upload/v123456/profile.jpg"
+        coverPictureUrl:
+          type: string
+          example: "https://res.cloudinary.com/demo/image/upload/v123456/cover.jpg"
+        interests:
+          type: array
+          items:
+            type: string
+          example: ["Technology", "Design"]
+
+    # --- Upload Schemas ---
+    UploadResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "File uploaded successfully"
+        filePath:
+          type: string
+          description: Local path or Cloud URL depending on controller logic
+        fileName:
+          type: string
+        type:
+          type: string
+          enum: [image, video]
+
 tags:
   - name: Auth
     description: Authentication endpoints (Login, Register, Verification)
+  - name: Users
+    description: User profile management and retrieval
+  - name: Upload
+    description: File upload handling
 
 paths:
+  # --- AUTH ROUTES ---
   /api/auth/register:
     post:
       summary: Register a new user
-      description: Creates a user account and sends a verification email. Does NOT return a login token.
-      tags:
-        - Auth
+      tags: [Auth]
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required:
-                - username
-                - email
-                - password
+              required: [username, email, password]
               properties:
-                username:
-                  type: string
-                  minLength: 3
-                  maxLength: 30
-                  example: "NewUser123"
-                email:
-                  type: string
-                  format: email
-                  example: "newuser@example.com"
-                password:
-                  type: string
-                  minLength: 6
-                  example: "securePassword123"
+                username: { type: string, minLength: 3, maxLength: 30 }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 6 }
       responses:
         "201":
-          description: User registered successfully (Verification Pending)
+          description: User registered successfully
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/RegistrationResponse"
         "400":
-          description: Validation error or User already exists
+          description: Error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-        "500":
-          description: Server error (e.g. Email failed to send)
 
   /api/auth/verify-email:
     post:
       summary: Verify email address
-      description: Validates the 6-digit code sent to the email and returns the login token.
-      tags:
-        - Auth
+      tags: [Auth]
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required:
-                - email
-                - code
+              required: [email, code]
               properties:
-                email:
-                  type: string
-                  format: email
-                  example: "newuser@example.com"
-                code:
-                  type: string
-                  description: The 6-digit verification code
-                  example: "123456"
+                email: { type: string, format: email }
+                code: { type: string }
       responses:
         "200":
-          description: Email verified successfully
+          description: Email verified
           content:
             application/json:
               schema:
@@ -144,42 +212,28 @@ paths:
                   - $ref: "#/components/schemas/UserWithToken"
                   - type: object
                     properties:
-                      message:
-                        type: string
-                        example: "Email successfully verified."
+                      message: { type: string }
         "400":
-          description: Invalid code or missing fields
+          description: Error
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-        "404":
-          description: User not found
-        "500":
-          description: Server error
 
   /api/auth/login:
     post:
       summary: Login user
-      tags:
-        - Auth
+      tags: [Auth]
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required:
-                - loginIdentifier
-                - password
+              required: [loginIdentifier, password]
               properties:
-                loginIdentifier:
-                  type: string
-                  description: Can be Username or Email
-                  example: "newuser@example.com"
-                password:
-                  type: string
-                  example: "securePassword123"
+                loginIdentifier: { type: string }
+                password: { type: string }
       responses:
         "200":
           description: Login successful
@@ -187,24 +241,114 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserWithToken"
-        "400":
-          description: Validation error (Missing fields)
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
         "401":
-          description: Invalid credentials OR Email not verified
+          description: Invalid credentials
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-              examples:
-                WrongPassword:
-                  value:
-                    message: "Invalid credentials"
-                Unverified:
-                  value:
-                    message: "Please verify your email before logging in."
+
+  # --- USER ROUTES ---
+  /api/users/{username}:
+    get:
+      summary: Get public profile by username
+      tags: [Users]
+      parameters:
+        - in: path
+          name: username
+          schema:
+            type: string
+          required: true
+          description: The username of the user to fetch
+      responses:
+        "200":
+          description: User profile data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfilePublic"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/users/me/info:
+    get:
+      summary: Get current logged-in user info
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserMe"
+        "401":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/users/profile:
+    put:
+      summary: Update user profile
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileRequest"
+      responses:
+        "200":
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  user: { $ref: "#/components/schemas/UserProfilePublic" }
+        "401":
+          description: Not authorized
+
+  # --- UPLOAD ROUTES ---
+  /api/upload:
+    post:
+      summary: Upload a file (Image/Video)
+      tags: [Upload]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The image or video file to upload
+      responses:
+        "200":
+          description: File uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadResponse"
+        "400":
+          description: No file uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "500":
           description: Server error
