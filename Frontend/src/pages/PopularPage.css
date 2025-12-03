@@ -4,7 +4,6 @@
   background: #f6f7f8;
   width: 100%;
   box-sizing: border-box;
-  overflow-x: hidden;
 }
 
 .popular-grid {
@@ -13,14 +12,17 @@
   gap: 24px;
   padding: 24px;
   margin-top: 16px;
+  align-items: stretch; /* stretch rows so sidebar has full height track */
 }
 
 .feed-column {
   min-width: 0;
+  align-self: stretch;
 }
 
 .sidebar-column {
-  /* Container for sticky sidebar */
+  align-self: stretch;
+  position: relative;
 }
 
 .trending-section {
@@ -79,10 +81,12 @@
   margin-bottom: 24px;
   margin-top: 24px;
   position: sticky;
-  top: 64px; /* stick below fixed navbar */
-  z-index: 50; /* above content and sidebar */
-  background: #f6f7f8; /* match page bg to avoid visual jump */
-  padding: 12px 0; /* space for shadow area when sticking */
+  top: 64px;
+  z-index: 70;
+  background: #f6f7f8;
+  padding: 12px 24px;
+  margin-left: -24px;
+  margin-right: -24px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
@@ -109,5 +113,5 @@
   gap: 24px;
   width: 100%;
   position: relative;
-  z-index: 7; /* Slightly above sidebar (6) to avoid overlap when needed */
+  z-index: 60; /* posts above sidebar (40) */
 }
