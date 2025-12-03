@@ -4,6 +4,7 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import postRoutes from "./routes/postRoutes.js";
 import connectDB from "./config/database.js";
 
 // --- Swagger Imports ---
@@ -40,7 +41,8 @@ app.use(
 // --- Routes ---
 app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
-app.use("/api/users", userRoutes); 
+app.use("/api/users", userRoutes);
+app.use("/api/posts", postRoutes); 
 // --- Server Startup ---
 const PORT = process.env.PORT || 5000;
 

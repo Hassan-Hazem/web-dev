@@ -1,0 +1,210 @@
+import {
+  createPost,
+  findAllPosts,
+  findPostById,
+  findPostsByCommunity,
+  findPostsByUser,
+  deletePostById,
+} from "../repositories/postRepository.js";
+import { findUserByUsername } from "../repositories/userRepository.js"; // Import the helper here
+import Community from "../models/communityModel.js";
+import Vote from "../models/voteModel.js";
+import Post from "../models/postModel.js";
+import { createPostSchema, voteSchema } from "../validators/postValidator.js";
+
+// --- CREATE POST ---
+export const createPostController = async (req, res) => {
+
+  const { error } = createPostSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+
+  try {
+    const { title, content, postType, communityName } = req.body;
+    const userId = req.user.id;
+
+   
+    let finalImageUrl = req.body.imageUrl || ""; // Default or manual link
+
+
+    if (req.file && req.file.path) {
+      finalImageUrl = req.file.path; 
+    }
+
+    // 3. Find Community
+    const community = await Community.findOne({ name: communityName });
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    // 4. Create Post
+    const newPost = await createPost({
+      title,
+      content,
+      postType: postType || "text", // Default to text if missing
+      imageUrl: finalImageUrl,      
+      author: userId,
+      community: community._id,
+    });
+
+    const populatedPost = await findPostById(newPost._id);
+    res.status(201).json(populatedPost);
+
+  } catch (error) {
+    console.error("Create Post Error:", error);
+    res.status(500).json({ message: "Error creating post", error: error.message });
+  }
+};
+
+export const getAllPosts = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const posts = await findAllPosts(skip, limit);
+    res.status(200).json(posts);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching posts", error: error.message });
+  }
+};
+
+
+export const getPost = async (req, res) => {
+  try {
+    const post = await findPostById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    res.status(200).json(post);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching post", error: error.message });
+  }
+};
+
+
+export const getCommunityPosts = async (req, res) => {
+  try {
+    const { communityName } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const community = await Community.findOne({ name: communityName });
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    const posts = await findPostsByCommunity(community._id, skip, limit);
+    res.status(200).json(posts);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching community posts", error: error.message });
+  }
+};
+
+
+// --- GET POSTS BY USER  ---
+export const getUserPosts = async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    // Use the existing repository function
+    const user = await findUserByUsername(username);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Now we have the ID to query posts
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const posts = await findPostsByUser(user._id, skip, limit);
+    res.status(200).json(posts);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching user posts", error: error.message });
+  }
+};
+
+
+export const votePost = async (req, res) => {
+  const { error } = voteSchema.validate(req.body);
+  if (error) return res.status(400).json({ message: error.details[0].message });
+
+  const { id: postId } = req.params;
+  const { voteType } = req.body;
+  const userId = req.user.id;
+
+  
+  try {
+    const post = await Post.findById(postId);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    // Check for existing vote
+    const existingVote = await Vote.findOne({
+      user: userId,
+      targetId: postId,
+      targetType: "Post",
+    });
+
+    if (existingVote) {
+      if (existingVote.voteType === voteType) {
+        // Remove vote
+        await Vote.findByIdAndDelete(existingVote._id);
+        if (voteType === "up") post.upvotes = Math.max(0, post.upvotes - 1);
+        else post.downvotes = Math.max(0, post.downvotes - 1);
+      } else {
+        // Change vote
+        existingVote.voteType = voteType;
+        await existingVote.save();
+        if (voteType === "up") {
+          post.upvotes++;
+          post.downvotes = Math.max(0, post.downvotes - 1);
+        } else {
+          post.downvotes++;
+          post.upvotes = Math.max(0, post.upvotes - 1);
+        }
+      }
+    } else {
+      // New vote
+      const newVote = new Vote({
+        user: userId,
+        voteType,
+        targetType: "Post",
+        targetId: postId,
+      });
+      await newVote.save();
+      if (voteType === "up") post.upvotes++;
+      else post.downvotes++;
+    }
+
+    await post.save();
+    res.status(200).json({ 
+      message: "Vote registered", 
+      upvotes: post.upvotes, 
+      downvotes: post.downvotes 
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error voting", error: error.message });
+  }
+};
+export const deletePost = async (req, res) => {
+  try {
+    const post = await findPostById(req.params.id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Authorization: Only author or admin (optional) can delete
+    if (post.author._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized to delete this post" });
+    }
+
+    await deletePostById(req.params.id);
+    res.status(200).json({ message: "Post deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting post", error: error.message });
+  }
+};
