@@ -6,7 +6,7 @@ import uploadRoutes from "./routes/uploadRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 import connectDB from "./config/database.js";
-
+import communityRoutes from "./routes/communityRoutes.js";
 // --- Swagger Imports ---
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
@@ -43,6 +43,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes); 
+app.use("/api/communities", communityRoutes);
 // --- Server Startup ---
 const PORT = process.env.PORT || 5000;
 

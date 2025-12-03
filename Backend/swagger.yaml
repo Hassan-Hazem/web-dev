@@ -132,6 +132,62 @@ components:
             type: string
           example: ["Technology", "Design"]
 
+    # --- Community Schemas ---
+    Community:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "654321abcdef1234567890"
+        name:
+          type: string
+          example: "reactjs"
+        description:
+          type: string
+          example: "A community for React developers."
+        creator:
+          type: object
+          properties:
+            _id: { type: string }
+            username: { type: string }
+            profilePictureUrl: { type: string }
+        memberCount:
+          type: number
+          default: 1
+        topics:
+          type: array
+          items:
+            type: string
+          example: ["Technology", "Programming"]
+        createdAt:
+          type: string
+          format: date-time
+        isCreator:
+          type: boolean
+          description: "True if the current user created this community (requires auth)"
+        isJoined:
+          type: boolean
+          description: "True if the current user is a member (requires auth)"
+
+    CreateCommunityRequest:
+      type: object
+      required: [name, description]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 30
+          example: "webdev"
+        description:
+          type: string
+          maxLength: 500
+          example: "Everything about web development."
+        topics:
+          type: array
+          items:
+            type: string
+          example: ["Coding", "Tech"]
+
     # --- Post Schemas ---
     Post:
       type: object
@@ -220,6 +276,8 @@ tags:
     description: Authentication endpoints (Login, Register, Verification)
   - name: Users
     description: User profile management and retrieval
+  - name: Communities
+    description: Community management (Create, Join, Explore)
   - name: Posts
     description: Post management (Create, Read, Delete, Vote)
   - name: Upload
@@ -386,6 +444,141 @@ paths:
                   user: { $ref: "#/components/schemas/UserProfilePublic" }
         "401":
           description: Not authorized
+
+  # --- COMMUNITY ROUTES ---
+  /api/communities:
+    get:
+      summary: Explore communities (List all)
+      description: Get a list of communities, optionally filtered by topic.
+      tags: [Communities]
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+        - in: query
+          name: topic
+          schema:
+            type: string
+          description: Filter communities by topic (e.g., "Technology")
+      responses:
+        "200":
+          description: List of communities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Community"
+        "500":
+          description: Server error
+
+    post:
+      summary: Create a new community
+      tags: [Communities]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommunityRequest"
+      responses:
+        "201":
+          description: Community created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Community"
+        "400":
+          description: Validation error or Name taken
+        "500":
+          description: Server error
+
+  /api/communities/{name}:
+    get:
+      summary: Get community details by name
+      description: Retrieves community info. Uses optional auth to set isCreator and isJoined flags.
+      tags: [Communities]
+      security:
+        - bearerAuth: []  # Optional, but supported
+      parameters:
+        - in: path
+          name: name
+          schema:
+            type: string
+          required: true
+          description: The name of the community (e.g., reactjs)
+      responses:
+        "200":
+          description: Community details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Community"
+        "404":
+          description: Community not found
+        "500":
+          description: Server error
+
+  /api/communities/{name}/join:
+    post:
+      summary: Join a community
+      tags: [Communities]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: name
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successfully joined
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Successfully joined r/reactjs" }
+        "400":
+          description: Already joined
+        "404":
+          description: Community not found
+
+  /api/communities/{name}/leave:
+    post:
+      summary: Leave a community
+      tags: [Communities]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: name
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Successfully left
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Successfully left r/reactjs" }
+        "400":
+          description: Not a member or Creator cannot leave
+        "404":
+          description: Community not found
 
   # --- POST ROUTES ---
   /api/posts:

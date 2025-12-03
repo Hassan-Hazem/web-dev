@@ -1,0 +1,141 @@
+import { 
+  createCommunity, 
+  findCommunityByName, 
+  getAllCommunities, 
+  updateCommunity 
+} from "../repositories/communityRepository.js";
+import Subscription from "../models/subscriptionModel.js"; 
+import { createCommunitySchema, updateCommunitySchema } from "../validators/communityValidator.js";
+
+
+export const createCommunityController = async (req, res) => {
+  const { error } = createCommunitySchema.validate(req.body);
+  if (error) return res.status(400).json({ message: error.details[0].message });
+
+  const { name, description, topics } = req.body;
+
+  try {
+    
+    const existingCommunity = await findCommunityByName(name);
+    if (existingCommunity) {
+      return res.status(400).json({ message: "Community with this name already exists" });
+    }
+
+    // 2. Create Community
+    const newCommunity = await createCommunity({
+      name,
+      description,
+      topics,
+      creator: req.user._id,
+      memberCount: 1, 
+    });
+
+  
+    await Subscription.create({
+      user: req.user._id,
+      community: newCommunity._id
+    });
+
+    res.status(201).json(newCommunity);
+  } catch (error) {
+    res.status(500).json({ message: "Error creating community", error: error.message });
+  }
+};
+
+
+export const getCommunity = async (req, res) => {
+  const { name } = req.params;
+
+  try {
+    const community = await findCommunityByName(name);
+    if (!community) {
+      return res.status(404).json({ message: "Community not found" });
+    }
+
+    let isCreator = false;
+    let isJoined = false;
+
+    // Check if user is logged in (req.user populated by optionalProtect)
+    if (req.user) {
+      isCreator = community.creator._id.toString() === req.user._id.toString();
+
+      const subscription = await Subscription.findOne({
+        user: req.user._id,
+        community: community._id
+      });
+      if (subscription) isJoined = true;
+    }
+
+    res.status(200).json({
+      ...community.toObject(),
+      isCreator,
+      isJoined
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching community", error: error.message });
+  }
+};
+
+// --- GET COMMUNITIES (Explore Page) ---
+export const getCommunities = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const topic = req.query.topic || null;
+    const skip = (page - 1) * limit;
+
+    const communities = await getAllCommunities(skip, limit, topic);
+    res.status(200).json(communities);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching communities", error: error.message });
+  }
+};
+
+// --- JOIN COMMUNITY ---
+export const joinCommunity = async (req, res) => {
+  const { name } = req.params;
+  const userId = req.user._id;
+
+  try {
+    const community = await findCommunityByName(name);
+    if (!community) return res.status(404).json({ message: "Community not found" });
+
+    const existingSub = await Subscription.findOne({ user: userId, community: community._id });
+    if (existingSub) return res.status(400).json({ message: "Already joined" });
+
+    await Subscription.create({ user: userId, community: community._id });
+    
+    community.memberCount += 1;
+    await community.save();
+
+    res.status(200).json({ message: `Successfully joined r/${name}` });
+  } catch (error) {
+    res.status(500).json({ message: "Error joining community", error: error.message });
+  }
+};
+
+// --- LEAVE COMMUNITY ---
+export const leaveCommunity = async (req, res) => {
+  const { name } = req.params;
+  const userId = req.user._id;
+
+  try {
+    const community = await findCommunityByName(name);
+    if (!community) return res.status(404).json({ message: "Community not found" });
+
+    if (community.creator._id.toString() === userId.toString()) {
+       return res.status(400).json({ message: "Creator cannot leave their own community." });
+    }
+
+    const deletedSub = await Subscription.findOneAndDelete({ user: userId, community: community._id });
+    if (!deletedSub) return res.status(400).json({ message: "You are not a member" });
+
+    community.memberCount = Math.max(0, community.memberCount - 1);
+    await community.save();
+
+    res.status(200).json({ message: `Successfully left r/${name}` });
+  } catch (error) {
+    res.status(500).json({ message: "Error leaving community", error: error.message });
+  }
+};
