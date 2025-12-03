@@ -5,6 +5,7 @@ import authRoutes from "./routes/authRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
+import corsOptions from "./config/corsConfig.js";
 import connectDB from "./config/database.js";
 import communityRoutes from "./routes/communityRoutes.js";
 // --- Swagger Imports ---
@@ -16,7 +17,7 @@ connectDB();
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 
 // --- Swagger Configuration ---
