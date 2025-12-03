@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import api from "../../api/axios"; // Import API
 import "../css/CreatePostModal.css";
 
 export default function CreatePostModal({ isOpen, onClose }) {
@@ -10,6 +11,28 @@ export default function CreatePostModal({ isOpen, onClose }) {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [pollOptions, setPollOptions] = useState(["", ""]);
   const [isDragging, setIsDragging] = useState(false);
+  
+  // New State for fetching communities
+  const [communityList, setCommunityList] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch communities when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const fetchCommunities = async () => {
+        try {
+          const res = await api.get("/communities");
+          // Ensure we handle the response correctly based on your controller
+          // If your controller returns an array directly: res.data
+          // If it returns paginated object: res.data.communities (adjust if needed)
+          setCommunityList(Array.isArray(res.data) ? res.data : []);
+        } catch (error) {
+          console.error("Failed to load communities", error);
+        }
+      };
+      fetchCommunities();
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -72,26 +95,52 @@ export default function CreatePostModal({ isOpen, onClose }) {
     setPollOptions(newOptions);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement post creation API call
-    console.log("Creating post:", { 
-      postType, 
-      title, 
-      content, 
-      community, 
-      link, 
-      files: selectedFiles,
-      pollOptions: postType === "poll" ? pollOptions : null
-    });
-    onClose();
-    // Reset form
-    setTitle("");
-    setContent("");
-    setCommunity("");
-    setLink("");
-    setSelectedFiles([]);
-    setPollOptions(["", ""]);
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("communityName", community);
+      
+      let finalPostType = "text"; 
+      if (postType === "image") finalPostType = "image";
+      if (postType === "link") finalPostType = "link";
+      formData.append("postType", finalPostType);
+
+      if (postType === "post") {
+        formData.append("content", content);
+      } else if (postType === "link") {
+        formData.append("content", link);
+      } else if (postType === "image") {
+        if (selectedFiles.length > 0) {
+           formData.append("image", selectedFiles[0]);
+        }
+        formData.append("content", content); 
+      }
+
+      await api.post("/posts", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      console.log("Post created successfully");
+      
+      // Reset form
+      setTitle("");
+      setContent("");
+      setCommunity("");
+      setLink("");
+      setSelectedFiles([]);
+      setPollOptions(["", ""]);
+      onClose();
+      
+    } catch (error) {
+      console.error("Error creating post:", error.response?.data?.message || error.message);
+      alert("Failed to create post: " + (error.response?.data?.message || error.message));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -110,6 +159,7 @@ export default function CreatePostModal({ isOpen, onClose }) {
 
         <div className="post-type-tabs">
           <button
+            type="button"
             className={`tab-btn ${postType === "post" ? "active" : ""}`}
             onClick={() => setPostType("post")}
           >
@@ -117,6 +167,7 @@ export default function CreatePostModal({ isOpen, onClose }) {
             Post
           </button>
           <button
+            type="button"
             className={`tab-btn ${postType === "image" ? "active" : ""}`}
             onClick={() => setPostType("image")}
           >
@@ -124,6 +175,7 @@ export default function CreatePostModal({ isOpen, onClose }) {
             Image & Video
           </button>
           <button
+            type="button"
             className={`tab-btn ${postType === "link" ? "active" : ""}`}
             onClick={() => setPostType("link")}
           >
@@ -131,6 +183,7 @@ export default function CreatePostModal({ isOpen, onClose }) {
             Link
           </button>
           <button
+            type="button"
             className={`tab-btn ${postType === "poll" ? "active" : ""}`}
             onClick={() => setPostType("poll")}
           >
@@ -148,11 +201,11 @@ export default function CreatePostModal({ isOpen, onClose }) {
               required
             >
               <option value="">Choose a community</option>
-              <option value="funny">r/funny</option>
-              <option value="tressless">r/tressless</option>
-              <option value="FunnyAnimals">r/FunnyAnimals</option>
-              <option value="MinoxBeards">r/MinoxBeards</option>
-              <option value="bald">r/bald</option>
+              {communityList.map((c) => (
+                <option key={c._id} value={c.name}>
+                  r/{c.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -268,11 +321,11 @@ export default function CreatePostModal({ isOpen, onClose }) {
           )}
 
           <div className="form-actions">
-            <button type="button" className="cancel-btn" onClick={onClose}>
+            <button type="button" className="cancel-btn" onClick={onClose} disabled={loading}>
               Cancel
             </button>
-            <button type="submit" className="submit-btn">
-              Post
+            <button type="submit" className="submit-btn" disabled={loading}>
+              {loading ? "Posting..." : "Post"}
             </button>
           </div>
         </form>

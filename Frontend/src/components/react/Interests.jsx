@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import api from "../../api/axios"; // Import API
 import "../css/Interests.css";
 
 const interestsData = {
@@ -36,6 +37,7 @@ const interestsData = {
 export default function Interests({ onComplete, onSkip }) {
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [activeCategory, setActiveCategory] = useState("Popular");
+  const [loading, setLoading] = useState(false); // Add loading state
 
   const toggleInterest = (interest) => {
     setSelectedInterests(prev => 
@@ -45,9 +47,21 @@ export default function Interests({ onComplete, onSkip }) {
     );
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (selectedInterests.length >= 1) {
-      onComplete(selectedInterests);
+      setLoading(true);
+      try {
+        // Integrate API: Update user profile with interests
+        await api.put('/users/profile', { interests: selectedInterests });
+        
+        // Proceed to next step
+        onComplete(selectedInterests);
+      } catch (error) {
+        console.error("Failed to update interests:", error);
+        alert("Something went wrong saving your interests.");
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -93,12 +107,14 @@ export default function Interests({ onComplete, onSkip }) {
       {/* Continue Button */}
       <button
         onClick={handleContinue}
-        disabled={selectedInterests.length < 1}
+        disabled={selectedInterests.length < 1 || loading}
         className={`interests-continue-btn ${selectedInterests.length >= 1 ? 'enabled' : ''}`}
       >
-        {selectedInterests.length >= 1 
-          ? `Continue (${selectedInterests.length} selected)` 
-          : "Select at least 1 to continue"}
+        {loading ? "Saving..." : (
+          selectedInterests.length >= 1 
+            ? `Continue (${selectedInterests.length} selected)` 
+            : "Select at least 1 to continue"
+        )}
       </button>
     </div>
   );
