@@ -5,8 +5,9 @@ import authRoutes from "./routes/authRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
+import corsOptions from "./config/corsConfig.js";
 import connectDB from "./config/database.js";
-
+import communityRoutes from "./routes/communityRoutes.js";
 // --- Swagger Imports ---
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
@@ -16,7 +17,7 @@ connectDB();
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 
 // --- Swagger Configuration ---
@@ -43,6 +44,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes); 
+app.use("/api/communities", communityRoutes);
 // --- Server Startup ---
 const PORT = process.env.PORT || 5000;
 
