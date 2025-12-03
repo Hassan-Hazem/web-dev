@@ -8,16 +8,13 @@ export default function CommunityPage() {
   const { user } = useAuth();
   const [bannerImage, setBannerImage] = useState(null);
 
-  /* -------------------- STATE (backend ready) -------------------- */
   const [community, setCommunity] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  /* -------------------- LOAD COMMUNITY -------------------- */
   useEffect(() => {
     const loadCommunity = async () => {
       try {
-        /* 🟡 localStorage fallback for now */
         let recents = [];
         try {
           const raw = localStorage.getItem("recents");
@@ -30,15 +27,14 @@ export default function CommunityPage() {
 
         const fallbackCommunity = {
           name: name || "TestCommunity",
-          description: "Make a place for people to share, discuss and discover.",
+          description: "Welcome to this community! Discuss and share.",
           creator: "creator",
-          members: 1,
-          online: 0,
+          members: 142,
+          online: 34,
           posts: [],
         };
 
         const finalCommunity = recent || fallbackCommunity;
-
         setCommunity(finalCommunity);
         setPosts(Array.isArray(finalCommunity.posts) ? finalCommunity.posts : []);
       } catch (error) {
@@ -51,8 +47,7 @@ export default function CommunityPage() {
     loadCommunity();
   }, [name]);
 
-  /* -------------------- MODERATOR LOGIC -------------------- */
-  const moderators = community?.creator ? [community.creator] : [];
+  const moderators = community?.creator ? [community.creator] : ["AutoModerator"];
   const isUserModerator = user && community?.creator === user.username;
 
   const handleBannerUpload = (e) => {
@@ -66,137 +61,123 @@ export default function CommunityPage() {
     }
   };
 
-  const triggerBannerInput = () => {
-    document.getElementById("banner-input")?.click();
-  };
-
-  /* -------------------- LOADING STATE -------------------- */
-  if (loading) return <div className="community-page">Loading...</div>;
+  if (loading) return <div className="comm-page">Loading...</div>;
 
   if (!community)
     return (
-      <div className="community-page">
-        <h2>Community not found</h2>
+      <div className="comm-page">
+        <div className="comm-content-wrap">
+          <h2>Community not found</h2>
+        </div>
       </div>
     );
 
-  /* -------------------- RENDER -------------------- */
   return (
-    <div className="community-page">
-      {/* This wrapper ensures content never goes under the left fixed sidebar */}
-      <div className="content-wrap">
+    <div className="comm-page">
+      {/* Banner Area */}
+      <div 
+        className="comm-banner"
+        style={{ backgroundImage: bannerImage ? `url(${bannerImage})` : undefined }}
+      >
+        {isUserModerator && (
+          <>
+            <div className="comm-banner-edit" onClick={() => document.getElementById("comm-banner-input")?.click()}>
+              ✎
+            </div>
+            <input
+              id="comm-banner-input"
+              type="file"
+              accept="image/*"
+              className="comm-banner-input"
+              onChange={handleBannerUpload}
+            />
+          </>
+        )}
+      </div>
 
-        {/* Banner */}
-        <div
-          className="community-banner"
-          style={{
-            backgroundImage: bannerImage ? `url(${bannerImage})` : undefined,
-          }}
-        >
-          {isUserModerator && (
-            <>
-              <div className="banner-edit" onClick={triggerBannerInput}>✎</div>
-              <input
-                id="banner-input"
-                type="file"
-                accept="image/*"
-                className="banner-input"
-                onChange={handleBannerUpload}
-              />
-            </>
-          )}
+      {/* Header Area */}
+      <div className="comm-content-wrap">
+        <div className="comm-header">
+          <div className="comm-icon-container">
+            <div className="comm-icon-placeholder">r/</div>
+          </div>
+
+          <div className="comm-header-text">
+            <h1 className="comm-title">{community.name}</h1>
+            <div className="comm-subtitle">r/{community.name}</div>
+          </div>
+
+          <div className="comm-header-actions">
+            <button className="comm-btn-join">Join</button>
+          </div>
         </div>
 
-        {/* Header */}
-        <div className="community-header">
-          <div className="community-left">
-            <div className="community-icon">
-              <span className="community-icon-text">r/</span>
+        {/* Main Grid Layout */}
+        <div className="comm-grid">
+          {/* Left Column: Feed */}
+          <main className="comm-main-col">
+            {/* Create Post Input */}
+            <div className="comm-post" style={{display: 'flex', alignItems: 'center', gap: '10px', background: 'white'}}>
+                 <div style={{width: 38, height: 38, borderRadius: '50%', background: '#ccc'}}></div>
+                 <input type="text" placeholder="Create Post" style={{flex: 1, background: '#f6f7f8', border: '1px solid #edeff1', borderRadius: 4, padding: '8px 16px'}} />
             </div>
 
-            <div className="community-meta">
-              <h1 className="community-name">r/{community.name}</h1>
-              <div className="community-sub">
-                <span className="sub-creator">u/{community.creator || "creator"}</span>
-                <span className="dot">•</span>
-                <span className="sub-age">new</span>
-              </div>
+            {/* Sort Bar */}
+            <div className="comm-sort-bar">
+              <button className="comm-sort-btn">Hot</button>
+              <button className="comm-sort-btn">New</button>
+              <button className="comm-sort-btn">Top</button>
             </div>
-          </div>
 
-          <div className="community-actions">
-            <button className="btn create-post">+ Create Post</button>
-            {isUserModerator && <button className="btn mod-tools">Mod Tools</button>}
-            <button className="btn more">⋯</button>
-          </div>
-        </div>
-
-        {/* Sort bar */}
-        <div className="sort-bar">
-          <div className="sort-left">
-            <button className="sort-btn">Best ▾</button>
-            <button className="layout-btn">▦</button>
-          </div>
-        </div>
-
-        {/* Page content */}
-        <div className="community-content">
-          {/* Posts column */}
-          <main className="posts-column">
+            {/* Posts List */}
             {posts.length === 0 ? (
-              <div className="empty-state">
-                <h2>This community doesn't have any posts yet</h2>
-                <p>Make one and get this feed started.</p>
-                <button className="btn primary large">Create Post</button>
+              <div className="comm-empty">
+                <h3>No posts yet</h3>
+                <p>Be the first to share something!</p>
               </div>
             ) : (
-              posts.map((p) => (
-                <article key={p.id || Math.random()} className="post-card">
-                  <h3>{p.title}</h3>
-                  <p>{p.content}</p>
+              posts.map((p, idx) => (
+                <article key={p.id || idx} className="comm-post">
+                  <h3 className="comm-post-title">{p.title}</h3>
+                  <div className="comm-post-body">{p.content}</div>
                 </article>
               ))
             )}
           </main>
 
-          {/* Right sidebar */}
-          <aside className="community-sidebar">
-            <div className="sidebar-card stats-card">
-              <div className="stat">
-                <div className="stat-num">{community.members}</div>
-                <div className="stat-label">Visitors</div>
-              </div>
-              <div className="stat">
-                <div className="stat-num">{community.online}</div>
-                <div className="stat-label">Online</div>
-              </div>
-            </div>
-
-            <div className="sidebar-card mods-card">
-              <h3>MODERATORS</h3>
-              <button className="btn message-mods">✉ Message Mods</button>
-
-              {isUserModerator && <div className="invite-mod">+ Invite Mod</div>}
-
-              <div className="mod-list">
-                {moderators.map((m) => (
-                  <div key={m} className="mod-item">
-                    <div className="mod-avatar" aria-hidden="true">🐸</div>
-                    <div className="mod-name">u/{m}</div>
+          {/* Right Column: Sidebar */}
+          <aside className="comm-sidebar">
+            <div className="comm-card">
+              <div className="comm-card-header">About Community</div>
+              <div className="comm-card-body">
+                <div className="comm-about-desc">{community.description}</div>
+                
+                <div className="comm-stats">
+                  <div className="comm-stat-item">
+                    <span className="comm-stat-num">{community.members}</span>
+                    <span className="comm-stat-label">Members</span>
                   </div>
-                ))}
-              </div>
+                  <div className="comm-stat-item">
+                    <span className="comm-stat-num">{community.online}</span>
+                    <span className="comm-stat-label">Online</span>
+                  </div>
+                </div>
 
-              <button className="btn view-mods">View all moderators</button>
+                <button className="comm-create-btn">Create Post</button>
+              </div>
             </div>
 
-            {isUserModerator && (
-              <div className="sidebar-card settings-card">
-                <h3>COMMUNITY SETTINGS</h3>
-                <button className="btn settings">Community Appearance</button>
-                <button className="btn settings">Customize Community</button>
+            <div className="comm-card">
+              <div className="comm-card-header">Moderators</div>
+              <div className="comm-card-body">
+                <div className="comm-mod-list">
+                  <button className="comm-btn-outline" style={{width: '100%', marginBottom: '10px'}}>Message Mods</button>
+                  {moderators.map((m) => (
+                    <div key={m} className="comm-mod-item">u/{m}</div>
+                  ))}
+                </div>
               </div>
-            )}
+            </div>
           </aside>
         </div>
       </div>
