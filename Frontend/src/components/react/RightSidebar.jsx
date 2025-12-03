@@ -1,23 +1,33 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../api/axios"; //
 import "../css/RightSidebar.css";
 
 export default function RightSidebar() {
   const [communities, setCommunities] = useState([]);
+  const [limit, setLimit] = useState(5);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCommunities = async () => {
       try {
-        // Fetch top 5 communities (Backend sorts by memberCount by default)
-        const response = await api.get("/communities?limit=5"); //
+        setLoading(true);
+        const response = await api.get(`/communities?limit=${limit}`);
         setCommunities(response.data);
       } catch (error) {
         console.error("Error fetching communities:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchCommunities();
-  }, []);
+  }, [limit]);
+
+  const loadMore = () => {
+    setLimit((prev) => Math.min(prev + 5, 10));
+  };
 
   return (
     <aside className="right-sidebar">
@@ -25,7 +35,12 @@ export default function RightSidebar() {
         <h3>POPULAR COMMUNITIES</h3>
         <ul className="community-list">
           {communities.map((c) => (
-            <li key={c._id} className="community-item">
+            <li
+              key={c._id}
+              className="community-item"
+              onClick={() => navigate(`/community/${encodeURIComponent(c.name)}`)}
+              style={{ cursor: "pointer" }}
+            >
               {/* Use profilePictureUrl if available, otherwise default color */}
               <span 
                 className="community-icon" 
@@ -43,7 +58,11 @@ export default function RightSidebar() {
             </li>
           ))}
         </ul>
-        <button className="see-more-btn">See more</button>
+        {(limit < 10 && communities.length >= limit) && (
+          <button className="see-more-btn" onClick={loadMore} disabled={loading}>
+            {loading ? "Loading..." : "See more"}
+          </button>
+        )}
       </div>
     </aside>
   );
