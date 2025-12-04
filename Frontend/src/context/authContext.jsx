@@ -8,12 +8,14 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
-  const [loading, setLoading] = useState(true);
+  // loading is used for actions (login), initializing gates initial hydration only
+  const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const storedToken = localStorage.getItem('token');
-    
+
     if (storedToken && storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
@@ -21,14 +23,13 @@ export const AuthProvider = ({ children }) => {
         setToken(storedToken);
       } catch (error) {
         console.error("Error parsing user data:", error);
-        // Clear invalid data
         localStorage.removeItem('user');
         localStorage.removeItem('token');
         setUser(null);
         setToken(null);
       }
     }
-    setLoading(false);
+    setInitializing(false);
   }, []);
 
   // Login Action
@@ -37,7 +38,14 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await loginUser({ loginIdentifier, password });
 
-      // Save token and user data
+      if (!data || !data.token || data.success === false) {
+        setLoading(false);
+        return { 
+          success: false, 
+          message: data?.message || 'Invalid username or password' 
+        };
+      }
+
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify({
         _id: data._id,
@@ -59,7 +67,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return { 
         success: false, 
-        message: error.response?.data?.message || error.message || 'Login failed' 
+        message: error.response?.data?.message || error.message || 'Invalid username or password' 
       };
     }
   };
@@ -74,7 +82,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, loading }}>
-      {!loading && children}
+      {!initializing && children}
     </AuthContext.Provider>
   );
 };
