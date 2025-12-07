@@ -1,18 +1,41 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../css/Navbar.css";
 import redditLogo from "../../assets/images/reddit_logo.png";
 import AuthModal from "./AuthModal";
 import CreatePostModal from "./CreatePostModal";
 import { useAuth } from "../../context/authContext";
 import { useNavigate } from "react-router-dom"; 
+import { getMyProfile } from "../../api/userApi";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [authView, setAuthView] = useState("login");
+  const [profilePicUrl, setProfilePicUrl] = useState(null);
 
   const navigate = useNavigate(); 
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user) {
+        setProfilePicUrl(null);
+        return;
+      }
+      try {
+        const data = await getMyProfile();
+        if (data?.profilePictureUrl) {
+          setProfilePicUrl(data.profilePictureUrl);
+        } else {
+          setProfilePicUrl(null);
+        }
+      } catch (err) {
+        console.error("Failed to load profile picture", err);
+        setProfilePicUrl(null);
+      }
+    };
+
+    loadProfile();
+  }, [user]);
 
   const openLoginModal = () => {
     setAuthView("login");
@@ -73,7 +96,11 @@ export default function Navbar() {
               onClick={goToProfile}
             >
               <div className="user-avatar">
-                {user.username ? user.username.charAt(0).toUpperCase() : "U"}
+                {profilePicUrl ? (
+                  <img src={profilePicUrl} alt="profile" />
+                ) : (
+                  user.username ? user.username.charAt(0).toUpperCase() : "U"
+                )}
               </div>
               <span className="user-name">
                 {user.username}

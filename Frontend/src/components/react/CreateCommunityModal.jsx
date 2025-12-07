@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../css/CreateCommunityModal.css"; // Import the CSS
+import api from "../../api/axios";
+import "../css/CreateCommunityModal.css";
 
 export default function CreateCommunityModal({ onClose }) {
   const navigate = useNavigate();
@@ -11,6 +12,8 @@ export default function CreateCommunityModal({ onClose }) {
   const [description, setDescription] = useState("");
   const [communityType, setCommunityType] = useState("public");
   const [isAdult, setIsAdult] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState("");
 
   // Categories with topics (grouped) — used to render chips grouped like Reddit categories
   const CATEGORIES = [
@@ -66,45 +69,51 @@ export default function CreateCommunityModal({ onClose }) {
     );
   };
 
-  const createCommunity = () => {
-    if (!communityName.trim()) return alert("Enter a community name.");
-
-    const safeName = communityName.trim().replace(/\s+/g, '-').toLowerCase();
-
-    // Build community object to save in recents
-    const newCommunity = {
-      name: safeName,
-      displayName: communityName.trim(),
-      description: description.trim(),
-      type: communityType,
-      isAdult,
-      topics: selectedInterests,
-      createdAt: new Date().toISOString(),
-    };
-
-    try {
-      const raw = localStorage.getItem('recents');
-      let recents = raw ? JSON.parse(raw) : [];
-
-      // Remove existing with same name if present
-      recents = recents.filter((c) => c.name !== newCommunity.name);
-
-      // Add to front
-      recents.unshift(newCommunity);
-
-      // Keep only latest 6
-      recents = recents.slice(0, 6);
-
-      localStorage.setItem('recents', JSON.stringify(recents));
-
-      // Notify other components in this window/tab
-      window.dispatchEvent(new Event('recentsUpdated'));
-    } catch (err) {
-      console.error('Failed saving recents', err);
+  const createCommunity = async () => {
+    if (!communityName.trim()) {
+      setError("Enter a community name.");
+      return;
     }
 
-    navigate(`/community/${safeName}`);
-    onClose();
+    setCreating(true);
+    setError("");
+
+    try {
+      const payload = {
+        name: communityName.trim(),
+        description: description.trim() || "Welcome to this community! Discuss and share.",
+        topics: selectedInterests,
+      };
+
+      const response = await api.post("/communities", payload);
+      const newCommunity = response.data;
+
+      // Save to recents
+      try {
+        const raw = localStorage.getItem('recents');
+        let recents = raw ? JSON.parse(raw) : [];
+        recents = recents.filter((c) => c.name !== newCommunity.name);
+        recents.unshift({
+          name: newCommunity.name,
+          displayName: newCommunity.name,
+          description: newCommunity.description,
+          createdAt: newCommunity.createdAt,
+        });
+        recents = recents.slice(0, 6);
+        localStorage.setItem('recents', JSON.stringify(recents));
+        window.dispatchEvent(new Event('recentsUpdated'));
+      } catch (err) {
+        console.error('Failed saving recents', err);
+      }
+
+      navigate(`/community/${newCommunity.name}`);
+      onClose();
+    } catch (err) {
+      console.error("Error creating community:", err);
+      setError(err.response?.data?.message || "Failed to create community");
+    } finally {
+      setCreating(false);
+    }
   };
 
   return (
@@ -252,9 +261,13 @@ export default function CreateCommunityModal({ onClose }) {
               onChange={(e) => setDescription(e.target.value)}
             />
 
+            {error && <p style={{color: '#c0392b', fontSize: '13px', marginTop: '8px'}}>{error}</p>}
+
             <div style={{display:'flex', justifyContent:'space-between', gap:12, marginTop:18}}>
-              <button onClick={() => setStep(2)} className="btn btn-secondary">Back</button>
-              <button onClick={createCommunity} className="btn btn-primary">Create</button>
+              <button onClick={() => setStep(2)} className="btn btn-secondary" disabled={creating}>Back</button>
+              <button onClick={createCommunity} className="btn btn-primary" disabled={creating}>
+                {creating ? "Creating..." : "Create"}
+              </button>
             </div>
           </div>
         )}

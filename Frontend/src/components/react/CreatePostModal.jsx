@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import api from "../../api/axios"; // Import API
 import "../css/CreatePostModal.css";
 
-export default function CreatePostModal({ isOpen, onClose }) {
+export default function CreatePostModal({ isOpen, onClose, defaultCommunity, onCreated }) {
   const [postType, setPostType] = useState("post"); // post, image, link
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -21,9 +21,6 @@ export default function CreatePostModal({ isOpen, onClose }) {
       const fetchCommunities = async () => {
         try {
           const res = await api.get("/communities");
-          // Ensure we handle the response correctly based on your controller
-          // If your controller returns an array directly: res.data
-          // If it returns paginated object: res.data.communities (adjust if needed)
           setCommunityList(Array.isArray(res.data) ? res.data : []);
         } catch (error) {
           console.error("Failed to load communities", error);
@@ -32,6 +29,12 @@ export default function CreatePostModal({ isOpen, onClose }) {
       fetchCommunities();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen && defaultCommunity) {
+      setCommunity(defaultCommunity);
+    }
+  }, [isOpen, defaultCommunity]);
 
   if (!isOpen) return null;
 
@@ -101,9 +104,11 @@ export default function CreatePostModal({ isOpen, onClose }) {
         formData.append("content", content); 
       }
 
-      await api.post("/posts", formData, {
+      const res = await api.post("/posts", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+
+      const createdPost = res.data;
 
       console.log("Post created successfully");
       
@@ -113,6 +118,7 @@ export default function CreatePostModal({ isOpen, onClose }) {
       setCommunity("");
       setLink("");
       setSelectedFiles([]);
+      if (onCreated) onCreated(createdPost);
       onClose();
       
     } catch (error) {
