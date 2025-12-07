@@ -1,36 +1,35 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 import { loginUser } from '../api/authApi';
 
 const AuthContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
 
+// Lazy init helpers to avoid setState in effects
+const safeParseUser = () => {
+  const storedUser = localStorage.getItem('user');
+  if (!storedUser) return null;
+  try {
+    return JSON.parse(storedUser);
+  } catch (err) {
+    console.error('Error parsing user data:', err);
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    return null;
+  }
+};
+
+const safeGetToken = () => {
+  const storedToken = localStorage.getItem('token');
+  return storedToken || null;
+};
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
-  // loading is used for actions (login), initializing gates initial hydration only
+  const [user, setUser] = useState(() => safeParseUser());
+  const [token, setToken] = useState(() => safeGetToken());
+  // loading is used for actions (login)
   const [loading, setLoading] = useState(false);
-  const [initializing, setInitializing] = useState(true);
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const storedToken = localStorage.getItem('token');
-
-    if (storedToken && storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setToken(storedToken);
-      } catch (error) {
-        console.error("Error parsing user data:", error);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        setUser(null);
-        setToken(null);
-      }
-    }
-    setInitializing(false);
-  }, []);
 
   // Login Action
   const login = async (loginIdentifier, password) => {
@@ -82,7 +81,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, loading }}>
-      {!initializing && children}
+      {children}
     </AuthContext.Provider>
   );
 };

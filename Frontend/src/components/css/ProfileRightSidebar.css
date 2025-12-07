@@ -5,23 +5,28 @@
     font-family: Arial, sans-serif;
     z-index: 2;
   }
+
+.right-sidebar.rs-modal-open {
+    z-index: 2000;
+  }
   
   .rs-card {
     background: white;
     border-radius: 12px;
     border: 1px solid #d7d8da;
     overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
   
   .rs-cover.large {
-    height: 140px;
+    height: 160px;
     background-size: cover;
     background-position: center;
     position: relative;
     display: flex;
     align-items: flex-end;
-    justify-content: center;
-    padding-bottom: 34px; 
+    justify-content: flex-start;
+    padding: 0 16px 24px; 
     transition: transform 0.12s ease;
   }
   
@@ -51,13 +56,24 @@
     border: 1px solid rgba(11,20,22,0.08);
     cursor: pointer;
     font-size: 13px;
+    font-weight: 600;
   }
 
   .rs-add-btn:hover {
      transform: translateY(-1px); 
     }
   
-  .rs-avatar {
+  .rs-avatar-wrapper {
+    position: absolute;
+    bottom: -30px;
+    left: 16px;
+    width: 66px;
+    height: 66px;
+    z-index: 5;
+  }
+
+  .rs-avatar-img,
+  .rs-avatar-fallback {
     width: 66px;
     height: 66px;
     border-radius: 50%;
@@ -67,99 +83,171 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    position: absolute;
-    bottom: -30px;
-    left: 16px;
     font-size: 24px;
-    z-index: 5;
     border: 3px solid white;
+    object-fit: cover;
   }
+
   
-  .rs-username {
+  .rs-identity {
     position: absolute;
-    bottom: 8px;
+    bottom: 10px;
     left: 96px;
-    color: white;
-    font-weight: 700;
     z-index: 5;
+    color: white;
+  }
+
+  .rs-username {
+    margin: 0;
+    font-weight: 700;
     text-shadow: 0 1px 2px rgba(0,0,0,0.6);
   }
+
+  .rs-username-sub {
+    margin: 2px 0 0 0;
+    font-size: 13px;
+    opacity: 0.9;
+  }
   
-  hr {
-     border: none; 
-     border-top: 1px solid #e5e5e5; 
-     margin: 0; 
-    }
+  .rs-card hr {
+    border: none; 
+    border-top: 1px solid #e5e5e5; 
+    margin: 8px 0; 
+  }
   
   .rs-section {
-     padding: 12px 16px; 
-     display: flex; flex-direction: 
-     column; gap: 8px; 
-    }
+    padding: 16px; 
+    display: flex;
+    flex-direction: column;
+    gap: 10px; 
+  }
+
+  .rs-header-section {
+    padding-top: 12px;
+    padding-bottom: 6px;
+  }
+
+  .rs-identity-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .rs-identity-label {
+    margin: 0;
+    font-size: 12px;
+    color: #777;
+  }
+
+  .rs-identity-value {
+    margin: 4px 0 0 0;
+    font-weight: 600;
+    color: #1c1c1c;
+  }
+
 
   .rs-section-title {
-     font-size: 13px; 
-     font-weight: 600; 
-     color: #1c1c1c; 
-     margin-bottom: 6px; 
-    }
+    font-size: 14px; 
+    font-weight: 600; 
+    color: #1c1c1c; 
+    margin: 0;
+    margin-bottom: 8px; 
+  }
   
   .rs-info-row { 
-    display:flex; justify-content: 
-    space-between; font-size: 13px; 
-    color: #4e4e4e; 
-   }
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px; 
+    color: #4e4e4e;
+    padding: 4px 0;
+  }
 
   .rs-info-label {
-     color: #7a7a7a; 
-    }
+    color: #7a7a7a; 
+  }
 
   .rs-info-value {
-     font-weight: 600; 
-    }
+    font-weight: 600;
+    color: #1c1c1c;
+  }
   
   .rs-badges { 
-    display:flex; 
-    gap:6px; 
-    flex-wrap:wrap; 
-}
+    display: flex; 
+    gap: 8px; 
+    flex-wrap: wrap;
+    margin: 4px 0;
+  }
 
   .rs-badge { 
-    background:#f6f7f8; 
-    padding:4px 6px; 
-    border-radius:8px; 
-    font-size:12px; 
-}
+    background: #f6f7f8; 
+    padding: 6px 10px; 
+    border-radius: 16px; 
+    font-size: 13px; 
+    font-weight: 600;
+  }
+
+  .rs-badge-note {
+    font-size: 13px;
+    color: #7a7a7a;
+    margin: 0;
+  }
+
+  .rs-badge-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
   
   .rs-button { 
     background: #f6f7f8; 
-    border: none; 
-    padding: 6px 10px; 
-    border-radius: 8px; 
-    cursor:pointer; 
-    font-size:12px; 
-    color: black
-}
+    border: 1px solid #d7d8da; 
+    padding: 8px 12px; 
+    border-radius: 10px; 
+    cursor: pointer; 
+    font-size: 13px; 
+    color: #1a1a1b;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  .rs-button.inline {
+    margin-top: 0;
+  }
 
   .rs-button:hover { 
-    background:#e1e3e6; 
-}
+    background: #e1e3e6; 
+  }
   
   .rs-setting-row {
-     display:flex; 
-     justify-content:space-between; 
-     align-items:center; 
-     font-size:13px; 
-     background:#fff;
-      padding:6px 0; 
-    }
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    font-size: 14px; 
+    background: #fff;
+    padding: 8px 0; 
+  }
+
+  .rs-setting-row button {
+    background: #f6f7f8;
+    border: 1px solid #d7d8da;
+    padding: 6px 14px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .rs-setting-row button:hover {
+    background: #e1e3e6;
+  }
   
   .rs-trophy { 
-    background:#f6f7f8; 
-    padding:4px 6px; 
-    border-radius:8px; 
-    font-size:12px; 
-}
+    background: #f6f7f8; 
+    padding: 6px 10px; 
+    border-radius: 8px; 
+    font-size: 13px; 
+    font-weight: 600;
+  }
   
   .upload-modal-overlay {
     position: fixed;
@@ -168,7 +256,7 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    z-index: 1000;
+    z-index: 9999;
   }
   
   .upload-modal {
@@ -177,6 +265,8 @@
     border-radius: 10px;
     padding: 18px;
     box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    position: relative;
+    z-index: 10000;
   }
   
   .upload-modal h3 {
@@ -242,13 +332,25 @@
      cursor:pointer; 
     }
 
+  .cancel-btn:disabled,
+  .save-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
   .save-btn:hover {
      background:#0062b0;
      }
+
+  .upload-error {
+    color: #c0392b;
+    font-size: 13px;
+    margin: 10px 0 0;
+  }
   
   @media (max-width: 980px) {
     .right-sidebar { width: 280px; }
     .rs-avatar { left: 12px; }
-    .rs-username { left: 86px; }
+    .rs-identity { left: 82px; }
   }
   

@@ -3,13 +3,12 @@ import api from "../../api/axios"; // Import API
 import "../css/CreatePostModal.css";
 
 export default function CreatePostModal({ isOpen, onClose }) {
-  const [postType, setPostType] = useState("post"); // post, image, link, poll
+  const [postType, setPostType] = useState("post"); // post, image, link
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [community, setCommunity] = useState("");
   const [link, setLink] = useState("");
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const [pollOptions, setPollOptions] = useState(["", ""]);
   const [isDragging, setIsDragging] = useState(false);
   
   // New State for fetching communities
@@ -77,24 +76,6 @@ export default function CreatePostModal({ isOpen, onClose }) {
     setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
   };
 
-  const addPollOption = () => {
-    if (pollOptions.length < 6) {
-      setPollOptions([...pollOptions, ""]);
-    }
-  };
-
-  const removePollOption = (index) => {
-    if (pollOptions.length > 2) {
-      setPollOptions(pollOptions.filter((_, i) => i !== index));
-    }
-  };
-
-  const updatePollOption = (index, value) => {
-    const newOptions = [...pollOptions];
-    newOptions[index] = value;
-    setPollOptions(newOptions);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -132,7 +113,6 @@ export default function CreatePostModal({ isOpen, onClose }) {
       setCommunity("");
       setLink("");
       setSelectedFiles([]);
-      setPollOptions(["", ""]);
       onClose();
       
     } catch (error) {
@@ -181,14 +161,6 @@ export default function CreatePostModal({ isOpen, onClose }) {
           >
             <span className="tab-icon">🔗</span>
             Link
-          </button>
-          <button
-            type="button"
-            className={`tab-btn ${postType === "poll" ? "active" : ""}`}
-            onClick={() => setPostType("poll")}
-          >
-            <span className="tab-icon">📊</span>
-            Poll
           </button>
         </div>
 
@@ -287,36 +259,6 @@ export default function CreatePostModal({ isOpen, onClose }) {
                 onChange={(e) => setLink(e.target.value)}
                 required
               />
-            </div>
-          )}
-
-          {postType === "poll" && (
-            <div className="form-group">
-              {pollOptions.map((option, index) => (
-                <div key={index} className="poll-option-container">
-                  <input
-                    type="text"
-                    className="poll-option"
-                    placeholder={`Option ${index + 1}`}
-                    value={option}
-                    onChange={(e) => updatePollOption(index, e.target.value)}
-                  />
-                  {pollOptions.length > 2 && (
-                    <button
-                      type="button"
-                      className="remove-option-btn"
-                      onClick={() => removePollOption(index)}
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              ))}
-              {pollOptions.length < 6 && (
-                <button type="button" className="add-option-btn" onClick={addPollOption}>
-                  + Add option
-                </button>
-              )}
             </div>
           )}
 
