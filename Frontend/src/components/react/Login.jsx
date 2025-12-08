@@ -19,7 +19,7 @@ export default function Login({ onSwitchToSignup, closeModal }) {
     if (result.success) {
       if (closeModal) closeModal();
     } else {
-      setError(result.message || "Login failed. Please try again.");
+      setError(result.message || "Invalid username or password.");
     }
   };
 

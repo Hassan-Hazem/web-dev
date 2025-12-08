@@ -1,17 +1,68 @@
-import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+
 import { useAuth } from "../context/authContext";
+import api from "../api/axios";
+import { updateUserProfile } from "../api/userApi";
+import CreatePostModal from "../components/react/CreatePostModal";
 import ProfileRightSidebar from "../components/react/ProfileRightSidebar";
 import PostCard from "../components/react/PostCard";
-import CommentCard from "../components/react/CommentCard";
 import snooImg from "../assets/images/Snoo_Expression_NoMouth.png";
 import "./UserProfilePage.css";
 
 export default function UserProfilePage() {
   const { user } = useAuth();
-  const { username: paramUsername } = useParams();
+  
   const [activeTab, setActiveTab] = useState("Overview");
-  const [filterOpen, setFilterOpen] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [error, setError] = useState(null);
+  const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
+  const [userPosts, setUserPosts] = useState([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+  const [postsError, setPostsError] = useState(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState("");
+  const avatarInputRef = useRef(null);
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      setLoadingProfile(true);
+      setError(null);
+      try {
+        const response = await api.get("/users/me/info");
+        setProfileData(response.data);
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+        setError(err.response?.data?.message || "Failed to load profile");
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+
+    if (user) {
+      fetchProfileData();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const fetchUserPosts = async () => {
+      if (!profileData?.username) return;
+      
+      setLoadingPosts(true);
+      setPostsError(null);
+      try {
+        const response = await api.get(`/posts/user/${profileData.username}`);
+        setUserPosts(response.data);
+      } catch (err) {
+        console.error("Error fetching user posts:", err);
+        setPostsError(err.response?.data?.message || "Failed to load posts");
+      } finally {
+        setLoadingPosts(false);
+      }
+    };
+
+    fetchUserPosts();
+  }, [profileData?.username]);
 
 
   if (!user) {
@@ -22,29 +73,43 @@ export default function UserProfilePage() {
       </div>
     );
   }
-  
 
-  const username = user.username; 
+  if (loadingProfile) {
+    return (
+      <div className="login-message">
+        <h2>Loading profile...</h2>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="login-message">
+        <h2>Error loading profile</h2>
+        <p>{error}</p>
+      </div>
+    );
+  }
+
+  if (!profileData) {
+    return (
+      <div className="login-message">
+        <h2>Profile not found</h2>
+      </div>
+    );
+  }
+
+  const username = profileData.username || user.username;
+  const karma = profileData.karma || 0;
+  const joinDate = profileData.createdAt
+    ? new Date(profileData.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short" })
+    : "Unknown";
+  const redditAgeYears = profileData.createdAt
+    ? `${Math.max(1, Math.floor((Date.now() - new Date(profileData.createdAt).getTime()) / (1000 * 60 * 60 * 24 * 365)))}y`
+    : "--";
   const tabs = [
     "Overview", "Posts", "Comments", "Saved",
     "History", "Hidden", "Upvoted", "Downvoted"
-  ];
-
-  const feedOptions = [
-    { name: "Hot", emoji: "🔥" },
-    { name: "New", emoji: "🆕" },
-    { name: "Top", emoji: "📈" },
-    { name: "View", emoji: "👁️" },
-    { name: "Card", emoji: "🃏" },
-    { name: "Compact", emoji: "🗂️" }
-  ];
-
-  const demoPosts = [
-    { id: 1, title: "My first demo post", subreddit: "reactjs", author: username, votes: 42, comments: 5, image: "https://via.placeholder.com/300" }
-  ];
-
-  const demoComments = [
-    { id: 1, author: username, text: "This is a demo comment.", votes: 12, time: "3h ago" }
   ];
 
   const tabContent = {
@@ -58,66 +123,126 @@ export default function UserProfilePage() {
     "Downvoted": { title: "Downvoted content", heading: "Looks like you haven't downvoted anything yet", text: "" }
   };
 
-  const renderFilterButton = () => {
-    if (activeTab === "Overview" || activeTab === "Posts") {
-      return (
-        <div className="filter-dropdown-wrapper">
-          <button className="filter-btn" onClick={() => setFilterOpen(!filterOpen)}>🔽 Filter</button>
-          {filterOpen && (
-            <ul className="filter-dropdown">
-              {feedOptions.map(option => (
-                <li key={option.name}>
-                  <span className="filter-emoji">{option.emoji}</span> {option.name}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      );
-    }
-    return null;
-  };
-
   const renderEmptyFeed = (tab) => (
     <div className="overview-box">
       <div className="overview-header">
         <h3>{tabContent[tab].title}</h3>
         {(tab === "Overview" || tab === "Posts") && (
           <div className="overview-actions">
-            <button className="create-post-btn">Create Post</button>
-            {renderFilterButton()}
+            <button className="create-post-btn" onClick={() => setIsCreatePostOpen(true)}>Create Post</button>
           </div>
         )}
       </div>
       <div className="overview-feed">
-        <img src={snooImg} alt="Snoo" className="snoo-img" />
-        <h4>{tabContent[tab].heading}</h4>
-        {tabContent[tab].text && <p>{tabContent[tab].text}</p>}
-        {(tab === "Overview" || tab === "Posts" || tab === "Comments") && (
-          <button className="update-settings-btn">Update Settings</button>
+        {loadingPosts ? (
+          <p>Loading posts...</p>
+        ) : postsError ? (
+          <p style={{ color: "red" }}>{postsError}</p>
+        ) : (
+          <>
+            <img src={snooImg} alt="Snoo" className="snoo-img" />
+            <h4>{tabContent[tab].heading}</h4>
+            {tabContent[tab].text && <p>{tabContent[tab].text}</p>}
+          </>
         )}
       </div>
     </div>
   );
 
+  const handleAvatarSelect = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    await uploadAvatar(file);
+    if (avatarInputRef.current) avatarInputRef.current.value = "";
+  };
+
+  const uploadAvatar = async (file) => {
+    setAvatarError("");
+    if (!file) return;
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+      setAvatarError("Only JPG, PNG, GIF, or WEBP images are allowed.");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarError("Image exceeds 2 MB.");
+      return;
+    }
+
+    try {
+      setAvatarUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const uploadResponse = await api.post("/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const avatarUrl = uploadResponse.data.filePath;
+      await updateUserProfile({ profilePictureUrl: avatarUrl });
+      setProfileData((prev) => (prev ? { ...prev, profilePictureUrl: avatarUrl } : prev));
+    } catch (err) {
+      console.error("Avatar upload failed", err);
+      setAvatarError(err.response?.data?.message || "Failed to update avatar");
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
   return (
     <div className="profile-wrapper">
+      <CreatePostModal isOpen={isCreatePostOpen} onClose={() => setIsCreatePostOpen(false)} />
       <div className="profile-layout">
         <div className="profile-main">
           <div className="profile-header">
-            <div className="profile-avatar">{username.charAt(0).toUpperCase()}</div>
+            <div className="profile-avatar-wrapper">
+              {profileData.profilePictureUrl ? (
+                <img
+                  src={profileData.profilePictureUrl}
+                  alt={`${username}'s avatar`}
+                  className="profile-avatar-img"
+                />
+              ) : (
+                <div className="profile-avatar-fallback">{username.charAt(0).toUpperCase()}</div>
+              )}
+              <button
+                type="button"
+                className="profile-avatar-upload-btn"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={avatarUploading}
+                title="Update profile picture"
+                aria-label="Update profile picture"
+              >
+                {avatarUploading ? "…" : "+"}
+              </button>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                style={{ display: "none" }}
+                onChange={handleAvatarSelect}
+              />
+            </div>
             <div className="profile-header-info">
-              <h2>{username}</h2>
-              <p className="meta">123 Karma • Joined Jan 2023</p>
+              <h2 className="profile-title">{username}</h2>
+              <p className="meta">u/{username}</p>
+              <div className="profile-meta-stats">
+                <span>{karma} Karma</span>
+                <span>•</span>
+                <span>{redditAgeYears} Reddit Age</span>
+              </div>
+            </div>
+            <div className="profile-actions">
+              <button className="profile-share-btn" aria-label="Share profile">Share</button>
             </div>
           </div>
+          {avatarError && <p className="profile-avatar-error" role="alert">{avatarError}</p>}
 
           <div className="profile-tabs">
             {tabs.map(tab => (
               <button
                 key={tab}
                 className={`profile-tab ${activeTab === tab ? "active" : ""}`}
-                onClick={() => { setActiveTab(tab); setFilterOpen(false); }}
+                onClick={() => setActiveTab(tab)}
               >
                 {tab}
               </button>
@@ -125,16 +250,14 @@ export default function UserProfilePage() {
           </div>
 
           <div className="profile-content">
-            {activeTab === "Posts" && demoPosts.length > 0
-              ? demoPosts.map(post => <PostCard key={post.id} post={post} />)
-              : activeTab === "Comments" && demoComments.length > 0
-              ? demoComments.map(comment => <CommentCard key={comment.id} comment={comment} />)
+            {(activeTab === "Posts" || activeTab === "Overview") && userPosts.length > 0
+              ? userPosts.map(post => <PostCard key={post._id} post={post} />)
               : renderEmptyFeed(activeTab)
             }
           </div>
         </div>
 
-        <ProfileRightSidebar username={username} />
+        <ProfileRightSidebar username={username} joinDate={joinDate} karma={karma} redditAgeYears={redditAgeYears} />
       </div>
     </div>
   );

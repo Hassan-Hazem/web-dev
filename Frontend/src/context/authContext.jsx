@@ -1,35 +1,35 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 import { loginUser } from '../api/authApi';
 
 const AuthContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
-  const [loading, setLoading] = useState(true);
+// Lazy init helpers to avoid setState in effects
+const safeParseUser = () => {
+  const storedUser = localStorage.getItem('user');
+  if (!storedUser) return null;
+  try {
+    return JSON.parse(storedUser);
+  } catch (err) {
+    console.error('Error parsing user data:', err);
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    return null;
+  }
+};
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    const storedToken = localStorage.getItem('token');
-    
-    if (storedToken && storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setToken(storedToken);
-      } catch (error) {
-        console.error("Error parsing user data:", error);
-        // Clear invalid data
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        setUser(null);
-        setToken(null);
-      }
-    }
-    setLoading(false);
-  }, []);
+const safeGetToken = () => {
+  const storedToken = localStorage.getItem('token');
+  return storedToken || null;
+};
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(() => safeParseUser());
+  const [token, setToken] = useState(() => safeGetToken());
+  // loading is used for actions (login)
+  const [loading, setLoading] = useState(false);
 
   // Login Action
   const login = async (loginIdentifier, password) => {
@@ -37,7 +37,14 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await loginUser({ loginIdentifier, password });
 
-      // Save token and user data
+      if (!data || !data.token || data.success === false) {
+        setLoading(false);
+        return { 
+          success: false, 
+          message: data?.message || 'Invalid username or password' 
+        };
+      }
+
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify({
         _id: data._id,
@@ -59,7 +66,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return { 
         success: false, 
-        message: error.response?.data?.message || error.message || 'Login failed' 
+        message: error.response?.data?.message || error.message || 'Invalid username or password' 
       };
     }
   };
@@ -74,7 +81,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, loading }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

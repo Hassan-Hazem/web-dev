@@ -2,14 +2,13 @@ import React, { useState, useEffect } from "react";
 import api from "../../api/axios"; // Import API
 import "../css/CreatePostModal.css";
 
-export default function CreatePostModal({ isOpen, onClose }) {
-  const [postType, setPostType] = useState("post"); // post, image, link, poll
+export default function CreatePostModal({ isOpen, onClose, defaultCommunity, onCreated }) {
+  const [postType, setPostType] = useState("post"); // post, image, link
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [community, setCommunity] = useState("");
   const [link, setLink] = useState("");
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const [pollOptions, setPollOptions] = useState(["", ""]);
   const [isDragging, setIsDragging] = useState(false);
   
   // New State for fetching communities
@@ -22,9 +21,6 @@ export default function CreatePostModal({ isOpen, onClose }) {
       const fetchCommunities = async () => {
         try {
           const res = await api.get("/communities");
-          // Ensure we handle the response correctly based on your controller
-          // If your controller returns an array directly: res.data
-          // If it returns paginated object: res.data.communities (adjust if needed)
           setCommunityList(Array.isArray(res.data) ? res.data : []);
         } catch (error) {
           console.error("Failed to load communities", error);
@@ -33,6 +29,12 @@ export default function CreatePostModal({ isOpen, onClose }) {
       fetchCommunities();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen && defaultCommunity) {
+      setCommunity(defaultCommunity);
+    }
+  }, [isOpen, defaultCommunity]);
 
   if (!isOpen) return null;
 
@@ -77,24 +79,6 @@ export default function CreatePostModal({ isOpen, onClose }) {
     setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
   };
 
-  const addPollOption = () => {
-    if (pollOptions.length < 6) {
-      setPollOptions([...pollOptions, ""]);
-    }
-  };
-
-  const removePollOption = (index) => {
-    if (pollOptions.length > 2) {
-      setPollOptions(pollOptions.filter((_, i) => i !== index));
-    }
-  };
-
-  const updatePollOption = (index, value) => {
-    const newOptions = [...pollOptions];
-    newOptions[index] = value;
-    setPollOptions(newOptions);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -120,9 +104,11 @@ export default function CreatePostModal({ isOpen, onClose }) {
         formData.append("content", content); 
       }
 
-      await api.post("/posts", formData, {
+      const res = await api.post("/posts", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+
+      const createdPost = res.data;
 
       console.log("Post created successfully");
       
@@ -132,7 +118,7 @@ export default function CreatePostModal({ isOpen, onClose }) {
       setCommunity("");
       setLink("");
       setSelectedFiles([]);
-      setPollOptions(["", ""]);
+      if (onCreated) onCreated(createdPost);
       onClose();
       
     } catch (error) {
@@ -181,14 +167,6 @@ export default function CreatePostModal({ isOpen, onClose }) {
           >
             <span className="tab-icon">🔗</span>
             Link
-          </button>
-          <button
-            type="button"
-            className={`tab-btn ${postType === "poll" ? "active" : ""}`}
-            onClick={() => setPostType("poll")}
-          >
-            <span className="tab-icon">📊</span>
-            Poll
           </button>
         </div>
 
@@ -287,36 +265,6 @@ export default function CreatePostModal({ isOpen, onClose }) {
                 onChange={(e) => setLink(e.target.value)}
                 required
               />
-            </div>
-          )}
-
-          {postType === "poll" && (
-            <div className="form-group">
-              {pollOptions.map((option, index) => (
-                <div key={index} className="poll-option-container">
-                  <input
-                    type="text"
-                    className="poll-option"
-                    placeholder={`Option ${index + 1}`}
-                    value={option}
-                    onChange={(e) => updatePollOption(index, e.target.value)}
-                  />
-                  {pollOptions.length > 2 && (
-                    <button
-                      type="button"
-                      className="remove-option-btn"
-                      onClick={() => removePollOption(index)}
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              ))}
-              {pollOptions.length < 6 && (
-                <button type="button" className="add-option-btn" onClick={addPollOption}>
-                  + Add option
-                </button>
-              )}
             </div>
           )}
 

@@ -72,6 +72,30 @@
   overflow: hidden;
 }
 
+.comm-avatar-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #0079d3;
+  color: #0079d3;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.comm-avatar-btn:hover {
+  background: #0079d3;
+  color: white;
+}
+
 .comm-icon-img {
   width: 100%;
   height: 100%;

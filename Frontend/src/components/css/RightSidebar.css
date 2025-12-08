@@ -51,7 +51,19 @@
   background: #ff4500;
   border-radius: 50%;
   margin-right: 10px;
-  display: inline-block;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.community-icon-placeholder {
+  background: #0079D3 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 11px;
 }
 
 .community-name {
@@ -74,4 +86,23 @@
   font-weight: 500;
   cursor: pointer;
   margin-top: 8px;
+}
+
+.see-more-btn:hover {
+  background: #d0d0d0;
+}
+
+.see-less-btn {
+  background: #eaeaea;
+  color: #333;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.see-less-btn:hover {
+  background: #d0d0d0;
 }
