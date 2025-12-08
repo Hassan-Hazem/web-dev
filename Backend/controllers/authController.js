@@ -1,11 +1,13 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto'; // Node's built-in cryptographic library
 import { 
   createUser, 
   findUserByEmail, 
-  findUserByUsername 
+  findUserByUsername,
+  updateUser
 } from '../repositories/userRepository.js';
-import { generateVerificationCode, sendVerificationEmail } from '../services/emailService.js'; 
+import { generateVerificationCode, sendVerificationEmail, sendPasswordResetEmail } from '../services/emailService.js'; 
 import { registerSchema, loginSchema } from '../validators/userValidator.js';
 
 const generateToken = (id) => {
@@ -143,4 +145,90 @@ export const login = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
+
+};
+
+// `--- GOOGLE AUTH CALLBACK ---
+export const googleAuthCallback = (req, res) => {
+    const token = generateToken(req.user._id); 
+    res.redirect(`http://localhost:5173/auth/success?token=${token}`);//edit here
+};
+
+export const getMe = (req, res) => {
+    res.json({
+        _id: req.user._id,
+        username: req.user.username,
+        email: req.user.email,
+        karma: req.user.karma,
+        profilePictureUrl: req.user.profilePictureUrl,
+    });
+};
+
+const createPasswordResetToken = () => {
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    return resetToken;
+};
+
+export const forgotPassword = async (req, res) => {
+    const { identifier } = req.body;
+
+    let user;
+    if (identifier.includes('@')) {
+        user = await findUserByEmail(identifier);
+    } else {
+        user = await findUserByUsername(identifier);
+    }
+    if (!user) {
+        return res.status(200).json({ message: 'If a user is registered with that email, a password reset link will be sent.' });
+    }
+
+    const resetToken = createPasswordResetToken();
+    const tokenExpiry = Date.now() + 3600000; //1 hour
+
+    await updateUser(user._id, {
+        passwordResetToken: resetToken,
+        passwordResetExpires: tokenExpiry,
+    });
+
+    const resetUrl = `http://localhost:5173/resetpassword?token=${resetToken}&email=${user.email}`; //edit here
+
+    try {
+        await sendPasswordResetEmail(user.email, resetUrl);
+        res.status(200).json({ message: 'Password reset link sent to email.' });
+    } catch (error) {
+        console.error('Email sending error:', error);
+        await updateUser(user._id, {
+            passwordResetToken: undefined,
+            passwordResetExpires: undefined,
+        });
+        res.status(500).json({ message: 'Failed to send password reset email.' });
+    }
+};
+
+export const resetPassword = async (req, res) => {
+    const { token } = req.params;
+    const { email, password } = req.body;
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+    
+    const user = await User.findOne({ 
+        passwordResetToken: token,
+        passwordResetExpires: { $gt: Date.now() },
+        email: email // Optional: Adds extra verification
+    });
+
+  if (!user) {
+              // Log the failure details for future debugging (optional, but helpful)
+              console.warn(`Reset failure: Token ${token} not found, expired, or email ${email} mismatch.`);
+              return res.status(400).json({ message: 'Token is invalid or has expired.' });
+          }
+
+    await updateUser(user._id, {
+        passwordHash: passwordHash, 
+        passwordResetToken: undefined,
+        passwordResetExpires: undefined,
+    });
+
+    res.status(200).json({ message: 'Password successfully reset.' });
 };

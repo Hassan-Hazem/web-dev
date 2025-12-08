@@ -30,3 +30,8 @@ export const updateUser = async (userId, updateData) => {
 export const deleteUser = async (userId) => {
   return await User.findByIdAndDelete(userId);
 };
+
+// used for google oauth to know if the google account is already linked to a user
+export const findUserByGoogleId = async (googleId) => {
+    return await User.findOne({ googleId });
+};
