@@ -12,3 +12,8 @@ export const loginUser = async (credentials) => {
   return response.data;
 };
 
+export const fetchCurrentUser = async () => {
+  // Axios needs to be configured to send the Bearer token for this call
+  const response = await api.get('/auth/me'); 
+  return response.data;
+};

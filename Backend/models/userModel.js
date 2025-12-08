@@ -20,7 +20,14 @@ const userSchema = new mongoose.Schema(
     },
     passwordHash: {
       type: String,
-      required: true,
+      required: function() {
+        return !this.googleId; //password is required if googleId is not present
+      },
+    },
+    googleId: { 
+        type: String, 
+        unique: true, 
+        sparse: true //ensures Mongoose only indexes non-null values
     },
     isVerified: { 
       type: Boolean,
@@ -55,6 +62,8 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   {
     timestamps: true,

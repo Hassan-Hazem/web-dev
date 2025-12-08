@@ -10,7 +10,9 @@ import ExplorePage from "./pages/ExplorePage";
 import CommunityPage from "./pages/CommunityPage";
 import UserProfilePage from "./pages/UserProfilePage";
 
-
+import AuthSuccess from "./pages/AuthSuccess";
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 import "./App.css";
 import Interests from "./components/react/Interests";
@@ -38,6 +40,9 @@ function App() {
           {/* Main content wrapper (from main) */}
           <main className={`main-content ${isSidebarOpen ? "sidebar-open" : ""}`}>
             <Routes>
+              <Route path="/auth/success" element={<AuthSuccess />} />
+              <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
+              <Route path="/resetPassword" element={<ResetPasswordPage />} />
               <Route path="/" element={<HomePage />} />
               <Route path="/popular" element={<PopularPage />} />
               <Route path="/explore" element={<ExplorePage />} />

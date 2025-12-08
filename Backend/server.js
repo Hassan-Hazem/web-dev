@@ -16,6 +16,12 @@ connectDB();
 
 const app = express();
 
+// --- Passport Imports ---
+import passport from 'passport';
+import './config/passport.js';
+
+app.use(passport.initialize());
+
 app.use(express.json());
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
