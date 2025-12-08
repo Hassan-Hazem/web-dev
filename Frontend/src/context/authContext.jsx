@@ -1,5 +1,5 @@
-import React, { createContext, useState, useContext } from 'react';
-import { loginUser } from '../api/authApi';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { loginUser, fetchCurrentUser } from '../api/authApi';
 
 const AuthContext = createContext();
 
@@ -71,6 +71,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Login with existing token
+  const loginWithToken = async (token) => {
+    setLoading(true);
+    localStorage.setItem('token', token);
+    setToken(token);
+
+    try {
+        const data = await fetchCurrentUser();
+
+        localStorage.setItem('user', JSON.stringify(data));
+        setUser(data); 
+        
+        setLoading(false);
+        return { success: true };
+    } catch (error) {
+        console.error("Token Login Error:", error);
+        logout();
+        setLoading(false);
+        return { success: false, message: 'Could not fetch user data.' };
+    }
+};
+
   // Logout Action
   const logout = () => {
     localStorage.removeItem('token');
@@ -79,9 +101,11 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
-      {children}
-    </AuthContext.Provider>
-  );
+
+return (
+  <AuthContext.Provider value={{ user, token, login, logout, loading, loginWithToken }}>
+    {!loading && children}
+  </AuthContext.Provider>
+);
+
 };

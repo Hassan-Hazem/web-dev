@@ -1,54 +1,201 @@
+/* File: Frontend/src/components/css/AuthModal.css (Extended Styles) */
+
+/* -------------------- 1. MODAL STRUCTURE (YOUR BASE) -------------------- */
+
 .auth-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
 }
 
 .auth-modal-content {
-  position: relative;
-  background: #fff;
-  border-radius: 24px;
-  width: 100%;
-  max-width: 480px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    position: relative;
+    background: #fff; /* Keeping your white background */
+    border-radius: 24px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    color: #1c1c1c; /* Ensuring content text is dark */
+    padding: 32px; /* Uniform padding */
 }
 
+/* Scrollbar hiding */
 .auth-modal-content::-webkit-scrollbar {
-  display: none;
+    display: none;
+}
+.auth-modal-content {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
-.auth-modal-content {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+/* -------------------- 2. CLOSE AND BACK BUTTONS -------------------- */
 
 .auth-modal-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #1c1c1c;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background 0.2s;
-  z-index: 10;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #1c1c1c;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+    z-index: 10;
 }
 
 .auth-modal-close:hover {
-  background: #f6f7f8;
+    background: #f6f7f8;
+}
+
+/* ADDED: Back button, positioned on the left (as seen in screenshots) */
+.auth-modal-back {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #1c1c1c; /* Dark color for the back arrow */
+    padding: 8px;
+    z-index: 10;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.auth-modal-back:hover {
+    background: #f6f7f8;
+}
+
+
+/* -------------------- 3. FORM HEADERS & TEXT -------------------- */
+
+.form-header-content {
+    padding: 0 32px; /* Horizontal padding to match button/input width */
+    text-align: center;
+}
+
+.modal-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #1c1c1c;
+}
+
+.modal-description {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 32px;
+}
+
+.modal-note {
+    font-size: 12px;
+    color: #777;
+    text-align: center;
+    margin: 16px 0;
+}
+
+/* -------------------- 4. FORM INPUTS -------------------- */
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.auth-modal-content form {
+    /* Center the form content relative to the box */
+    padding: 0 32px;
+}
+
+.auth-modal-content input[type="text"],
+.auth-modal-content input[type="email"],
+.auth-modal-content input[type="password"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 8px;
+    background-color: #f9f9f9; /* Off-white input background */
+    color: #1c1c1c;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+    text-align: left;
+}
+
+.auth-modal-content input:focus {
+    border-color: #0079d3; /* Blue highlight on focus */
+    outline: none;
+    background-color: #fff;
+}
+
+/* -------------------- 5. BUTTONS -------------------- */
+
+.full-width-button {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: #0079d3; /* Blue primary button */
+    color: #ffffff;
+    border: none;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 24px;
+}
+
+.full-width-button:hover:not(:disabled) {
+    background-color: #0060ad;
+}
+
+.full-width-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* -------------------- 6. CHECK INBOX SPECIFIC -------------------- */
+
+.envelope-icon {
+    /* Use a custom size for the envelope icon/image */
+    width: 90px; 
+    height: auto;
+    margin: 32px auto;
+    display: block;
+}
+
+.resend-section {
+    font-size: 14px;
+    color: #555;
+    margin-top: 30px;
+    text-align: center;
+}
+
+.resend-link {
+    background: none;
+    border: none;
+    color: #0079d3;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 4px;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.resend-link:disabled {
+    color: #aaa;
+    cursor: not-allowed;
+    text-decoration: none;
 }

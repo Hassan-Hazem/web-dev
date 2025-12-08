@@ -15,6 +15,7 @@
     "concurrently": "^9.1.2"
   },
   "dependencies": {
-    "multer-storage-cloudinary": "^4.0.0"
+    "multer-storage-cloudinary": "^4.0.0",
+    "axios": "^1.13.2"
   }
 }

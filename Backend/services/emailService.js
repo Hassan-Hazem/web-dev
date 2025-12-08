@@ -1,5 +1,5 @@
+import e from 'express';
 import nodemailer from 'nodemailer';
-
 
 
 const transporter = nodemailer.createTransport({
@@ -39,5 +39,25 @@ export const sendVerificationEmail = async (email, code) => {
     } catch (error) {
         console.error(`Error sending verification email to ${email}:`, error);
         throw new Error('Failed to send verification email.');
+    }
+};
+
+export const sendPasswordResetEmail = async (email, resetUrl) => {
+    const mailOptions = {
+        from: `Reddit Clone <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: 'Password Reset Request',
+        html: `
+            <p>You requested a password reset. Click the link below to set a new password:</p>
+            <p><a href="${resetUrl}">Reset Password</a></p>
+            <p>This link is valid for 1 hour.</p>
+        `,
+    };
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Reset Password email sent to ${email}`);
+    } catch (error) {
+        console.error(`Error sending Reset Password email to ${email}:`, error);
+        throw new Error('Failed to send Reset Password email.');
     }
 };
