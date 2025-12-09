@@ -9,6 +9,7 @@ import {
 } from '../repositories/userRepository.js';
 import { generateVerificationCode, sendVerificationEmail, sendPasswordResetEmail } from '../services/emailService.js'; 
 import { registerSchema, loginSchema } from '../validators/userValidator.js';
+import User from '../models/userModel.js';
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
