@@ -1,0 +1,32 @@
+# AIService/.gitignore
+
+# --- Python Environment ---
+# Virtual environment directory
+venv/
+
+# Byte-compiled / optimized / shared objects
+__pycache__/
+*.pyc
+*.pyd
+*.so
+
+# Installer logs
+*.egg-info/
+
+# --- Environment Files ---
+# NEVER commit API keys or sensitive configurations
+# This hides the file containing your GEMINI_API_KEY
+.env
+
+# --- Testing / Debugging ---
+# Coverage reports
+.coverage
+.tox/
+
+# Python-specific IDE/Tool directories (e.g., PyCharm, VS Code)
+.idea/
+.vscode/
+
+# Build artifacts
+dist/
+build/
