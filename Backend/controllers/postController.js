@@ -10,11 +10,11 @@ import { findUserByUsername } from "../repositories/userRepository.js"; // Impor
 import Community from "../models/communityModel.js";
 import Vote from "../models/voteModel.js";
 import Post from "../models/postModel.js";
+import User from "../models/userModel.js";
 import { createPostSchema, voteSchema } from "../validators/postValidator.js";
 
 // --- CREATE POST ---
 export const createPostController = async (req, res) => {
-
   const { error } = createPostSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
@@ -24,12 +24,10 @@ export const createPostController = async (req, res) => {
     const { title, content, postType, communityName } = req.body;
     const userId = req.user.id;
 
-   
     let finalImageUrl = req.body.imageUrl || ""; // Default or manual link
 
-
     if (req.file && req.file.path) {
-      finalImageUrl = req.file.path; 
+      finalImageUrl = req.file.path;
     }
 
     // 3. Find Community
@@ -43,17 +41,18 @@ export const createPostController = async (req, res) => {
       title,
       content,
       postType: postType || "text", // Default to text if missing
-      imageUrl: finalImageUrl,      
+      imageUrl: finalImageUrl,
       author: userId,
       community: community._id,
     });
 
     const populatedPost = await findPostById(newPost._id);
     res.status(201).json(populatedPost);
-
   } catch (error) {
     console.error("Create Post Error:", error);
-    res.status(500).json({ message: "Error creating post", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error creating post", error: error.message });
   }
 };
 
@@ -66,10 +65,11 @@ export const getAllPosts = async (req, res) => {
     const posts = await findAllPosts(skip, limit);
     res.status(200).json(posts);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching posts", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching posts", error: error.message });
   }
 };
-
 
 export const getPost = async (req, res) => {
   try {
@@ -79,10 +79,11 @@ export const getPost = async (req, res) => {
     }
     res.status(200).json(post);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching post", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching post", error: error.message });
   }
 };
-
 
 export const getCommunityPosts = async (req, res) => {
   try {
@@ -99,10 +100,14 @@ export const getCommunityPosts = async (req, res) => {
     const posts = await findPostsByCommunity(community._id, skip, limit);
     res.status(200).json(posts);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching community posts", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Error fetching community posts",
+        error: error.message,
+      });
   }
 };
-
 
 // --- GET POSTS BY USER  ---
 export const getUserPosts = async (req, res) => {
@@ -124,10 +129,11 @@ export const getUserPosts = async (req, res) => {
     const posts = await findPostsByUser(user._id, skip, limit);
     res.status(200).json(posts);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching user posts", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching user posts", error: error.message });
   }
 };
-
 
 export const votePost = async (req, res) => {
   const { error } = voteSchema.validate(req.body);
@@ -137,24 +143,31 @@ export const votePost = async (req, res) => {
   const { voteType } = req.body;
   const userId = req.user.id;
 
-  
   try {
-    const post = await Post.findById(postId);
+    const post = await Post.findById(postId).populate("author");
+    console.log(post);
+    // Populate author to update karma
     if (!post) return res.status(404).json({ message: "Post not found" });
 
-    // Check for existing vote
     const existingVote = await Vote.findOne({
       user: userId,
       targetId: postId,
       targetType: "Post",
     });
 
+    let karmaChange = 0;
+
     if (existingVote) {
       if (existingVote.voteType === voteType) {
         // Remove vote
         await Vote.findByIdAndDelete(existingVote._id);
-        if (voteType === "up") post.upvotes = Math.max(0, post.upvotes - 1);
-        else post.downvotes = Math.max(0, post.downvotes - 1);
+        if (voteType === "up") {
+          post.upvotes = Math.max(0, post.upvotes - 1);
+          karmaChange = -1; // Remove upvote
+        } else {
+          post.downvotes = Math.max(0, post.downvotes - 1);
+          karmaChange = 1; // Remove downvote
+        }
       } else {
         // Change vote
         existingVote.voteType = voteType;
@@ -162,9 +175,11 @@ export const votePost = async (req, res) => {
         if (voteType === "up") {
           post.upvotes++;
           post.downvotes = Math.max(0, post.downvotes - 1);
+          karmaChange = 2; // Was down (-1), now up (+1) => +2 diff
         } else {
           post.downvotes++;
           post.upvotes = Math.max(0, post.upvotes - 1);
+          karmaChange = -2; // Was up (+1), now down (-1) => -2 diff
         }
       }
     } else {
@@ -176,15 +191,34 @@ export const votePost = async (req, res) => {
         targetId: postId,
       });
       await newVote.save();
-      if (voteType === "up") post.upvotes++;
-      else post.downvotes++;
+      if (voteType === "up") {
+        post.upvotes++;
+        karmaChange = 1;
+      } else {
+        post.downvotes++;
+        karmaChange = -1;
+      }
     }
 
     await post.save();
-    res.status(200).json({ 
-      message: "Vote registered", 
-      upvotes: post.upvotes, 
-      downvotes: post.downvotes 
+
+    if (post.author) {
+      console.log(
+        "Updating karma for user:",
+        post.author.username,
+        "Change:",
+        karmaChange
+      );
+      console.log("Post author ID:", post.author._id);
+      await User.findByIdAndUpdate(post.author._id, {
+        $inc: { karma: karmaChange },
+      });
+    }
+
+    res.status(200).json({
+      message: "Vote registered",
+      upvotes: post.upvotes,
+      downvotes: post.downvotes,
     });
   } catch (error) {
     res.status(500).json({ message: "Error voting", error: error.message });
@@ -199,12 +233,16 @@ export const deletePost = async (req, res) => {
 
     // Authorization: Only author or admin (optional) can delete
     if (post.author._id.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Not authorized to delete this post" });
+      return res
+        .status(403)
+        .json({ message: "Not authorized to delete this post" });
     }
 
     await deletePostById(req.params.id);
     res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting post", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error deleting post", error: error.message });
   }
 };
