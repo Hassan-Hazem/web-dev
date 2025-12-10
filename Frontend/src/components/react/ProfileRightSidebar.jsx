@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
-import { getMyProfile, updateUserProfile } from "../../api/userApi";
+import { getMyProfile } from "../../api/userApi";
 import api from "../../api/axios";
 import "../css/ProfileRightSidebar.css";
 
@@ -126,7 +126,7 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
       const coverUrl = uploadResponse.data.filePath;
 
       // Step 2: Update user profile with cover URL
-      const updateResponse = await updateUserProfile({ coverPictureUrl: coverUrl });
+      // const updateResponse = await updateUserProfile({ coverPictureUrl: coverUrl });
 
       // Step 3: Force refresh profile to get latest from database
       const refreshedProfile = await getMyProfile();

@@ -27,6 +27,9 @@ export default function CreatePostModal({ isOpen, onClose, defaultCommunity, onC
         }
       };
       fetchCommunities();
+    } else {
+      // Reset community list when modal closes to ensure fresh fetch next time
+      setCommunityList([]);
     }
   }, [isOpen]);
 
