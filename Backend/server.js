@@ -8,6 +8,8 @@ import postRoutes from "./routes/postRoutes.js";
 import corsOptions from "./config/corsConfig.js";
 import connectDB from "./config/database.js";
 import communityRoutes from "./routes/communityRoutes.js";
+import voteRoutes from './routes/voteRoutes.js';
+
 // --- Swagger Imports ---
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
@@ -51,6 +53,7 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes); 
 app.use("/api/communities", communityRoutes);
+app.use('/api/votes', voteRoutes);
 // --- Server Startup ---
 const PORT = process.env.PORT || 5000;
 

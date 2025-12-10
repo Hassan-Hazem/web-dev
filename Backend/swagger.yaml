@@ -51,6 +51,28 @@ components:
           type: string
           example: "Registration successful. A verification code has been sent to your email."
 
+    ForgotPasswordRequest:
+      type: object
+      required: [identifier]
+      properties:
+        identifier:
+          type: string
+          description: "User's email or username"
+          example: "user@example.com"
+
+    ResetPasswordRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        password:
+          type: string
+          minLength: 6
+          example: "newStrongPassword123"
+
     Error:
       type: object
       properties:
@@ -273,13 +295,15 @@ components:
 
 tags:
   - name: Auth
-    description: Authentication endpoints (Login, Register, Verification)
+    description: Authentication endpoints (Login, Register, Verification, Password Reset)
   - name: Users
     description: User profile management and retrieval
   - name: Communities
     description: Community management (Create, Join, Explore)
   - name: Posts
     description: Post management (Create, Read, Delete, Vote)
+  - name: Votes
+    description: User voting history (Upvoted/Downvoted posts)
   - name: Upload
     description: File upload handling
 
@@ -373,6 +397,65 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+
+  /api/auth/google:
+    get:
+      summary: Initiate Google OAuth
+      tags: [Auth]
+      responses:
+        "302":
+          description: Redirects to Google Login
+
+  /api/auth/forgotpassword:
+    post:
+      summary: Request password reset link
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordRequest"
+      responses:
+        "200":
+          description: Password reset link sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+        "500":
+          description: Server error
+
+  /api/auth/resetpassword/{token}:
+    patch:
+      summary: Reset password using token
+      tags: [Auth]
+      parameters:
+        - in: path
+          name: token
+          schema:
+            type: string
+          required: true
+          description: The reset token received via email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequest"
+      responses:
+        "200":
+          description: Password successfully reset
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+        "400":
+          description: Invalid token or expired
 
   # --- USER ROUTES ---
   /api/users/{username}:
@@ -508,7 +591,7 @@ paths:
       description: Retrieves community info. Uses optional auth to set isCreator and isJoined flags.
       tags: [Communities]
       security:
-        - bearerAuth: []  # Optional, but supported
+        - bearerAuth: [] # Optional, but supported
       parameters:
         - in: path
           name: name
@@ -548,7 +631,8 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: { type: string, example: "Successfully joined r/reactjs" }
+                  message:
+                    { type: string, example: "Successfully joined r/reactjs" }
         "400":
           description: Already joined
         "404":
@@ -574,7 +658,8 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: { type: string, example: "Successfully left r/reactjs" }
+                  message:
+                    { type: string, example: "Successfully left r/reactjs" }
         "400":
           description: Not a member or Creator cannot leave
         "404":
@@ -690,7 +775,8 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: { type: string, example: "Post deleted successfully" }
+                  message:
+                    { type: string, example: "Post deleted successfully" }
         "403":
           description: Not authorized to delete this post
         "404":
@@ -790,6 +876,69 @@ paths:
                   $ref: "#/components/schemas/Post"
         "404":
           description: User not found
+
+  # --- VOTE ROUTES (History) ---
+  /api/votes/upvoted:
+    get:
+      summary: Get posts upvoted by the current user
+      tags: [Votes]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: List of upvoted posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+        "401":
+          description: Not authorized
+        "500":
+          description: Server error
+
+  /api/votes/downvoted:
+    get:
+      summary: Get posts downvoted by the current user
+      tags: [Votes]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: List of downvoted posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+        "401":
+          description: Not authorized
+        "500":
+          description: Server error
 
   # --- UPLOAD ROUTES ---
   /api/upload:
