@@ -108,21 +108,43 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
       const formData = new FormData();
       formData.append("file", file);
 
+      console.log('Uploading file:', file.name, file.type, file.size);
+
       const uploadResponse = await api.post("/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      const coverUrl = uploadResponse.data.filePath;
-      await updateUserProfile({ coverPictureUrl: coverUrl });
+      console.log('Upload response:', uploadResponse.data);
 
-      setBannerImage(coverUrl);
-      try {
-        localStorage.setItem(localStorageKey, coverUrl);
-      } catch {
-        // Ignore storage errors
+      const coverUrl = uploadResponse.data.filePath;
+      console.log('Sending update with coverPictureUrl:', coverUrl);
+
+      const updateResponse = await updateUserProfile({ coverPictureUrl: coverUrl });
+      console.log('Update response:', updateResponse);
+
+      // Verify the update was successful
+      if (updateResponse && updateResponse.user && updateResponse.user.coverPictureUrl) {
+        console.log('Banner updated successfully in database:', updateResponse.user.coverPictureUrl);
+        setBannerImage(updateResponse.user.coverPictureUrl);
+        setProfileData(updateResponse.user);
+        try {
+          localStorage.setItem(localStorageKey, updateResponse.user.coverPictureUrl);
+        } catch {
+          // Ignore storage errors
+        }
+      } else {
+        // Fallback in case response structure is different
+        console.log('Update response structure different, using uploaded URL');
+        setBannerImage(coverUrl);
+        try {
+          localStorage.setItem(localStorageKey, coverUrl);
+        } catch {
+          // Ignore storage errors
+        }
       }
     } catch (err) {
       console.error("Banner upload failed", err);
+      console.error("Error details:", err.response?.data || err.message);
       setBannerError(err.response?.data?.message || "Failed to update banner");
     } finally {
       setBannerUploading(false);

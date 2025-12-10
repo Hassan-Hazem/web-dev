@@ -16,26 +16,29 @@ export default function Navbar() {
 
   const navigate = useNavigate(); 
   useEffect(() => {
+    // No user or already have avatar in auth context: nothing to do
+    if (!user || user.profilePictureUrl) return;
+
+    let isMounted = true;
     const loadProfile = async () => {
-      if (!user) {
-        setProfilePicUrl(null);
-        return;
-      }
       try {
         const data = await getMyProfile();
-        if (data?.profilePictureUrl) {
-          setProfilePicUrl(data.profilePictureUrl);
-        } else {
+        if (isMounted) setProfilePicUrl(data?.profilePictureUrl || null);
+      } catch (err) {
+        if (isMounted) {
+          console.error("Failed to load profile picture", err);
           setProfilePicUrl(null);
         }
-      } catch (err) {
-        console.error("Failed to load profile picture", err);
-        setProfilePicUrl(null);
       }
     };
 
     loadProfile();
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
+
+  const avatarUrl = user?.profilePictureUrl || profilePicUrl;
 
   const openLoginModal = () => {
     setAuthView("login");
@@ -96,8 +99,8 @@ export default function Navbar() {
               onClick={goToProfile}
             >
               <div className="user-avatar">
-                {profilePicUrl ? (
-                  <img src={profilePicUrl} alt="profile" />
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="profile" />
                 ) : (
                   user.username ? user.username.charAt(0).toUpperCase() : "U"
                 )}
