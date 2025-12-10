@@ -3,6 +3,7 @@ const corsOptions = {
   origin: [
     "http://localhost:5173", // Vite default port
     "http://localhost:3000", // React default port (just in case)
+    "http://localhost:5174", // Alternate Vite port used in console
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
