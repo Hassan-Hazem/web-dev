@@ -20,7 +20,7 @@ export default function CreatePostModal({ isOpen, onClose, defaultCommunity, onC
     if (isOpen) {
       const fetchCommunities = async () => {
         try {
-          const res = await api.get("/communities");
+          const res = await api.get("/communities?limit=100");
           setCommunityList(Array.isArray(res.data) ? res.data : []);
         } catch (error) {
           console.error("Failed to load communities", error);

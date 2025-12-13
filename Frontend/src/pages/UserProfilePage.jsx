@@ -20,6 +20,8 @@ export default function UserProfilePage() {
   const [userPosts, setUserPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [postsError, setPostsError] = useState(null);
+  const [upvotedPosts, setUpvotedPosts] = useState([]);
+  const [downvotedPosts, setDownvotedPosts] = useState([]);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState("");
   const avatarInputRef = useRef(null);
@@ -63,6 +65,36 @@ export default function UserProfilePage() {
 
     fetchUserPosts();
   }, [profileData?.username]);
+
+  useEffect(() => {
+    const fetchUpvotedPosts = async () => {
+      if (activeTab !== "Upvoted") return;
+      
+      try {
+        const response = await api.get("/votes/upvoted?limit=50");
+        setUpvotedPosts(response.data);
+      } catch (err) {
+        console.error("Error fetching upvoted posts:", err);
+      }
+    };
+
+    fetchUpvotedPosts();
+  }, [activeTab]);
+
+  useEffect(() => {
+    const fetchDownvotedPosts = async () => {
+      if (activeTab !== "Downvoted") return;
+      
+      try {
+        const response = await api.get("/votes/downvoted?limit=50");
+        setDownvotedPosts(response.data);
+      } catch (err) {
+        console.error("Error fetching downvoted posts:", err);
+      }
+    };
+
+    fetchDownvotedPosts();
+  }, [activeTab]);
 
 
   if (!user) {
@@ -259,7 +291,11 @@ export default function UserProfilePage() {
           </div>
 
           <div className="profile-content">
-            {(activeTab === "Posts" || activeTab === "Overview") && userPosts.length > 0
+            {activeTab === "Upvoted" && upvotedPosts.length > 0
+              ? upvotedPosts.map(post => <PostCard key={post._id} post={post} />)
+              : activeTab === "Downvoted" && downvotedPosts.length > 0
+              ? downvotedPosts.map(post => <PostCard key={post._id} post={post} />)
+              : (activeTab === "Posts" || activeTab === "Overview") && userPosts.length > 0
               ? userPosts.map(post => <PostCard key={post._id} post={post} />)
               : renderEmptyFeed(activeTab)
             }

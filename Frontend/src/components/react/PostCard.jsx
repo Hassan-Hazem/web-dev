@@ -1,11 +1,20 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/authContext";
 import api from "../../api/axios"; 
 import "../css/PostCard.css";
 
-export default function PostCard({ post }) {
+export default function PostCard({ post, onDelete }) {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const initialScore = (post.upvotes || 0) - (post.downvotes || 0);
   const [score, setScore] = useState(initialScore);
-  const [userVote, setUserVote] = useState(null); 
+  const [userVote, setUserVote] = useState(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  
+  // Check if current user is the post owner
+  const isOwner = user && post.author && user._id === post.author._id;
 
   // Helper to format URLs (handles local uploads vs external links)
   const formatUrl = (url) => {
@@ -34,6 +43,28 @@ export default function PostCard({ post }) {
       console.error("Voting error:", error);
       if (error.response?.status === 401) alert("Please login to vote");
     }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+    
+    setDeleting(true);
+    try {
+      await api.delete(`/posts/${post._id}`);
+      if (onDelete) onDelete(post._id);
+      alert("Post deleted successfully");
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert(error.response?.data?.message || "Failed to delete post");
+    } finally {
+      setDeleting(false);
+      setShowMenu(false);
+    }
+  };
+
+  const handleSummarize = () => {
+    alert("Summarize feature coming soon!");
+    setShowMenu(false);
   };
 
   return (
@@ -71,9 +102,45 @@ export default function PostCard({ post }) {
             <span className="post-dot">•</span>
             <span className="post-author">Posted by {authorName}</span>
           </div>
+
+          {/* Three Dots Menu */}
+          <div className="post-menu-container">
+            <button 
+              className="post-menu-btn" 
+              onClick={() => setShowMenu(!showMenu)}
+              aria-label="Post options"
+            >
+              ⋮
+            </button>
+            {showMenu && (
+              <div className="post-menu-dropdown">
+                <button 
+                  className="menu-item delete" 
+                  onClick={handleDelete}
+                  disabled={deleting || !isOwner}
+                  title={!isOwner ? "You can only delete your own posts" : ""}
+                >
+                  🗑️ {deleting ? "Deleting..." : "Delete"}
+                </button>
+                <button 
+                  className="menu-item" 
+                  onClick={handleSummarize}
+                  disabled
+                >
+                  📝 Summarize
+                </button>
+              </div>
+            )}
+          </div>
         </div>
         
-        <h3 className="post-title">{post.title}</h3>
+        <h3 
+          className="post-title" 
+          onClick={() => navigate(`/post/${post._id}`)}
+          style={{ cursor: "pointer" }}
+        >
+          {post.title}
+        </h3>
 
         {/* Content Render */}
         {postImageUrl && (
@@ -88,7 +155,10 @@ export default function PostCard({ post }) {
         
         {/* Actions */}
         <div className="post-actions">
-          <button className="action-btn">
+          <button 
+            className="action-btn"
+            onClick={() => navigate(`/post/${post._id}`)}
+          >
             <span className="action-icon comment" />
             {post.commentCount || 0} Comments
           </button>

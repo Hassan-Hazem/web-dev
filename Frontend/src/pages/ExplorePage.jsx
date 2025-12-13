@@ -1,172 +1,175 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
+import api from "../api/axios";
 import "./ExplorePage.css";
 
-const categories = [
-  "All",
-  "Internet Culture",
-  "Games",
-  "Q&As & Stories",
-  "Technology",
-  "Movies & TV",
-  "Places & Travel",
-  "Pop Culture",
-  "Business & Finance",
-  "Sports",
-  "Education & Career",
-  "News & Politics",
-];
-
-const recommendedCommunities = [
-  {
-    id: 1,
-    name: "tressless",
-    icon: "👨‍🦲",
-    members: "520K",
-    description: "Connect with others experiencing hair loss and explore effective treatments and solutions.",
-  },
-  {
-    id: 2,
-    name: "funny",
-    icon: "😂",
-    members: "4.3M",
-    description: "Get your daily fix of humor with posts that will have you laughing out loud.",
-  },
-  {
-    id: 3,
-    name: "Minoxbeards",
-    icon: "🧔",
-    members: "121K",
-    description: "Welcome to MinoxBeards, the subreddit for those seeking to grow fuller, thicker beards.",
-  },
-  {
-    id: 4,
-    name: "bald",
-    icon: "👨",
-    members: "1.6M",
-    description: "Embrace your baldness and connect with others who understand in this supportive community.",
-  },
-  {
-    id: 5,
-    name: "PersonalFinanceEgypt",
-    icon: "💰",
-    members: "36K",
-    description: "Discuss budgeting, investing, saving, banking services, and all around personal finance in Egypt.",
-  },
-  {
-    id: 6,
-    name: "FunnyAnimals",
-    icon: "🐾",
-    members: "529K",
-    description: "Laugh at the hilarious antics of our furry, feathered, and scaly friends.",
-  },
-];
-
-const internetCultureCommunities = [
-  {
-    id: 7,
-    name: "BestofRedditorUpdates",
-    icon: "📰",
-    members: "1.5M",
-    description: "Follow up on the most intriguing Reddit stories and see how they turned out.",
-  },
-  {
-    id: 8,
-    name: "SipsTea",
-    icon: "🍵",
-    members: "4.1M",
-    description: "Sip some tea and enjoy the internet's hottest viral videos and memes.",
-  },
-  {
-    id: 9,
-    name: "HistoryMemes",
-    icon: "📜",
-    members: "1.3M",
-    description: "Relive history in a hilarious way with our collection of historical memes.",
-  },
-  {
-    id: 10,
-    name: "Whatcouldgowrong",
-    icon: "🤦",
-    members: "2.2M",
-    description: "See the consequences of stupid ideas. Watch and learn what not to do.",
-  },
-  {
-    id: 11,
-    name: "funny",
-    icon: "😂",
-    members: "4.3M",
-    description: "Get your daily fix of humor with posts that will have you laughing out loud.",
-  },
-  {
-    id: 12,
-    name: "oddlysatisfying",
-    icon: "😌",
-    members: "2.3M",
-    description: "Share and enjoy videos and images that are pleasing to the eye and satisfying.",
-  },
+// Categories and topics
+const CATEGORIES = [
+	{ id: "all", name: "All" },
+	{ id: "technology", name: "Technology", topics: ["AI", "Web Development", "Data Science", "Cybersecurity", "Cloud"] },
+	{ id: "science", name: "Science", topics: ["Biology", "Physics", "Chemistry", "Astronomy", "Geology"] },
+	{ id: "arts", name: "Arts & Media", topics: ["Painting", "Music", "Photography", "Writing", "Design"] },
+	{ id: "gaming", name: "Gaming", topics: ["PC Gaming", "Console Gaming", "Esports", "Indie Games", "Game Development"] },
+	{ id: "lifestyle", name: "Lifestyle", topics: ["Travel", "Food", "Health", "Fitness", "Fashion"] },
+	{ id: "education", name: "Education", topics: ["School", "College", "Online Learning", "STEM", "Languages"] },
+	{ id: "business", name: "Business & Finance", topics: ["Startups", "Marketing", "Finance", "E-commerce", "Management"] },
 ];
 
 export default function ExplorePage() {
-  const [activeCategory, setActiveCategory] = useState("All");
+	const [activeTopic, setActiveTopic] = useState("all");
+	const [communities, setCommunities] = useState([]);
+	const [page, setPage] = useState(1);
+	const [limit] = useState(12);
+	const [hasMore, setHasMore] = useState(true);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState(null);
 
-  return (
-    <main className="explore-main">
-      <div className="explore-header">
-        <h1>Explore Communities</h1>
-        <div className="categories-bar">
-          {categories.map((category) => (
-            <button
-              key={category}
-              className={`category-btn ${activeCategory === category ? "active" : ""}`}
-              onClick={() => setActiveCategory(category)}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-      </div>
+	const allTopics = useMemo(
+		() => Array.from(new Set((CATEGORIES.filter((c) => c.id !== "all")).flatMap((c) => c.topics || []))),
+		[]
+	);
 
-      <div className="explore-container">
-        <section className="communities-section">
-          <h2 className="section-title">Recommended for you</h2>
-          <div className="communities-grid">
-            {recommendedCommunities.map((community) => (
-              <div key={community.id} className="community-card">
-                <div className="community-header">
-                  <div className="community-avatar">{community.icon}</div>
-                  <div className="community-meta">
-                    <h3 className="community-name">r/{community.name}</h3>
-                    <span className="community-members">{community.members} weekly visitors</span>
-                  </div>
-                  <button className="btn-join-card">Join</button>
-                </div>
-                <p className="community-description">{community.description}</p>
-              </div>
-            ))}
-          </div>
-          <button className="btn-show-more">Show more</button>
-        </section>
+	const fetchCommunities = async (reset = false, pageOverride) => {
+		setLoading(true);
+		setError(null);
+		try {
+			const currentPage = pageOverride ?? page;
+			const topicParam = activeTopic !== "all" ? activeTopic : undefined;
+			const params = new URLSearchParams();
+			params.append("page", String(currentPage));
+			params.append("limit", String(limit));
+			if (topicParam) params.append("topic", topicParam);
+			const res = await api.get(`/communities?${params.toString()}`);
+			const payload = res.data;
+			const data = Array.isArray(payload)
+				? payload
+				: Array.isArray(payload?.communities)
+				? payload.communities
+				: [];
+			setCommunities((prev) => (reset ? data : [...prev, ...data]));
+			setHasMore(data.length >= limit);
+		} catch (err) {
+			console.error("Failed to load communities", err);
+			setError(err.response?.data?.message || "Failed to load communities");
+		} finally {
+			setLoading(false);
+		}
+	};
 
-        <section className="communities-section">
-          <h2 className="section-title">Internet Culture</h2>
-          <div className="communities-grid">
-            {internetCultureCommunities.map((community) => (
-              <div key={community.id} className="community-card">
-                <div className="community-header">
-                  <div className="community-avatar">{community.icon}</div>
-                  <div className="community-meta">
-                    <h3 className="community-name">r/{community.name}</h3>
-                    <span className="community-members">{community.members} weekly visitors</span>
-                  </div>
-                  <button className="btn-join-card">Join</button>
-                </div>
-                <p className="community-description">{community.description}</p>
-              </div>
-            ))}
-          </div>
-          <button className="btn-show-more">Show more</button>
-        </section>
-      </div>
-    </main>
-  );
+	const filteredCommunities = useMemo(() => {
+		return communities.filter((cm) => {
+			if (activeTopic === "all") return true;
+			if (Array.isArray(cm.topics)) return cm.topics.includes(activeTopic);
+			return cm.topic === activeTopic;
+		});
+	}, [communities, activeTopic]);
+
+	const shouldShowMoreButton = filteredCommunities.length > limit || hasMore || page > 1;
+
+	useEffect(() => {
+		setPage(1);
+		setCommunities([]);
+		setHasMore(true);
+		fetchCommunities(true, 1);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [activeTopic]);
+
+	useEffect(() => {
+		if (page > 1) fetchCommunities(false);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [page]);
+
+	const handleToggleShow = () => {
+		if (loading) return;
+		if (page > 1 && !hasMore) {
+			// collapse to initial page
+			setPage(1);
+			setCommunities([]);
+			setHasMore(true);
+			fetchCommunities(true, 1);
+		} else {
+			setPage((p) => p + 1);
+		}
+	};
+
+	return (
+		<main className="explore-main">
+			<div className="explore-header">
+				<h1>Explore Communities</h1>
+				<div className="categories-bar" style={{ marginTop: 8 }}>
+					<button
+						key="topic-all"
+						className={`category-btn ${activeTopic === "all" ? "active" : ""}`}
+						onClick={() => setActiveTopic("all")}
+					>
+						All Topics
+					</button>
+					{allTopics.map((t) => (
+						<button
+							key={`topic-${t}`}
+							className={`category-btn ${activeTopic === t ? "active" : ""}`}
+							onClick={() => setActiveTopic(t)}
+						>
+							{t}
+						</button>
+					))}
+				</div>
+			</div>
+
+			<div className="explore-container">
+				<section className="communities-section">
+					<h2 className="section-title">Communities</h2>
+
+					{error && <p style={{ color: "red" }}>{error}</p>}
+
+					{!loading && filteredCommunities.length === 0 && (
+						<p className="no-communities-message">No communities found for this topic.</p>
+					)}
+
+					<div className="communities-grid">
+						{filteredCommunities.map((community) => (
+								<div key={community._id} className="community-card">
+									<div className="community-header">
+										<div className="community-avatar">
+											{(() => {
+												const avatarUrl =
+													community.profilePictureUrl ||
+													community.profilePicture ||
+													community.avatarUrl ||
+													community.iconUrl ||
+													"";
+												return avatarUrl ? (
+													<img
+														src={avatarUrl}
+														alt={`r/${community.name} avatar`}
+														className="community-avatar-img"
+														onError={(e) => {
+															e.currentTarget.style.display = 'none';
+															e.currentTarget.parentElement.textContent = '👥';
+														}}
+													/>
+												) : (
+													community.icon || "👥"
+												);
+											})()}
+										</div>
+										<div className="community-meta">
+											<h3 className="community-name">r/{community.name}</h3>
+											<span className="community-members">{community.memberCount || 0} members</span>
+										</div>
+										<button className="btn-join-card">Join</button>
+									</div>
+									<p className="community-description">{community.description}</p>
+								</div>
+							))}
+					</div>
+
+					{shouldShowMoreButton && (
+						<button className="btn-show-more" onClick={handleToggleShow} disabled={loading || (!hasMore && page === 1)}>
+							{loading ? "Loading..." : page > 1 && !hasMore ? "Show less" : "Show more"}
+						</button>
+					)}
+				</section>
+			</div>
+		</main>
+	);
 }

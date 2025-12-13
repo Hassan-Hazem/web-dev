@@ -2,41 +2,55 @@ import React, { useState } from "react";
 import api from "../../api/axios"; // Import API
 import "../css/Interests.css";
 
-const interestsData = {
-  Popular: [
-    "AlexandriaEgy",
-    "askegypt",
-    "PersonalFinanceEgypt",
-    "EGYescapism",
-    "TopCharacterTropes",
-    "ArcRaiders",
-    "NBA",
-    "Pop Culture Chat",
-    "Tech news",
-    "US news"
-  ],
-  "Places & Travel": [
-    "Libya",
-    "Egypt",
-    "Syria",
-    "Places in the Middle East",
-    "Places in Europe",
-    "Places in North America",
-    "CAIRO",
-    "Travel & Holiday",
-    "Places in Asia",
-    "Tunisia"
-  ],
-  "Q&As & Stories": [
-    "Q&As",
-    "Stories & Confessions",
-    "Ask Reddit"
-  ]
-};
+// Sync categories with CreateCommunityModal
+const CATEGORIES = [
+  {
+    id: 'technology',
+    name: 'Technology',
+    emoji: '💻',
+    topics: ['AI & ML','Web Development','Mobile Development','DevOps','Cybersecurity','Blockchain','Cloud Computing']
+  },
+  {
+    id: 'science',
+    name: 'Science',
+    emoji: '🔬',
+    topics: ['Physics','Biology','Chemistry','Astronomy','Earth Science','Neuroscience','Environmental Science']
+  },
+  {
+    id: 'arts',
+    name: 'Arts & Media',
+    emoji: '🎨',
+    topics: ['Photography','Music','Film & TV','Painting','Graphic Design','Literature','Theater']
+  },
+  {
+    id: 'gaming',
+    name: 'Gaming',
+    emoji: '🎮',
+    topics: ['PC Gaming','Console Gaming','Mobile Gaming','Esports','Game Development','Retro Games','VR/AR']
+  },
+  {
+    id: 'lifestyle',
+    name: 'Lifestyle',
+    emoji: '✨',
+    topics: ['Health & Fitness','Food & Cooking','Travel','Personal Finance','Home & Garden','Fashion','Relationships']
+  },
+  {
+    id: 'education',
+    name: 'Education',
+    emoji: '📚',
+    topics: ['STEM Education','Language Learning','Study Tips','Educational Tech','Research','Teaching Resources','Remote Learning']
+  },
+  {
+    id: 'business',
+    name: 'Business & Entrepreneurship',
+    emoji: '💼',
+    topics: ['Startups','Marketing','Product Management','Finance','E-commerce','Freelancing','HR & People Ops']
+  }
+];
 
 export default function Interests({ onComplete, onSkip }) {
   const [selectedInterests, setSelectedInterests] = useState([]);
-  const [activeCategory, setActiveCategory] = useState("Popular");
+  const [activeCategoryId, setActiveCategoryId] = useState('all');
   const [loading, setLoading] = useState(false); // Add loading state
 
   const toggleInterest = (interest) => {
@@ -75,31 +89,39 @@ export default function Interests({ onComplete, onSkip }) {
         Pick things you'd like to see in your home feed.
       </p>
 
-      {/* Category Tabs */}
+      {/* Category Tabs (synced with CreateCommunity) */}
       <div className="hide-scrollbar interests-tabs">
-        {Object.keys(interestsData).map(category => (
+        {/* All tab to show all topics without filters */}
+        <button
+          key="all"
+          onClick={() => setActiveCategoryId('all')}
+          className={`interests-tab-btn ${activeCategoryId === 'all' ? 'active' : ''}`}
+        >
+           All
+        </button>
+        {CATEGORIES.map((cat) => (
           <button
-            key={category}
-            onClick={() => setActiveCategory(category)}
-            className={`interests-tab-btn ${activeCategory === category ? 'active' : ''}`}
+            key={cat.id}
+            onClick={() => setActiveCategoryId(cat.id)}
+            className={`interests-tab-btn ${activeCategoryId === cat.id ? 'active' : ''}`}
           >
-            {category === "Popular" && "🎯 "}
-            {category === "Places & Travel" && "🌍 "}
-            {category === "Q&As & Stories" && "✏️ "}
-            {category}
+            {cat.emoji} {cat.name}
           </button>
         ))}
       </div>
 
-      {/* Interests Grid */}
+      {/* Interests Grid (topics from active category or all) */}
       <div className="interests-grid">
-        {interestsData[activeCategory].map(interest => (
+        {(activeCategoryId === 'all'
+          ? Array.from(new Set(CATEGORIES.flatMap((c) => c.topics)))
+          : (CATEGORIES.find((c) => c.id === activeCategoryId)?.topics || [])
+        ).map((topic) => (
           <button
-            key={interest}
-            onClick={() => toggleInterest(interest)}
-            className={`interest-chip ${selectedInterests.includes(interest) ? 'selected' : ''}`}
+            key={topic}
+            onClick={() => toggleInterest(topic)}
+            className={`interest-chip ${selectedInterests.includes(topic) ? 'selected' : ''}`}
           >
-            {interest}
+            {topic}
           </button>
         ))}
       </div>
