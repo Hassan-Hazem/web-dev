@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 import { loginUser, fetchCurrentUser } from '../api/authApi';
 
 const AuthContext = createContext();
@@ -101,8 +101,16 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // Update user profile (e.g., after avatar change)
+  const updateUserProfile = (updatedData) => {
+    const base = user || {};
+    const newUser = { ...base, ...updatedData };
+    setUser(newUser);
+    localStorage.setItem('user', JSON.stringify(newUser));
+  };
+
 return (
-  <AuthContext.Provider value={{ user, token, login, logout, loading, loginWithToken }}>
+  <AuthContext.Provider value={{ user, token, login, logout, loading, loginWithToken, updateUserProfile }}>
     {!loading && children}
   </AuthContext.Provider>
 );

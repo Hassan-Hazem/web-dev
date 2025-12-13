@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
-import { getMyProfile, updateUserProfile } from "../../api/userApi";
+import { getMyProfile } from "../../api/userApi";
 import api from "../../api/axios";
 import "../css/ProfileRightSidebar.css";
 
@@ -51,18 +51,22 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
   }, [localStorageKey]);
 
   function openFileDialog() {
-    if (fileInputRef.current) fileInputRef.current.click();
+    // Clear input to allow selecting same file multiple times
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+      fileInputRef.current.click();
+    }
   }
 
   function handleFileSelect(e) {
     const file = e.target.files && e.target.files[0];
-    validateImage(file);
+    if (file) validateImage(file);
   }
 
   function handleDrop(e) {
     e.preventDefault();
     const file = e.dataTransfer.files && e.dataTransfer.files[0];
-    validateImage(file);
+    if (file) validateImage(file);
   }
 
 
@@ -74,18 +78,19 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
 
   function validateImage(file) {
     if (!file) return;
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     if (!allowedTypes.includes(file.type)) {
-      alert("Only JPG, PNG, or WebP formats are allowed.");
+      setBannerError("Only JPG, PNG, GIF, or WebP formats are allowed.");
       resetFileInput();
       return;
     }
-    if (file.size > 3 * 1024 * 1024) {
-      alert("Image exceeds 3 MB max size.");
+    if (file.size > 5 * 1024 * 1024) {
+      setBannerError("Image exceeds 5 MB max size.");
       resetFileInput();
       return;
     }
 
+    setBannerError("");
     const reader = new FileReader();
     reader.onload = () => {
       setTempImage(reader.result);
@@ -95,16 +100,18 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
   }
 
   async function handleModalSave() {
-    if (!tempImage || !fileInputRef.current || !fileInputRef.current.files?.length) {
+    if (!tempImage || !fileInputRef.current?.files?.length) {
       setIsModalOpen(false);
+      setTempImage(null);
       return;
     }
 
     const file = fileInputRef.current.files[0];
-    try {
-      setBannerError("");
-      setBannerUploading(true);
+    setBannerError("");
+    setBannerUploading(true);
 
+    try {
+      // Step 1: Upload file to cloudinary
       const formData = new FormData();
       formData.append("file", file);
 
@@ -112,33 +119,57 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      const coverUrl = uploadResponse.data.filePath;
-      await updateUserProfile({ coverPictureUrl: coverUrl });
-
-      setBannerImage(coverUrl);
-      try {
-        localStorage.setItem(localStorageKey, coverUrl);
-      } catch {
-        // Ignore storage errors
+      if (!uploadResponse?.data?.filePath) {
+        throw new Error("Upload failed - no file path returned");
       }
-    } catch (err) {
-      console.error("Banner upload failed", err);
-      setBannerError(err.response?.data?.message || "Failed to update banner");
-    } finally {
-      setBannerUploading(false);
+
+      const coverUrl = uploadResponse.data.filePath;
+
+      // Step 2: Update user profile with cover URL
+      // const updateResponse = await updateUserProfile({ coverPictureUrl: coverUrl });
+
+      // Step 3: Force refresh profile to get latest from database
+      const refreshedProfile = await getMyProfile();
+      
+      if (refreshedProfile?.coverPictureUrl) {
+        setBannerImage(refreshedProfile.coverPictureUrl);
+        setProfileData(refreshedProfile);
+        try {
+          localStorage.setItem(localStorageKey, refreshedProfile.coverPictureUrl);
+        } catch {
+          // Ignore storage errors
+        }
+      } else {
+        // Fallback to uploaded URL
+        setBannerImage(coverUrl);
+        try {
+          localStorage.setItem(localStorageKey, coverUrl);
+        } catch {
+          // Ignore storage errors
+        }
+      }
+
+      // Success
+      setIsModalOpen(false);
       setTempImage(null);
       resetFileInput();
-      setIsModalOpen(false);
+    } catch (err) {
+      console.error("Banner upload error:", err);
+      setBannerError(err.response?.data?.message || err.message || "Failed to update banner");
+    } finally {
+      setBannerUploading(false);
     }
   }
 
   function handleModalCancel() {
     setTempImage(null);
     setIsModalOpen(false);
+    setBannerError("");
     resetFileInput();
   }
 
   function handleOpenUploader() {
+    setBannerError("");
     openFileDialog();
   }
 
@@ -180,7 +211,7 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/png,image/jpeg,image/webp"
+            accept="image/png,image/jpeg,image/webp,image/gif"
             style={{ display: "none" }}
             onChange={handleFileSelect}
           />
@@ -314,16 +345,9 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
               onClick={openFileDialog}
             >
               <p className="drop-text">Drop file or <span className="browse">browse device</span></p>
-              <p className="formats">Formats: JPG, PNG</p>
-              <p className="formats">Max size: 3 MB</p>
+              <p className="formats">Formats: JPG, PNG, WebP, GIF</p>
+              <p className="formats">Max size: 5 MB</p>
               {tempImage && <img src={tempImage} alt="preview" className="preview-img" />}
-              <input
-                type="file"
-                accept="image/png,image/jpeg"
-                ref={fileInputRef}
-                style={{ display: "none" }}
-                onChange={handleFileSelect}
-              />
             </div>
 
             {bannerError && <p className="upload-error" role="alert">{bannerError}</p>}

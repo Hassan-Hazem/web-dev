@@ -5,11 +5,11 @@ import { protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-
-router.get('/:username', getUserProfile);
-
-
+// More specific routes FIRST
 router.get('/me/info', protect, getMe); 
 router.put('/profile', protect, updateUserProfile);
+
+// Generic routes LAST
+router.get('/:username', getUserProfile);
 
 export default router;

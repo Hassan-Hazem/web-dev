@@ -39,6 +39,7 @@ export const findPostsByUser = async (userId, skip = 0, limit = 10) => {
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
+    .populate("author", "username profilePictureUrl")
     .populate("community", "name profilePictureUrl");
 };
 

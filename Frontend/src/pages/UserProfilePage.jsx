@@ -10,7 +10,7 @@ import snooImg from "../assets/images/Snoo_Expression_NoMouth.png";
 import "./UserProfilePage.css";
 
 export default function UserProfilePage() {
-  const { user } = useAuth();
+  const { user, updateUserProfile: updateAuthUser } = useAuth();
   
   const [activeTab, setActiveTab] = useState("Overview");
   const [profileData, setProfileData] = useState(null);
@@ -178,8 +178,17 @@ export default function UserProfilePage() {
       });
 
       const avatarUrl = uploadResponse.data.filePath;
-      await updateUserProfile({ profilePictureUrl: avatarUrl });
-      setProfileData((prev) => (prev ? { ...prev, profilePictureUrl: avatarUrl } : prev));
+      const updateRes = await updateUserProfile({ profilePictureUrl: avatarUrl });
+
+      // Prefer server response user object if present
+      const updatedUser = updateRes?.user;
+      if (updatedUser) {
+        setProfileData((prev) => ({ ...(prev || {}), ...updatedUser }));
+        updateAuthUser(updatedUser);
+      } else {
+        setProfileData((prev) => (prev ? { ...prev, profilePictureUrl: avatarUrl } : prev));
+        updateAuthUser({ profilePictureUrl: avatarUrl });
+      }
     } catch (err) {
       console.error("Avatar upload failed", err);
       setAvatarError(err.response?.data?.message || "Failed to update avatar");
