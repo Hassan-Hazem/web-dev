@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
 import api from "../../api/axios"; 
 import "../css/PostCard.css";
+import AuthModal from "./AuthModal";
 
 export default function PostCard({ post, onDelete, showBackButton, onBack }) {
   const navigate = useNavigate();
@@ -13,6 +15,7 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
   const [showMenu, setShowMenu] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   
   // Check if current user is the post owner
   const isOwner = user && post.author && user._id === post.author._id;
@@ -35,14 +38,37 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
   const postImageUrl = formatUrl(post.imageUrl);
 
   const handleVote = async (type) => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    // Optimistic update: adjust UI immediately, then reconcile with server
+    const previousVote = userVote;
+    const previousScore = score;
+
+    const nextVote = previousVote === type ? null : type;
+
+    // Calculate score delta based on vote transition
+    let delta = 0;
+    if (previousVote === 'up') delta -= 1;
+    if (previousVote === 'down') delta += 1;
+    if (nextVote === 'up') delta += 1;
+    if (nextVote === 'down') delta -= 1;
+
+    setUserVote(nextVote);
+    setScore((s) => s + delta);
+
     try {
       const response = await api.post(`/posts/${post._id}/vote`, { voteType: type });
       const { upvotes, downvotes } = response.data;
       setScore(upvotes - downvotes);
-      setUserVote(userVote === type ? null : type);
+      setUserVote(nextVote);
     } catch (error) {
       console.error("Voting error:", error);
-      if (error.response?.status === 401) alert("Please login to vote");
+      setUserVote(previousVote);
+      setScore(previousScore);
+      if (error.response?.status === 401) setShowLoginModal(true);
     }
   };
 
@@ -69,7 +95,16 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
   };
 
   return (
-    <div className="post-card">
+    <>
+      {showLoginModal && createPortal(
+        <AuthModal
+          isOpen
+          initialView="login"
+          onClose={() => setShowLoginModal(false)}
+        />,
+        document.body
+      )}
+      <div className="post-card">
       {/* Back Button - if in detail view */}
       {showBackButton && (
         <button className="post-back-btn" onClick={onBack} aria-label="Go back">
@@ -183,5 +218,6 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
         </div>
       </div>
     </div>
+    </>
   );
 }

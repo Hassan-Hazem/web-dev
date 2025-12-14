@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 import api from "../api/axios";
 import CreatePostModal from "../components/react/CreatePostModal";
+import AuthModal from "../components/react/AuthModal";
 import "./Community.css";
 
 export default function CommunityPage() {
@@ -21,6 +23,7 @@ export default function CommunityPage() {
   const [tempAvatar, setTempAvatar] = useState(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState("");
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const avatarInputRef = React.useRef(null);
 
   const loadCommunity = useCallback(async () => {
@@ -73,7 +76,7 @@ export default function CommunityPage() {
 
   const handleJoinToggle = async () => {
     if (!user) {
-      alert("Please log in to join communities.");
+      setShowLoginModal(true);
       return;
     }
     if (!community) return;
@@ -90,7 +93,11 @@ export default function CommunityPage() {
       }
     } catch (err) {
       console.error("Join/leave failed", err);
-      alert(err.response?.data?.message || "Action failed");
+      if (err.response?.status === 401) {
+        setShowLoginModal(true);
+      } else {
+        alert(err.response?.data?.message || "Action failed");
+      }
     } finally {
       setJoinLoading(false);
     }
@@ -98,7 +105,7 @@ export default function CommunityPage() {
 
   const openCreate = () => {
     if (!user) {
-      alert("Please log in to create a post.");
+      setShowLoginModal(true);
       return;
     }
     setIsCreateOpen(true);
@@ -181,8 +188,17 @@ export default function CommunityPage() {
     );
 
   return (
-    <div className="comm-page">
-      {/* Banner Area */}
+    <>
+      {showLoginModal && createPortal(
+        <AuthModal
+          isOpen
+          initialView="login"
+          onClose={() => setShowLoginModal(false)}
+        />,
+        document.body
+      )}
+      <div className="comm-page">
+        {/* Banner Area */}
       <div 
         className="comm-banner"
         style={{ backgroundImage: bannerImage ? `url(${bannerImage})` : undefined }}
@@ -343,5 +359,6 @@ export default function CommunityPage() {
           </div>
         )}
     </div>
+    </>
   );
 }

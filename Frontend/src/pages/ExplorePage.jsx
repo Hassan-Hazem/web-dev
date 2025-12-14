@@ -1,7 +1,10 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/authContext";
 import api from "../api/axios";
 import "./ExplorePage.css";
+import AuthModal from "../components/react/AuthModal";
 
 // Categories and topics
 const CATEGORIES = [
@@ -60,6 +63,8 @@ export default function ExplorePage() {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
 	const [joiningCommunity, setJoiningCommunity] = useState(null);
+	const [showLoginModal, setShowLoginModal] = useState(false);
+	const { user } = useAuth();
 
 	// Get all topics from all categories
 	const allTopics = useMemo(
@@ -132,13 +137,21 @@ export default function ExplorePage() {
 
 	const handleJoinCommunity = async (e, communityName) => {
 		e.stopPropagation(); // Prevent card click
+		if (!user) {
+			setShowLoginModal(true);
+			return;
+		}
 		setJoiningCommunity(communityName);
 		try {
 			await api.post(`/communities/${communityName}/join`);
 			alert("Joined community successfully!");
 		} catch (err) {
 			console.error("Error joining community:", err);
-			alert(err.response?.data?.message || "Failed to join community");
+			if (err.response?.status === 401) {
+				setShowLoginModal(true);
+			} else {
+				alert(err.response?.data?.message || "Failed to join community");
+			}
 		} finally {
 			setJoiningCommunity(null);
 		}
@@ -149,8 +162,17 @@ export default function ExplorePage() {
 	};
 
 	return (
-		<main className="explore-main">
-			<div className="explore-header">
+		<>
+			{showLoginModal && createPortal(
+				<AuthModal
+					isOpen
+					initialView="login"
+					onClose={() => setShowLoginModal(false)}
+				/>,
+				document.body
+			)}
+			<main className="explore-main">
+				<div className="explore-header">
 				<h1>Explore Communities</h1>
 				<div className="categories-bar" style={{ marginTop: 8 }}>
 					<button
@@ -239,5 +261,6 @@ export default function ExplorePage() {
 				</section>
 			</div>
 		</main>
+		</>
 	);
 }
