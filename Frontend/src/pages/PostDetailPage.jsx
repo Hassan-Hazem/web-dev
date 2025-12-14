@@ -80,15 +80,10 @@ export default function PostDetailPage() {
 
   return (
     <div className="post-detail-page">
-      {/* Back Button - Top Left */}
-      <button className="back-btn" onClick={() => navigate('/explore')}>
-        ← Back to Explore
-      </button>
-      
       <div className="post-detail-container">
         {/* Main Post */}
         <div className="post-detail-main">
-          <PostCard post={post} onDelete={handlePostDelete} />
+          <PostCard post={post} onDelete={handlePostDelete} showBackButton={true} onBack={() => navigate(-1)} />
         </div>
 
         {/* Comments Section */}

@@ -4,7 +4,7 @@ import { useAuth } from "../../context/authContext";
 import api from "../../api/axios"; 
 import "../css/PostCard.css";
 
-export default function PostCard({ post, onDelete }) {
+export default function PostCard({ post, onDelete, showBackButton, onBack }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const initialScore = (post.upvotes || 0) - (post.downvotes || 0);
@@ -12,6 +12,7 @@ export default function PostCard({ post, onDelete }) {
   const [userVote, setUserVote] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   
   // Check if current user is the post owner
   const isOwner = user && post.author && user._id === post.author._id;
@@ -69,6 +70,13 @@ export default function PostCard({ post, onDelete }) {
 
   return (
     <div className="post-card">
+      {/* Back Button - if in detail view */}
+      {showBackButton && (
+        <button className="post-back-btn" onClick={onBack} aria-label="Go back">
+          ←
+        </button>
+      )}
+
       {/* Vote Section */}
       <div className="vote-section">
         <button 
@@ -145,7 +153,13 @@ export default function PostCard({ post, onDelete }) {
         {/* Content Render */}
         {postImageUrl && (
           <div className="post-image">
-            <img src={postImageUrl} alt={post.title} />
+            <img 
+              src={postImageUrl} 
+              alt={post.title}
+              loading="lazy"
+              onLoad={() => setImageLoaded(true)}
+              className={imageLoaded ? 'loaded' : 'loading'}
+            />
           </div>
         )}
         

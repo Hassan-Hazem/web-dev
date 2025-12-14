@@ -20,6 +20,8 @@ export default function UserProfilePage() {
   const [userPosts, setUserPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
   const [postsError, setPostsError] = useState(null);
+  const [postsPage, setPostsPage] = useState(1);
+  const [postsHasMore, setPostsHasMore] = useState(true);
   const [upvotedPosts, setUpvotedPosts] = useState([]);
   const [downvotedPosts, setDownvotedPosts] = useState([]);
   const [avatarUploading, setAvatarUploading] = useState(false);
@@ -53,8 +55,15 @@ export default function UserProfilePage() {
       setLoadingPosts(true);
       setPostsError(null);
       try {
-        const response = await api.get(`/posts/user/${profileData.username}`);
-        setUserPosts(response.data);
+        const response = await api.get(`/posts/user/${profileData.username}?page=${postsPage}&limit=10`);
+        const newPosts = response.data;
+        
+        if (newPosts.length === 0) {
+          setPostsHasMore(false);
+        } else {
+          // Replace posts if page 1, append otherwise
+          setUserPosts((prev) => postsPage === 1 ? newPosts : [...prev, ...newPosts]);
+        }
       } catch (err) {
         console.error("Error fetching user posts:", err);
         setPostsError(err.response?.data?.message || "Failed to load posts");
@@ -64,7 +73,7 @@ export default function UserProfilePage() {
     };
 
     fetchUserPosts();
-  }, [profileData?.username]);
+  }, [profileData?.username, postsPage]);
 
   useEffect(() => {
     const fetchUpvotedPosts = async () => {
@@ -79,6 +88,15 @@ export default function UserProfilePage() {
     };
 
     fetchUpvotedPosts();
+  }, [activeTab]);
+
+  // Reset pagination when tab changes to Posts or Overview
+  useEffect(() => {
+    if (activeTab === "Posts" || activeTab === "Overview") {
+      setPostsPage(1);
+      setUserPosts([]);
+      setPostsHasMore(true);
+    }
   }, [activeTab]);
 
   useEffect(() => {
@@ -296,7 +314,27 @@ export default function UserProfilePage() {
               : activeTab === "Downvoted" && downvotedPosts.length > 0
               ? downvotedPosts.map(post => <PostCard key={post._id} post={post} />)
               : (activeTab === "Posts" || activeTab === "Overview") && userPosts.length > 0
-              ? userPosts.map(post => <PostCard key={post._id} post={post} />)
+              ? (
+                <>
+                  {userPosts.map(post => <PostCard key={post._id} post={post} />)}
+                  {postsHasMore && (
+                    <div className="pagination-controls">
+                      <button 
+                        className="load-more-btn"
+                        onClick={() => setPostsPage(prev => prev + 1)}
+                        disabled={loadingPosts}
+                      >
+                        {loadingPosts ? "Loading..." : "Load More Posts"}
+                      </button>
+                    </div>
+                  )}
+                  {!postsHasMore && userPosts.length > 0 && (
+                    <div className="pagination-end">
+                      <p>No more posts to load</p>
+                    </div>
+                  )}
+                </>
+              )
               : renderEmptyFeed(activeTab)
             }
           </div>

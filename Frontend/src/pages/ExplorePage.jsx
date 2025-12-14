@@ -1,20 +1,57 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import "./ExplorePage.css";
 
 // Categories and topics
 const CATEGORIES = [
 	{ id: "all", name: "All" },
-	{ id: "technology", name: "Technology", topics: ["AI", "Web Development", "Data Science", "Cybersecurity", "Cloud"] },
-	{ id: "science", name: "Science", topics: ["Biology", "Physics", "Chemistry", "Astronomy", "Geology"] },
-	{ id: "arts", name: "Arts & Media", topics: ["Painting", "Music", "Photography", "Writing", "Design"] },
-	{ id: "gaming", name: "Gaming", topics: ["PC Gaming", "Console Gaming", "Esports", "Indie Games", "Game Development"] },
-	{ id: "lifestyle", name: "Lifestyle", topics: ["Travel", "Food", "Health", "Fitness", "Fashion"] },
-	{ id: "education", name: "Education", topics: ["School", "College", "Online Learning", "STEM", "Languages"] },
-	{ id: "business", name: "Business & Finance", topics: ["Startups", "Marketing", "Finance", "E-commerce", "Management"] },
+	{
+		id: 'technology',
+		name: 'Technology',
+		emoji: '💻',
+		topics: ['AI & ML','Web Development','Mobile Development','DevOps','Cybersecurity','Blockchain','Cloud Computing']
+	},
+	{
+		id: 'science',
+		name: 'Science',
+		emoji: '🔬',
+		topics: ['Physics','Biology','Chemistry','Astronomy','Earth Science','Neuroscience','Environmental Science']
+	},
+	{
+		id: 'arts',
+		name: 'Arts & Media',
+		emoji: '🎨',
+		topics: ['Photography','Music','Film & TV','Painting','Graphic Design','Literature','Theater']
+	},
+	{
+		id: 'gaming',
+		name: 'Gaming',
+		emoji: '🎮',
+		topics: ['PC Gaming','Console Gaming','Mobile Gaming','Esports','Game Development','Retro Games','VR/AR']
+	},
+	{
+		id: 'lifestyle',
+		name: 'Lifestyle',
+		emoji: '✨',
+		topics: ['Health & Fitness','Food & Cooking','Travel','Personal Finance','Home & Garden','Fashion','Relationships']
+	},
+	{
+		id: 'education',
+		name: 'Education',
+		emoji: '📚',
+		topics: ['STEM Education','Language Learning','Study Tips','Educational Tech','Research','Teaching Resources','Remote Learning']
+	},
+	{
+		id: 'business',
+		name: 'Business & Entrepreneurship',
+		emoji: '💼',
+		topics: ['Startups','Marketing','Product Management','Finance','E-commerce','Freelancing','HR & People Ops']
+	}
 ];
 
 export default function ExplorePage() {
+	const navigate = useNavigate();
 	const [activeTopic, setActiveTopic] = useState("all");
 	const [communities, setCommunities] = useState([]);
 	const [page, setPage] = useState(1);
@@ -22,9 +59,11 @@ export default function ExplorePage() {
 	const [hasMore, setHasMore] = useState(true);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
+	const [joiningCommunity, setJoiningCommunity] = useState(null);
 
+	// Get all topics from all categories
 	const allTopics = useMemo(
-		() => Array.from(new Set((CATEGORIES.filter((c) => c.id !== "all")).flatMap((c) => c.topics || []))),
+		() => Array.from(new Set(CATEGORIES.filter((c) => c.id !== "all").flatMap((c) => c.topics || []))),
 		[]
 	);
 
@@ -91,6 +130,24 @@ export default function ExplorePage() {
 		}
 	};
 
+	const handleJoinCommunity = async (e, communityName) => {
+		e.stopPropagation(); // Prevent card click
+		setJoiningCommunity(communityName);
+		try {
+			await api.post(`/communities/${communityName}/join`);
+			alert("Joined community successfully!");
+		} catch (err) {
+			console.error("Error joining community:", err);
+			alert(err.response?.data?.message || "Failed to join community");
+		} finally {
+			setJoiningCommunity(null);
+		}
+	};
+
+	const handleCommunityClick = (communityName) => {
+		navigate(`/community/${communityName}`);
+	};
+
 	return (
 		<main className="explore-main">
 			<div className="explore-header">
@@ -103,13 +160,13 @@ export default function ExplorePage() {
 					>
 						All Topics
 					</button>
-					{allTopics.map((t) => (
+					{allTopics.map((topic) => (
 						<button
-							key={`topic-${t}`}
-							className={`category-btn ${activeTopic === t ? "active" : ""}`}
-							onClick={() => setActiveTopic(t)}
+							key={`topic-${topic}`}
+							className={`category-btn ${activeTopic === topic ? "active" : ""}`}
+							onClick={() => setActiveTopic(topic)}
 						>
-							{t}
+							{topic}
 						</button>
 					))}
 				</div>
@@ -127,7 +184,12 @@ export default function ExplorePage() {
 
 					<div className="communities-grid">
 						{filteredCommunities.map((community) => (
-								<div key={community._id} className="community-card">
+								<div 
+									key={community._id} 
+									className="community-card"
+									onClick={() => handleCommunityClick(community.name)}
+									style={{ cursor: 'pointer' }}
+								>
 									<div className="community-header">
 										<div className="community-avatar">
 											{(() => {
@@ -156,7 +218,13 @@ export default function ExplorePage() {
 											<h3 className="community-name">r/{community.name}</h3>
 											<span className="community-members">{community.memberCount || 0} members</span>
 										</div>
-										<button className="btn-join-card">Join</button>
+										<button 
+										className="btn-join-card"
+										onClick={(e) => handleJoinCommunity(e, community.name)}
+										disabled={joiningCommunity === community.name}
+									>
+										{joiningCommunity === community.name ? "Joining..." : "Join"}
+										</button>
 									</div>
 									<p className="community-description">{community.description}</p>
 								</div>

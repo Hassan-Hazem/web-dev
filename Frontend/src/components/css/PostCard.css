@@ -9,6 +9,29 @@
   position: relative;
 }
 
+.post-back-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.post-back-btn:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
 .vote-section {
   display: flex;
   flex-direction: column;
@@ -78,6 +101,17 @@
   object-fit: cover;
   border-radius: 8px;
   background: #eee;
+}
+
+.post-image img.loading {
+  opacity: 0.5;
+  filter: blur(5px);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+.post-image img.loaded {
+  opacity: 1;
+  filter: blur(0);
 }
 
 .post-actions {
