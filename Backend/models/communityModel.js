@@ -36,6 +36,11 @@ const communitySchema = new mongoose.Schema(
       type: String,
       trim: true,
     }],
+    isPublic: {
+      type: Boolean,
+      default: true,
+      description: "If true, anyone can post/vote/comment. If false, only members can."
+    },
   },
   { timestamps: true }
 );

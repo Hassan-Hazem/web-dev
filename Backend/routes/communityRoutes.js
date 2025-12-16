@@ -4,7 +4,8 @@ import {
   getCommunity,
   getCommunities,
   joinCommunity,
-  leaveCommunity
+  leaveCommunity,
+  getAvailableCommunitiesForPostingController
 } from "../controllers/communityController.js";
 import { protect } from "../middlewares/authMiddleware.js";
 import { optionalProtect } from "../middlewares/optionalAuthMiddleware.js";
@@ -12,7 +13,8 @@ import { optionalProtect } from "../middlewares/optionalAuthMiddleware.js";
 const router = express.Router();
 
 
-router.get("/", getCommunities); 
+router.get("/", optionalProtect, getCommunities); 
+router.get("/available/for-posting", protect, getAvailableCommunitiesForPostingController);
 router.get("/:name", optionalProtect, getCommunity); 
 
 router.post("/", protect, createCommunityController);

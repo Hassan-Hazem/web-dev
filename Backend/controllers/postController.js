@@ -8,10 +8,30 @@ import {
 } from "../repositories/postRepository.js";
 import { findUserByUsername } from "../repositories/userRepository.js"; // Import the helper here
 import Community from "../models/communityModel.js";
+import Subscription from "../models/subscriptionModel.js";
 import Vote from "../models/voteModel.js";
 import Post from "../models/postModel.js";
 import User from "../models/userModel.js";
 import { createPostSchema, voteSchema } from "../validators/postValidator.js";
+
+// --- Helper function to check if user can perform actions in community ---
+const checkCommunityAccess = async (community, userId) => {
+  // If community is public, anyone can perform actions
+  if (community.isPublic) {
+    return true;
+  }
+  
+  // If community is restricted, only joined members can perform actions
+  if (userId) {
+    const subscription = await Subscription.findOne({
+      user: userId,
+      community: community._id
+    });
+    return !!subscription;
+  }
+  
+  return false;
+};
 
 // --- CREATE POST ---
 export const createPostController = async (req, res) => {
@@ -34,6 +54,14 @@ export const createPostController = async (req, res) => {
     const community = await Community.findOne({ name: communityName });
     if (!community) {
       return res.status(404).json({ message: "Community not found" });
+    }
+
+    // Check if user has access to post in this community
+    const hasAccess = await checkCommunityAccess(community, userId);
+    if (!hasAccess) {
+      return res.status(403).json({ 
+        message: "You must join this restricted community to post" 
+      });
     }
 
     // 4. Create Post
@@ -144,10 +172,16 @@ export const votePost = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const post = await Post.findById(postId).populate("author");
-    console.log(post);
-    // Populate author to update karma
+    const post = await Post.findById(postId).populate("author community");
     if (!post) return res.status(404).json({ message: "Post not found" });
+
+    // Check if user has access to vote in this community
+    const hasAccess = await checkCommunityAccess(post.community, userId);
+    if (!hasAccess) {
+      return res.status(403).json({ 
+        message: "You must join this restricted community to vote" 
+      });
+    }
 
     const existingVote = await Vote.findOne({
       user: userId,
