@@ -8,7 +8,8 @@ import postRoutes from "./routes/postRoutes.js";
 import corsOptions from "./config/corsConfig.js";
 import connectDB from "./config/database.js";
 import communityRoutes from "./routes/communityRoutes.js";
-import voteRoutes from './routes/voteRoutes.js';
+import voteRoutes from "./routes/voteRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
 
 // --- Swagger Imports ---
 import swaggerUi from "swagger-ui-express";
@@ -19,8 +20,8 @@ connectDB();
 const app = express();
 
 // --- Passport Imports ---
-import passport from 'passport';
-import './config/passport.js';
+import passport from "passport";
+import "./config/passport.js";
 
 app.use(passport.initialize());
 
@@ -51,9 +52,10 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/posts", postRoutes); 
+app.use("/api/posts", postRoutes);
 app.use("/api/communities", communityRoutes);
-app.use('/api/votes', voteRoutes);
+app.use("/api/votes", voteRoutes);
+app.use("/api/ai", aiRoutes);
 // --- Server Startup ---
 const PORT = process.env.PORT || 5000;
 

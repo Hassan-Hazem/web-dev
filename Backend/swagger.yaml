@@ -301,6 +301,27 @@ components:
           type: string
           enum: [image, video]
 
+    # --- AI Schemas ---
+    SummarizeRequest:
+      type: object
+      required:
+        - title
+        - content
+      properties:
+        title:
+          type: string
+          example: "My Post Title"
+        content:
+          type: string
+          example: "This is the detailed content of my post that needs to be summarized..."
+
+    SummarizeResponse:
+      type: object
+      properties:
+        summary:
+          type: string
+          example: "A concise summary of the post content."
+
 tags:
   - name: Auth
     description: Authentication endpoints (Login, Register, Verification, Password Reset)
@@ -314,6 +335,8 @@ tags:
     description: User voting history (Upvoted/Downvoted posts)
   - name: Upload
     description: File upload handling
+  - name: AI
+    description: AI-powered features (Post summarization)
 
 paths:
   # --- AUTH ROUTES ---
@@ -977,6 +1000,44 @@ paths:
           description: Not authorized
         "500":
           description: Server error
+
+  # --- AI ROUTES ---
+  /api/ai/summarize:
+    post:
+      summary: Generate an AI summary of a post
+      description: Uses the AI Service to generate a concise summary based on post title and content
+      tags: [AI]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SummarizeRequest"
+      responses:
+        "200":
+          description: Summary generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SummarizeResponse"
+        "400":
+          description: Missing required fields (title or content)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "503":
+          description: AI Service is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Failed to process request to AI Service
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   # --- UPLOAD ROUTES ---
   /api/upload:
