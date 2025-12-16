@@ -11,7 +11,14 @@ export const findUserByEmail = async (email) => {
   return await User.findOne({ email });
 };
 
-
+export const searchUsers = async (query, skip = 0, limit = 10) => {
+  return await User.find({
+    username: { $regex: query, $options: "i" }, // Case-insensitive partial match
+  })
+    .select("username profilePictureUrl karma bio") // Only return public info
+    .skip(skip)
+    .limit(limit);
+};
 export const findUserByUsername = async (username) => {
   return await User.findOne({ username });
 };

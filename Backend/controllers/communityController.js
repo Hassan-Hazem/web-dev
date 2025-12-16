@@ -5,6 +5,7 @@ import {
   updateCommunity,
   getAvailableCommunitiesForPosting,
   getCommunityContributorsCount,
+  searchCommunities,
 } from "../repositories/communityRepository.js";
 import Subscription from "../models/subscriptionModel.js";
 import {
@@ -225,7 +226,20 @@ export const updateCommunityController = async (req, res) => {
           .json({ message: "Community name already taken" });
     }
 
-    const updated = await updateCommunity(community._id, req.body);
+    // Get file paths from uploaded files
+    const profilePictureUrl =
+      req.files?.profilePictureUrl?.[0]?.path || req.body.profilePictureUrl;
+    const coverPictureUrl =
+      req.files?.coverPictureUrl?.[0]?.path || req.body.coverPictureUrl;
+
+    // Build update data
+    const updateData = { ...req.body };
+    if (profilePictureUrl !== undefined)
+      updateData.profilePictureUrl = profilePictureUrl;
+    if (coverPictureUrl !== undefined)
+      updateData.coverPictureUrl = coverPictureUrl;
+
+    const updated = await updateCommunity(community._id, updateData);
     res.status(200).json(updated);
   } catch (err) {
     console.error("Error updating community", err);
@@ -245,5 +259,43 @@ export const getAvailableCommunitiesForPostingController = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error fetching communities", error: error.message });
+  }
+};
+export const searchCommunitiesController = async (req, res) => {
+  try {
+    const { q } = req.query; // Get search query ?q=keyword
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    if (!q) {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+
+    const communities = await searchCommunities(q, skip, limit);
+
+    // Add 'isJoined' status for the logged-in user
+    const communitiesWithJoinStatus = await Promise.all(
+      communities.map(async (community) => {
+        let isJoined = false;
+        if (req.user) {
+          const subscription = await Subscription.findOne({
+            user: req.user._id,
+            community: community._id,
+          });
+          if (subscription) isJoined = true;
+        }
+        return {
+          ...community.toObject(),
+          isJoined,
+        };
+      })
+    );
+
+    res.status(200).json(communitiesWithJoinStatus);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error searching communities", error: error.message });
   }
 };

@@ -5,6 +5,7 @@ import { useAuth } from "../../context/authContext";
 import api from "../../api/axios"; 
 import "../css/PostCard.css";
 import AuthModal from "./AuthModal";
+import SummarizeModal from "./SummarizeModal";
 
 export default function PostCard({ post, onDelete, showBackButton, onBack }) {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
   const [deleting, setDeleting] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSummarizeModal, setShowSummarizeModal] = useState(false);
   
   // Check if current user is the post owner
   const isOwner = user && post.author && user._id === post.author._id;
@@ -90,7 +92,7 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
   };
 
   const handleSummarize = () => {
-    alert("Summarize feature coming soon!");
+    setShowSummarizeModal(true);
     setShowMenu(false);
   };
 
@@ -104,6 +106,11 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
         />,
         document.body
       )}
+      <SummarizeModal 
+        isOpen={showSummarizeModal}
+        post={post}
+        onClose={() => setShowSummarizeModal(false)}
+      />
       <div className="post-card">
       {/* Back Button - if in detail view */}
       {showBackButton && (
@@ -198,7 +205,6 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
                 <button 
                   className="menu-item" 
                   onClick={handleSummarize}
-                  disabled
                 >
                   📝 Summarize
                 </button>
