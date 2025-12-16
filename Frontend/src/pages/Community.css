@@ -447,29 +447,94 @@
 }
 .comm-edit-name-btn:hover { background: #ffffff; color: #111827; transform: translateY(-1px); }
 
-/* Inline edit controls for community name */
-.comm-edit-input {
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid #e6e9eb;
-  font-size: 15px;
-  flex: 1;
+/* Inline edit controls for community name (Reddit-like) */
+.comm-edit-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  flex-wrap: wrap;
 }
-.comm-edit-actions { display: flex; gap: 8px; }
+
+.comm-edit-input-wrap {
+  display: flex;
+  align-items: center;
+  background: #f6f7f8;
+  border: 1px solid #edeff1;
+  border-radius: 999px;
+  padding: 6px 10px 6px 12px;
+  min-height: 40px;
+  flex: 1 1 auto;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.comm-edit-input-wrap:focus-within {
+  border-color: #0079d3;
+  box-shadow: 0 0 0 1px #0079d3;
+}
+
+.comm-edit-prefix {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1c1c1c;
+  margin-right: 6px;
+  user-select: none;
+}
+
+.comm-edit-input {
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1c1c1c;
+  outline: none;
+  flex: 1;
+  min-width: 80px;
+}
+
+.comm-edit-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.comm-edit-cancel {
+  background: #ffffff;
+  color: #1c1c1c;
+  border: 1px solid #e6e9eb;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.comm-edit-cancel:hover {
+  background: #f6f7f8;
+  border-color: #d7d8da;
+}
+
 .comm-edit-save {
   background: #0079d3;
   color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 8px;
+  border: 1px solid #0079d3;
+  padding: 8px 16px;
+  border-radius: 999px;
   cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  transition: filter 0.15s ease, transform 0.1s ease;
 }
-.comm-edit-cancel {
-  background: transparent;
-  border: 1px solid #e6e9eb;
-  padding: 6px 10px;
-  border-radius: 8px;
-  cursor: pointer;
+.comm-edit-save:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+.comm-edit-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
 }
 
 /* Improved Create Post input */

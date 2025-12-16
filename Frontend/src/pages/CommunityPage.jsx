@@ -439,14 +439,20 @@ useEffect(() => {
                     )}
                   </>
                 ) : (
-                  <div style={{display: 'flex', gap: 8, alignItems: 'center', width: '100%'}}>
-                    <input
-                      className="comm-edit-input"
-                      value={newName}
-                      onChange={(e) => setNewName(e.target.value)}
-                      autoFocus
-                    />
+                  <div className="comm-edit-inline">
+                    <div className="comm-edit-input-wrap">
+                      <span className="comm-edit-prefix">r/</span>
+                      <input
+                        className="comm-edit-input"
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        autoFocus
+                      />
+                    </div>
                     <div className="comm-edit-actions">
+                      <button className="comm-edit-cancel" onClick={() => { setNewName(community.name); setEditingName(false); }}>
+                        Cancel
+                      </button>
                       <button
                         className="comm-edit-save"
                         onClick={async () => {
@@ -490,8 +496,9 @@ useEffect(() => {
                           }
                         }}
                         disabled={editingSaving}
-                      >{editingSaving ? 'Saving...' : 'Save'}</button>
-                      <button className="comm-edit-cancel" onClick={() => { setNewName(community.name); setEditingName(false); }}>Cancel</button>
+                      >
+                        {editingSaving ? 'Saving...' : 'Save'}
+                      </button>
                     </div>
                   </div>
                 )}
