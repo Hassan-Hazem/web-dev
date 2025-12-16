@@ -83,6 +83,7 @@ export default function CreateCommunityModal({ onClose }) {
         name: communityName.trim(),
         description: description.trim() || "Welcome to this community! Discuss and share.",
         topics: selectedInterests,
+        isPublic: communityType === "public",
       };
 
       const response = await api.post("/communities", payload);

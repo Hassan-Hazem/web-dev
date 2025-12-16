@@ -4,14 +4,13 @@ import {
   getAllCommunities,
   updateCommunity,
   getAvailableCommunitiesForPosting,
+  getCommunityContributorsCount,
 } from "../repositories/communityRepository.js";
 import Subscription from "../models/subscriptionModel.js";
 import {
   createCommunitySchema,
   updateCommunitySchema,
 } from "../validators/communityValidator.js";
-import Post from "../models/postModel.js";
-import Comment from "../models/commentModel.js";
 
 export const createCommunityController = async (req, res) => {
   const { error } = createCommunitySchema.validate(req.body);
@@ -76,42 +75,9 @@ export const getCommunity = async (req, res) => {
     // ----------------------------------
     // CONTRIBUTORS COUNT (Reddit-style)
     // ----------------------------------
-
-    // 1) Users who posted
-    const postAuthors = await Post.distinct("author", {
-      community: community._id,
-    });
-
-    // 2) Users who commented
-    const commentAuthors = await Comment.aggregate([
-      {
-        $lookup: {
-          from: "posts",
-          localField: "post",
-          foreignField: "_id",
-          as: "postData",
-        },
-      },
-      { $unwind: "$postData" },
-      {
-        $match: {
-          "postData.community": community._id,
-        },
-      },
-      {
-        $group: {
-          _id: "$author",
-        },
-      },
-    ]);
-
-    // 3) Merge & deduplicate
-    const contributorSet = new Set([
-      ...postAuthors.map(String),
-      ...commentAuthors.map((c) => String(c._id)),
-    ]);
-
-    const contributorsCount = contributorSet.size;
+    const contributorsCount = await getCommunityContributorsCount(
+      community._id
+    );
 
     // ----------------------------------
     // RESPONSE

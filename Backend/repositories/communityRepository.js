@@ -1,4 +1,6 @@
 import Community from "../models/communityModel.js";
+import Post from "../models/postModel.js";
+import Comment from "../models/commentModel.js";
 
 export const createCommunity = async (communityData) => {
   const community = new Community(communityData);
@@ -65,4 +67,39 @@ export const getAvailableCommunitiesForPosting = async (userId) => {
   }).sort({ memberCount: -1 });
 
   return [...publicCommunities, ...restrictedCommunities];
+};
+
+export const getCommunityContributorsCount = async (communityId) => {
+  const postAuthors = await Post.distinct("author", {
+    community: communityId,
+  });
+
+  const commentAuthors = await Comment.aggregate([
+    {
+      $lookup: {
+        from: "posts",
+        localField: "post",
+        foreignField: "_id",
+        as: "postData",
+      },
+    },
+    { $unwind: "$postData" },
+    {
+      $match: {
+        "postData.community": communityId,
+      },
+    },
+    {
+      $group: {
+        _id: "$author",
+      },
+    },
+  ]);
+
+  const contributorSet = new Set([
+    ...postAuthors.map(String),
+    ...commentAuthors.map((c) => String(c._id)),
+  ]);
+
+  return contributorSet.size;
 };
