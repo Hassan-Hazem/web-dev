@@ -58,7 +58,7 @@ export const getCommunity = async (req, res) => {
     let isCreator = false;
     let isJoined = false;
 
-    // Check if user is logged in (req.user populated by optionalProtect)
+
     if (req.user) {
       isCreator = community.creator._id.toString() === req.user._id.toString();
 

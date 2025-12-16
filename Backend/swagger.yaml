@@ -625,11 +625,10 @@ paths:
   /api/communities/available/for-posting:
     get:
       summary: Get communities available for posting (dropdown in create post modal)
-      description: Returns public communities and joined restricted communities. Uses optional auth.
+      description: Returns public communities and joined restricted communities. Requires authentication.
       tags: [Communities]
       security:
-        - bearerAuth: [] # Optional, but supported
-        - {} # Allow unauthenticated access
+        - bearerAuth: []
       responses:
         "200":
           description: List of available communities
@@ -639,6 +638,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Community"
+        "401":
+          description: Not authorized
         "500":
           description: Server error
 
