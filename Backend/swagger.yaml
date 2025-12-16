@@ -139,6 +139,12 @@ components:
     UpdateProfileRequest:
       type: object
       properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 30
+          example: "cool_redditor"
+          description: "Username must be unique and between 3-30 characters"
         bio:
           type: string
           example: "I love coding and coffee."
@@ -591,6 +597,12 @@ paths:
                 properties:
                   message: { type: string }
                   user: { $ref: "#/components/schemas/UserProfilePublic" }
+        "400":
+          description: Bad request (e.g., username already taken or invalid length)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "401":
           description: Not authorized
 

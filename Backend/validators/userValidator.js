@@ -1,44 +1,54 @@
-import Joi from 'joi';
+import Joi from "joi";
 
 export const registerSchema = Joi.object({
-  username: Joi.string()
-    .min(3)
-    .max(30) 
-    .required()
-    .messages({
-      'string.base': 'Username must be a text string',
-      'string.empty': 'Username cannot be empty',
-      'string.min': 'Username should have a minimum length of 3',
-      'any.required': 'Username is required'
-    }),
+  username: Joi.string().min(3).max(30).required().messages({
+    "string.base": "Username must be a text string",
+    "string.empty": "Username cannot be empty",
+    "string.min": "Username should have a minimum length of 3",
+    "any.required": "Username is required",
+  }),
 
-  email: Joi.string()
-    .email()
-    .required()
-    .messages({
-      'string.email': 'Please enter a valid email address',
-      'any.required': 'Email is required'
-    }),
+  email: Joi.string().email().required().messages({
+    "string.email": "Please enter a valid email address",
+    "any.required": "Email is required",
+  }),
 
-  password: Joi.string()
-    .min(6)
-    .required()
-    .messages({
-      'string.min': 'Password must be at least 6 characters long',
-      'any.required': 'Password is required'
-    })
+  password: Joi.string().min(6).required().messages({
+    "string.min": "Password must be at least 6 characters long",
+    "any.required": "Password is required",
+  }),
 });
 
 export const loginSchema = Joi.object({
-  loginIdentifier: Joi.string()
-    .required()
-    .messages({
-      'any.required': 'Username or Email is required to login'
-    }),
+  loginIdentifier: Joi.string().required().messages({
+    "any.required": "Username or Email is required to login",
+  }),
 
-  password: Joi.string()
-    .required()
-    .messages({
-      'any.required': 'Password is required'
-    })
+  password: Joi.string().required().messages({
+    "any.required": "Password is required",
+  }),
+});
+
+export const updateUserSchema = Joi.object({
+  username: Joi.string().min(3).max(30).trim().optional().messages({
+    "string.base": "Username must be a text string",
+    "string.min": "Username must be at least 3 characters long",
+    "string.max": "Username cannot exceed 30 characters",
+  }),
+
+  bio: Joi.string().max(500).allow("").optional().messages({
+    "string.max": "Bio cannot exceed 500 characters",
+  }),
+
+  profilePictureUrl: Joi.string().uri().allow("").optional().messages({
+    "string.uri": "Profile picture URL must be a valid URL",
+  }),
+
+  coverPictureUrl: Joi.string().uri().allow("").optional().messages({
+    "string.uri": "Cover picture URL must be a valid URL",
+  }),
+
+  interests: Joi.array().items(Joi.string().trim()).optional().messages({
+    "array.base": "Interests must be an array of strings",
+  }),
 });
