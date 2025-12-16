@@ -10,6 +10,7 @@ export const createCommunitySchema = Joi.object({
 });
 
 export const updateCommunitySchema = Joi.object({
+  name: Joi.string().min(3).max(30).trim().optional(),
   description: Joi.string().max(500).optional(),
   coverPictureUrl: Joi.string().uri().allow("").optional(),
   profilePictureUrl: Joi.string().uri().allow("").optional(),

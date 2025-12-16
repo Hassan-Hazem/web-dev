@@ -6,6 +6,8 @@ import {
 } from "../repositories/communityRepository.js";
 import Subscription from "../models/subscriptionModel.js"; 
 import { createCommunitySchema, updateCommunitySchema } from "../validators/communityValidator.js";
+import Post from "../models/postModel.js";
+import Comment from "../models/commentModel.js";
 
 
 export const createCommunityController = async (req, res) => {
@@ -55,7 +57,6 @@ export const getCommunity = async (req, res) => {
     let isCreator = false;
     let isJoined = false;
 
-    // Check if user is logged in (req.user populated by optionalProtect)
     if (req.user) {
       isCreator = community.creator._id.toString() === req.user._id.toString();
 
@@ -66,16 +67,63 @@ export const getCommunity = async (req, res) => {
       if (subscription) isJoined = true;
     }
 
+    // ----------------------------------
+    // CONTRIBUTORS COUNT (Reddit-style)
+    // ----------------------------------
+
+    // 1) Users who posted
+    const postAuthors = await Post.distinct("author", {
+      community: community._id
+    });
+
+    // 2) Users who commented
+    const commentAuthors = await Comment.aggregate([
+      {
+        $lookup: {
+          from: "posts",
+          localField: "post",
+          foreignField: "_id",
+          as: "postData"
+        }
+      },
+      { $unwind: "$postData" },
+      {
+        $match: {
+          "postData.community": community._id
+        }
+      },
+      {
+        $group: {
+          _id: "$author"
+        }
+      }
+    ]);
+
+    // 3) Merge & deduplicate
+    const contributorSet = new Set([
+      ...postAuthors.map(String),
+      ...commentAuthors.map(c => String(c._id))
+    ]);
+
+    const contributorsCount = contributorSet.size;
+
+    // ----------------------------------
+    // RESPONSE
+    // ----------------------------------
+
     res.status(200).json({
       ...community.toObject(),
       isCreator,
-      isJoined
+      isJoined,
+      contributorsCount
     });
 
   } catch (error) {
+    console.error("Error fetching community", error);
     res.status(500).json({ message: "Error fetching community", error: error.message });
   }
 };
+
 
 // --- GET COMMUNITIES (Explore Page) ---
 export const getCommunities = async (req, res) => {
@@ -137,5 +185,34 @@ export const leaveCommunity = async (req, res) => {
     res.status(200).json({ message: `Successfully left r/${name}` });
   } catch (error) {
     res.status(500).json({ message: "Error leaving community", error: error.message });
+  }
+};
+
+// --- UPDATE COMMUNITY ---
+export const updateCommunityController = async (req, res) => {
+  const { name: paramName } = req.params;
+  const { error } = updateCommunitySchema.validate(req.body);
+  if (error) return res.status(400).json({ message: error.details[0].message });
+
+  try {
+    const community = await findCommunityByName(paramName);
+    if (!community) return res.status(404).json({ message: "Community not found" });
+
+    // only creator can update
+    if (!req.user || community.creator._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized to update this community" });
+    }
+
+    // if name is being changed, ensure it's not taken
+    if (req.body.name && req.body.name !== community.name) {
+      const existing = await findCommunityByName(req.body.name);
+      if (existing) return res.status(400).json({ message: "Community name already taken" });
+    }
+
+    const updated = await updateCommunity(community._id, req.body);
+    res.status(200).json(updated);
+  } catch (err) {
+    console.error("Error updating community", err);
+    res.status(500).json({ message: "Error updating community", error: err.message });
   }
 };

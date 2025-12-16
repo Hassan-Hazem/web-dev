@@ -4,7 +4,8 @@ import {
   getCommunity,
   getCommunities,
   joinCommunity,
-  leaveCommunity
+  leaveCommunity,
+  updateCommunityController
 } from "../controllers/communityController.js";
 import { protect } from "../middlewares/authMiddleware.js";
 import { optionalProtect } from "../middlewares/optionalAuthMiddleware.js";
@@ -16,6 +17,7 @@ router.get("/", getCommunities);
 router.get("/:name", optionalProtect, getCommunity); 
 
 router.post("/", protect, createCommunityController);
+router.put("/:name", protect, updateCommunityController);
 router.post("/:name/join", protect, joinCommunity);
 router.post("/:name/leave", protect, leaveCommunity);
 

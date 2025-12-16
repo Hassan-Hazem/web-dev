@@ -11,7 +11,7 @@ export default function CreateCommunityModal({ onClose }) {
   const [communityName, setCommunityName] = useState("");
   const [description, setDescription] = useState("");
   const [communityType, setCommunityType] = useState("public");
-  const [isAdult, setIsAdult] = useState(false);
+  
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
 
@@ -196,40 +196,6 @@ export default function CreateCommunityModal({ onClose }) {
                   onChange={() => setCommunityType('restricted')}
                 />
               </label>
-
-              <label className={`type-option ${communityType === 'private' ? 'selected' : ''}`} onClick={() => setCommunityType('private')}>
-                <div style={{display:'flex', alignItems:'center', gap:12}}>
-                  <span className="type-icon">🔒</span>
-                  <div className="type-option-label">
-                    <span className="type-option-name">Private</span>
-                    <span className="type-option-desc">Only approved users can view and contribute</span>
-                  </div>
-                </div>
-                <input
-                  className="type-radio"
-                  type="radio"
-                  name="communityType"
-                  checked={communityType === 'private'}
-                  onChange={() => setCommunityType('private')}
-                />
-              </label>
-            </div>
-
-            <hr style={{margin: '18px 0', border: 'none', borderTop: '1px solid #e6e7eb'}} />
-
-            <div className="adult-option">
-              <div style={{display:'flex', alignItems:'center', gap:12}}>
-                <span className="type-icon">🔞</span>
-                <div>
-                  <div className="type-option-name">Mature (18+)</div>
-                  <div className="type-option-desc">Users must be over 18 to view and contribute</div>
-                </div>
-              </div>
-              <input
-                type="checkbox"
-                checked={isAdult}
-                onChange={() => setIsAdult(!isAdult)}
-              />
             </div>
 
             <div style={{display:'flex', justifyContent:'space-between', gap:12, marginTop:18}}>

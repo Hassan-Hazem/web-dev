@@ -29,5 +29,8 @@ export const getAllCommunities = async (skip = 0, limit = 10, topic = null) => {
 };
 
 export const updateCommunity = async (id, updateData) => {
-  return await Community.findByIdAndUpdate(id, updateData, { new: true });
+  // Use findByIdAndUpdate then populate creator so callers receive the same shape
+  const updated = await Community.findByIdAndUpdate(id, updateData, { new: true });
+  if (!updated) return null;
+  return await Community.findById(updated._id).populate("creator", "username profilePictureUrl");
 };
