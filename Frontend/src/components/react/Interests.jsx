@@ -48,8 +48,8 @@ const CATEGORIES = [
   }
 ];
 
-export default function Interests({ onComplete, onSkip }) {
-  const [selectedInterests, setSelectedInterests] = useState([]);
+export default function Interests({ onComplete, onSkip, initialInterests = [] }) {
+  const [selectedInterests, setSelectedInterests] = useState(initialInterests);
   const [activeCategoryId, setActiveCategoryId] = useState('all');
   const [loading, setLoading] = useState(false); // Add loading state
 

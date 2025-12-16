@@ -629,7 +629,6 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
               onComplete={handleInterestsComplete}
               onSkip={handleInterestsModalClose}
               initialInterests={profileData?.interests || []}
-              isEditing={true}
             />
           </div>
         </div>
