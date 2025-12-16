@@ -1,15 +1,17 @@
-import { 
-  createCommunity, 
-  findCommunityByName, 
-  getAllCommunities, 
+import {
+  createCommunity,
+  findCommunityByName,
+  getAllCommunities,
   updateCommunity,
-  getAvailableCommunitiesForPosting
+  getAvailableCommunitiesForPosting,
 } from "../repositories/communityRepository.js";
-import Subscription from "../models/subscriptionModel.js"; 
-import { createCommunitySchema, updateCommunitySchema } from "../validators/communityValidator.js";
+import Subscription from "../models/subscriptionModel.js";
+import {
+  createCommunitySchema,
+  updateCommunitySchema,
+} from "../validators/communityValidator.js";
 import Post from "../models/postModel.js";
 import Comment from "../models/commentModel.js";
-
 
 export const createCommunityController = async (req, res) => {
   const { error } = createCommunitySchema.validate(req.body);
@@ -18,10 +20,11 @@ export const createCommunityController = async (req, res) => {
   const { name, description, topics } = req.body;
 
   try {
-    
     const existingCommunity = await findCommunityByName(name);
     if (existingCommunity) {
-      return res.status(400).json({ message: "Community with this name already exists" });
+      return res
+        .status(400)
+        .json({ message: "Community with this name already exists" });
     }
 
     // 2. Create Community
@@ -32,21 +35,21 @@ export const createCommunityController = async (req, res) => {
       topics,
       isPublic,
       creator: req.user._id,
-      memberCount: 1, 
+      memberCount: 1,
     });
 
-  
     await Subscription.create({
       user: req.user._id,
-      community: newCommunity._id
+      community: newCommunity._id,
     });
 
     res.status(201).json(newCommunity);
   } catch (error) {
-    res.status(500).json({ message: "Error creating community", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error creating community", error: error.message });
   }
 };
-
 
 export const getCommunity = async (req, res) => {
   const { name } = req.params;
@@ -65,7 +68,7 @@ export const getCommunity = async (req, res) => {
 
       const subscription = await Subscription.findOne({
         user: req.user._id,
-        community: community._id
+        community: community._id,
       });
       if (subscription) isJoined = true;
     }
@@ -76,7 +79,7 @@ export const getCommunity = async (req, res) => {
 
     // 1) Users who posted
     const postAuthors = await Post.distinct("author", {
-      community: community._id
+      community: community._id,
     });
 
     // 2) Users who commented
@@ -86,26 +89,26 @@ export const getCommunity = async (req, res) => {
           from: "posts",
           localField: "post",
           foreignField: "_id",
-          as: "postData"
-        }
+          as: "postData",
+        },
       },
       { $unwind: "$postData" },
       {
         $match: {
-          "postData.community": community._id
-        }
+          "postData.community": community._id,
+        },
       },
       {
         $group: {
-          _id: "$author"
-        }
-      }
+          _id: "$author",
+        },
+      },
     ]);
 
     // 3) Merge & deduplicate
     const contributorSet = new Set([
       ...postAuthors.map(String),
-      ...commentAuthors.map(c => String(c._id))
+      ...commentAuthors.map((c) => String(c._id)),
     ]);
 
     const contributorsCount = contributorSet.size;
@@ -118,15 +121,15 @@ export const getCommunity = async (req, res) => {
       ...community.toObject(),
       isCreator,
       isJoined,
-      contributorsCount
+      contributorsCount,
     });
-
   } catch (error) {
     console.error("Error fetching community", error);
-    res.status(500).json({ message: "Error fetching community", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching community", error: error.message });
   }
 };
-
 
 // --- GET COMMUNITIES (Explore Page) ---
 export const getCommunities = async (req, res) => {
@@ -137,27 +140,29 @@ export const getCommunities = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const communities = await getAllCommunities(skip, limit, topic);
-    
+
     const communitiesWithJoinStatus = await Promise.all(
       communities.map(async (community) => {
         let isJoined = false;
         if (req.user) {
           const subscription = await Subscription.findOne({
             user: req.user._id,
-            community: community._id
+            community: community._id,
           });
           if (subscription) isJoined = true;
         }
         return {
           ...community.toObject(),
-          isJoined
+          isJoined,
         };
       })
     );
 
     res.status(200).json(communitiesWithJoinStatus);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching communities", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching communities", error: error.message });
   }
 };
 
@@ -168,19 +173,25 @@ export const joinCommunity = async (req, res) => {
 
   try {
     const community = await findCommunityByName(name);
-    if (!community) return res.status(404).json({ message: "Community not found" });
+    if (!community)
+      return res.status(404).json({ message: "Community not found" });
 
-    const existingSub = await Subscription.findOne({ user: userId, community: community._id });
+    const existingSub = await Subscription.findOne({
+      user: userId,
+      community: community._id,
+    });
     if (existingSub) return res.status(400).json({ message: "Already joined" });
 
     await Subscription.create({ user: userId, community: community._id });
-    
+
     community.memberCount += 1;
     await community.save();
 
     res.status(200).json({ message: `Successfully joined r/${name}` });
   } catch (error) {
-    res.status(500).json({ message: "Error joining community", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error joining community", error: error.message });
   }
 };
 
@@ -191,21 +202,30 @@ export const leaveCommunity = async (req, res) => {
 
   try {
     const community = await findCommunityByName(name);
-    if (!community) return res.status(404).json({ message: "Community not found" });
+    if (!community)
+      return res.status(404).json({ message: "Community not found" });
 
     if (community.creator._id.toString() === userId.toString()) {
-       return res.status(400).json({ message: "Creator cannot leave their own community." });
+      return res
+        .status(400)
+        .json({ message: "Creator cannot leave their own community." });
     }
 
-    const deletedSub = await Subscription.findOneAndDelete({ user: userId, community: community._id });
-    if (!deletedSub) return res.status(400).json({ message: "You are not a member" });
+    const deletedSub = await Subscription.findOneAndDelete({
+      user: userId,
+      community: community._id,
+    });
+    if (!deletedSub)
+      return res.status(400).json({ message: "You are not a member" });
 
     community.memberCount = Math.max(0, community.memberCount - 1);
     await community.save();
 
     res.status(200).json({ message: `Successfully left r/${name}` });
   } catch (error) {
-    res.status(500).json({ message: "Error leaving community", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error leaving community", error: error.message });
   }
 };
 
@@ -217,24 +237,38 @@ export const updateCommunityController = async (req, res) => {
 
   try {
     const community = await findCommunityByName(paramName);
-    if (!community) return res.status(404).json({ message: "Community not found" });
+    if (!community)
+      return res.status(404).json({ message: "Community not found" });
 
     // only creator can update
-    if (!req.user || community.creator._id.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Not authorized to update this community" });
+    if (
+      !req.user ||
+      community.creator._id.toString() !== req.user._id.toString()
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to update this community" });
     }
 
     // if name is being changed, ensure it's not taken
     if (req.body.name && req.body.name !== community.name) {
       const existing = await findCommunityByName(req.body.name);
-      if (existing) return res.status(400).json({ message: "Community name already taken" });
+      if (existing)
+        return res
+          .status(400)
+          .json({ message: "Community name already taken" });
     }
 
     const updated = await updateCommunity(community._id, req.body);
     res.status(200).json(updated);
   } catch (err) {
     console.error("Error updating community", err);
-    res.status(500).json({ message: "Error updating community", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Error updating community", error: err.message });
+  }
+};
+
 // --- GET AVAILABLE COMMUNITIES FOR POSTING (For dropdown in create post modal) ---
 export const getAvailableCommunitiesForPostingController = async (req, res) => {
   try {
@@ -242,6 +276,8 @@ export const getAvailableCommunitiesForPostingController = async (req, res) => {
     const communities = await getAvailableCommunitiesForPosting(userId);
     res.status(200).json(communities);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching communities", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching communities", error: error.message });
   }
 };
