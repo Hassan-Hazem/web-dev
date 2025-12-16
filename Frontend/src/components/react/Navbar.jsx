@@ -60,14 +60,16 @@ export default function Navbar() {
       navigate(`/user/${user.username}`); 
     }
   };
-
+  const handleRedditLogoClick = () => {
+    navigate("/");
+  }
   return (
     <>
       <nav className="navbar">
         <div className="navbar-left">
           <div className="reddit-logo">
-            <img src={redditLogo} alt="Reddit" className="reddit-icon" />
-            <span className="reddit-text">reddit</span>
+            <img src={redditLogo} alt="Reddit" className="reddit-icon" onClick={handleRedditLogoClick} />
+            <span className="reddit-text" onClick={handleRedditLogoClick}>reddit</span>
           </div>
         </div>
 
