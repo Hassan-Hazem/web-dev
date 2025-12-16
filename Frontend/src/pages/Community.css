@@ -4,16 +4,14 @@
 .comm-page {
   background: #dae0e6; /* Standard Reddit gray */
   min-height: 100vh;
-  padding: 28px 16px 40px;
 }
 
 /* Content Container */
 .comm-content-wrap {
   width: 100%;
-  max-width: 1240px;
+  max-width: 1200px;
   margin: 0 auto;
   box-sizing: border-box;
-  position: relative; /* For absolute positioning of sidebar */
 }
 
 /* Banner */
@@ -218,12 +216,9 @@
 /* Main Layout Grid */
 .comm-grid {
   display: flex;
-  gap: 28px;
-  padding: 0 12px;
-  max-width: 1240px;
-  width: 100%;
-  max-width: none;
-  align-items: flex-start
+  justify-content: center;
+  gap: 48px; /* increased spacing to prevent posts/sidebar overlap */
+  padding: 0 24px;
 }
 
 .comm-main-col {
@@ -246,7 +241,8 @@
   align-items: center;
   box-sizing: border-box;
   overflow-x: auto;
-  width: 100%;
+  /* smaller, align with post column */
+  width: 680px;
   align-self: flex-start;
 }
 .comm-sort-btn {
@@ -295,7 +291,7 @@
   border-radius: 4px;
 }
 
-/* Right Sidebar - Fixed positioning to prevent movement when left sidebar toggles */
+/* Right Sidebar */
 .comm-sidebar {
   width: 320px;
   display: flex;
@@ -436,120 +432,44 @@
 }
 
 .comm-edit-name-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  border-radius: 4px;
-  border: none;
+  background: #ffffff;
+  border-radius: 50%;
+  border: 1px solid #e6e9eb;
+  box-shadow: 0 2px 6px rgba(2,6,23,0.06);
   cursor: pointer;
-  color: #878a8c;
-  font-size: 16px;
-  transition: background-color 0.2s, color 0.2s;
-  flex-shrink: 0;
+  color: #6b7280;
+  font-size: 14px;
 }
-.comm-edit-name-btn:hover { 
-  background: #f6f7f8; 
-  color: #1c1c1c; 
-}
+.comm-edit-name-btn:hover { background: #ffffff; color: #111827; transform: translateY(-1px); }
 
 /* Inline edit controls for community name */
-.comm-edit-container {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  width: 100%;
-  flex-wrap: wrap;
-}
-
-.comm-edit-input-wrapper {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  min-width: 200px;
-  border: 1px solid #edeff1;
-  border-radius: 4px;
-  background: #ffffff;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.comm-edit-input-wrapper:focus-within {
-  border-color: #0079d3;
-  box-shadow: 0 0 0 1px #0079d3;
-}
-
-.comm-edit-prefix {
-  padding: 8px 0 8px 12px;
-  font-size: 16px;
-  font-weight: 700;
-  color: #1c1c1c;
-  user-select: none;
-  flex-shrink: 0;
-}
-
 .comm-edit-input {
-  padding: 8px 12px 8px 4px;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: 700;
-  color: #1c1c1c;
-  background: transparent;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #e6e9eb;
+  font-size: 15px;
   flex: 1;
-  min-width: 0;
-  outline: none;
 }
-
-.comm-edit-input::placeholder {
-  color: #878a8c;
-  font-weight: 400;
-}
-
-.comm-edit-actions { 
-  display: flex; 
-  gap: 8px; 
-  align-items: center;
-  flex-shrink: 0;
-}
-
+.comm-edit-actions { display: flex; gap: 8px; }
 .comm-edit-save {
   background: #0079d3;
   color: white;
   border: none;
-  padding: 6px 16px;
-  border-radius: 999px;
+  padding: 6px 10px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 700;
-  transition: background-color 0.2s;
-  white-space: nowrap;
 }
-.comm-edit-save:hover {
-  background: #005ba1;
-}
-.comm-edit-save:disabled {
-  background: #ccd0d5;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
 .comm-edit-cancel {
   background: transparent;
-  border: 1px solid #edeff1;
-  padding: 6px 16px;
-  border-radius: 999px;
+  border: 1px solid #e6e9eb;
+  padding: 6px 10px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 700;
-  color: #1c1c1c;
-  transition: background-color 0.2s, border-color 0.2s;
-  white-space: nowrap;
-}
-.comm-edit-cancel:hover {
-  background: #f6f7f8;
-  border-color: #d7d8da;
 }
 
 /* Improved Create Post input */
@@ -609,6 +529,9 @@
 }
 .comm-create-input::placeholder { color: #9ca3af; }
 .comm-create-input:focus { outline: none; box-shadow: none; }
+
+/* Banner content overlay: align with page content area */
+/* banner description removed */
 
 /* Mods List */
 .comm-mod-list {
