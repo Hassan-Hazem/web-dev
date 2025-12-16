@@ -95,14 +95,13 @@ export default function UserProfilePage() {
     fetchUpvotedPosts();
   }, [activeTab]);
 
-  // Reset pagination when tab changes to Posts or Overview
+  // Reset posts and tab when profile/user changes
   useEffect(() => {
-    if (activeTab === "Posts" || activeTab === "Overview") {
-      setPostsPage(1);
-      setUserPosts([]);
-      setPostsHasMore(true);
-    }
-  }, [activeTab]);
+    setPostsPage(1);
+    setUserPosts([]);
+    setPostsHasMore(true);
+    setActiveTab("Overview");
+  }, [profileData?.username]);
 
   useEffect(() => {
     const fetchDownvotedPosts = async () => {
@@ -163,10 +162,9 @@ export default function UserProfilePage() {
   const redditAgeYears = profileData.createdAt
     ? `${Math.max(1, Math.floor((Date.now() - new Date(profileData.createdAt).getTime()) / (1000 * 60 * 60 * 24 * 365)))}y`
     : "--";
-  const tabs = [
-    "Overview", "Posts", "Comments", "Saved",
-    "History", "Hidden", "Upvoted", "Downvoted"
-  ];
+  const tabs = isSelf
+    ? ["Overview", "Posts", "Comments", "Saved", "History", "Hidden", "Upvoted", "Downvoted"]
+    : ["Overview", "Posts", "Comments"];
 
   const tabContent = {
     "Overview": { title: "Showing all content", heading: "You don't have any posts yet", text: "Once you post to a community, it'll show up here. If you'd rather hide your posts, update your settings." },
@@ -183,7 +181,7 @@ export default function UserProfilePage() {
     <div className="overview-box">
       <div className="overview-header">
         <h3>{tabContent[tab].title}</h3>
-        {(tab === "Overview" || tab === "Posts") && (
+        {isSelf && (tab === "Overview" || tab === "Posts") && (
           <div className="overview-actions">
             <button className="create-post-btn" onClick={() => setIsCreatePostOpen(true)}>Create Post</button>
           </div>
