@@ -188,21 +188,7 @@
 }
 
 /* Adult Setting */
-.adult-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px;
-  border: 2px solid #e6e7eb;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  background: white;
-  transition: border-color 0.15s, background-color 0.15s;
-}
-.adult-option:hover {
-  border-color: #ccc;
-  background-color: #fafafa;
-}
+/* Adult Setting removed (UI option deleted) */
 
 /* Buttons */
 .btn {

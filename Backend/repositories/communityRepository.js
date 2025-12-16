@@ -29,31 +29,8 @@ export const getAllCommunities = async (skip = 0, limit = 10, topic = null) => {
 };
 
 export const updateCommunity = async (id, updateData) => {
-  return await Community.findByIdAndUpdate(id, updateData, { new: true });
-};
-
-// Get communities available for posting (public + joined restricted)
-export const getAvailableCommunitiesForPosting = async (userId) => {
-  // First, get all public communities
-  const publicCommunities = await Community.find({ isPublic: true })
-    .sort({ memberCount: -1 });
-
-  // If user is not logged in, return only public communities
-  if (!userId) {
-    return publicCommunities;
-  }
-
-  // Get all communities the user has joined
-  const Subscription = (await import("../models/subscriptionModel.js")).default;
-  const userSubscriptions = await Subscription.find({ user: userId }).select("community");
-  const joinedCommunityIds = userSubscriptions.map(sub => sub.community.toString());
-
-  // Get restricted communities the user is a member of
-  const restrictedCommunities = await Community.find({
-    _id: { $in: joinedCommunityIds },
-    isPublic: false
-  }).sort({ memberCount: -1 });
-
-  // Combine and return
-  return [...publicCommunities, ...restrictedCommunities];
+  // Use findByIdAndUpdate then populate creator so callers receive the same shape
+  const updated = await Community.findByIdAndUpdate(id, updateData, { new: true });
+  if (!updated) return null;
+  return await Community.findById(updated._id).populate("creator", "username profilePictureUrl");
 };

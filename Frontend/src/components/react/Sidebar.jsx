@@ -15,7 +15,7 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar }) {
   useEffect(() => {
     const loadRecents = () => {
       try {
-        const raw = localStorage.getItem('recents');
+        const raw = localStorage.getItem('recentCommunities');
         const parsed = raw ? JSON.parse(raw) : [];
         setRecents(parsed);
       } catch (err) {
@@ -115,7 +115,7 @@ export default function Sidebar({ isSidebarOpen, toggleSidebar }) {
                   {recents.map((c) => (
                     <Link
                       key={c.name}
-                      to={`/community/${c.name}`}
+                      to={`/community/${encodeURIComponent(c.name)}`}
                       className={`sidebar-link recent-item ${location.pathname === `/community/${c.name}` ? 'active' : ''}`}
                     >
                       <span className="sidebar-icon recent" />
