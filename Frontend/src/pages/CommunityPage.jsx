@@ -430,13 +430,28 @@ useEffect(() => {
                     )}
                   </>
                 ) : (
-                  <div style={{display: 'flex', gap: 8, alignItems: 'center', width: '100%'}}>
-                    <input
-                      className="comm-edit-input"
-                      value={newName}
-                      onChange={(e) => setNewName(e.target.value)}
-                      autoFocus
-                    />
+                  <div className="comm-edit-container">
+                    <div className="comm-edit-input-wrapper">
+                      <span className="comm-edit-prefix">r/</span>
+                      <input
+                        className="comm-edit-input"
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            const trimmed = (newName || '').trim();
+                            if (trimmed && trimmed !== community.name) {
+                              e.target.closest('.comm-edit-container')?.querySelector('.comm-edit-save')?.click();
+                            }
+                          } else if (e.key === 'Escape') {
+                            setNewName(community.name);
+                            setEditingName(false);
+                          }
+                        }}
+                        autoFocus
+                        placeholder="community-name"
+                      />
+                    </div>
                     <div className="comm-edit-actions">
                       <button
                         className="comm-edit-save"
@@ -482,7 +497,13 @@ useEffect(() => {
                         }}
                         disabled={editingSaving}
                       >{editingSaving ? 'Saving...' : 'Save'}</button>
-                      <button className="comm-edit-cancel" onClick={() => { setNewName(community.name); setEditingName(false); }}>Cancel</button>
+                      <button 
+                        className="comm-edit-cancel" 
+                        onClick={() => { 
+                          setNewName(community.name); 
+                          setEditingName(false); 
+                        }}
+                      >Cancel</button>
                     </div>
                   </div>
                 )}
