@@ -46,8 +46,13 @@ export const updateUserProfile = async (req, res) => {
     return res.status(400).json({ message: error.details[0].message });
   }
 
-  const { username, bio, profilePictureUrl, coverPictureUrl, interests } =
-    req.body;
+  const { username, bio, interests } = req.body;
+
+  // Get file paths from uploaded files
+  const profilePictureUrl =
+    req.files?.profilePictureUrl?.[0]?.path || req.body.profilePictureUrl;
+  const coverPictureUrl =
+    req.files?.coverPictureUrl?.[0]?.path || req.body.coverPictureUrl;
 
   console.log("updateUserProfile called with:", {
     userId,

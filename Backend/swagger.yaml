@@ -199,6 +199,44 @@ components:
           description: "True if the current user created this community (requires auth)"
         isJoined:
           type: boolean
+          description: "True if the current user joined this community (requires auth)"
+        profilePictureUrl:
+          type: string
+          example: "https://res.cloudinary.com/demo/image/upload/v123456/profile.jpg"
+        coverPictureUrl:
+          type: string
+          example: "https://res.cloudinary.com/demo/image/upload/v123456/cover.jpg"
+
+    UpdateCommunityRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 30
+          example: "reactjs"
+          description: "Community name must be unique"
+        description:
+          type: string
+          maxLength: 500
+          example: "A community for React developers"
+        profilePictureUrl:
+          type: string
+          format: binary
+          description: "Profile picture file (multipart/form-data) or URL string"
+        coverPictureUrl:
+          type: string
+          format: binary
+          description: "Cover picture file (multipart/form-data) or URL string"
+        topics:
+          type: array
+          items:
+            type: string
+          example: ["Technology", "Programming"]
+        isPublic:
+          type: boolean
+          default: true
+          type: boolean
           description: "True if the current user is a member (requires auth)"
 
     CreateCommunityRequest:
@@ -727,6 +765,53 @@ paths:
                 $ref: "#/components/schemas/Community"
         "404":
           description: Community not found
+        "500":
+          description: Server error
+
+    put:
+      summary: Update community details
+      description: Update community info including name, description, images, and topics. Only community creator can update. Supports both file uploads and URL strings for images.
+      tags: [Communities]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: name
+          schema:
+            type: string
+          required: true
+          description: The name of the community to update
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/UpdateCommunityRequest"
+      responses:
+        "200":
+          description: Community updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Community"
+        "400":
+          description: Bad request (e.g., community name already taken)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Not authorized (not the community creator)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Community not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
         "500":
           description: Server error
 

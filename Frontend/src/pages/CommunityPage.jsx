@@ -155,14 +155,34 @@ useEffect(() => {
   const moderators = community?.creator?.username ? [community.creator.username] : ["AutoModerator"];
   const isUserModerator = user && community?.creator?.username === user.username;
 
-  const handleBannerUpload = (e) => {
+  const handleBannerUpload = async (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        setBannerImage(evt.target?.result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    try {
+      // Create FormData with the file using the correct field name for the backend
+      const formData = new FormData();
+      formData.append("coverPictureUrl", file);
+
+      // Send directly to the community update endpoint
+      const updateRes = await api.put(
+        `/communities/${encodeURIComponent(name)}`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+
+      const updatedCommunity = updateRes.data || null;
+      if (updatedCommunity && typeof updatedCommunity === "object") {
+        setCommunity(updatedCommunity);
+        setBannerImage(updatedCommunity.coverPictureUrl || bannerImage);
+      } else {
+        await loadCommunity();
+      }
+    } catch (err) {
+      console.error("Failed to update community banner:", err);
+      alert(err.response?.data?.message || "Failed to update community banner");
     }
   };
 
@@ -242,44 +262,33 @@ useEffect(() => {
     setAvatarError("");
 
     try {
+      // Create FormData with the file using the correct field name for the backend
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("profilePictureUrl", file);
 
-      const uploadRes = await api.post("/upload", formData);
-      const data = uploadRes.data || {};
-
-      const avatarUrl = data.filePath || data.file?.path || data.file?.location || data.file?.secure_url || data.file?.url || data.secure_url || data.url || null;
-
-      if (!avatarUrl) {
-        console.error("Upload response missing URL:", data);
-        setAvatarError(data.message || "Upload succeeded but no file URL returned by storage provider");
-        setAvatarUploading(false);
-        return;
-      }
-
-      try {
-        const updateRes = await api.put(`/communities/${encodeURIComponent(name)}`, {
-          profilePictureUrl: avatarUrl,
-        });
-
-        const updatedCommunity = updateRes.data || null;
-        if (updatedCommunity && typeof updatedCommunity === "object") {
-          setCommunity(updatedCommunity);
-          setBannerImage(updatedCommunity.coverPictureUrl || updatedCommunity.profilePictureUrl || bannerImage);
-        } else {
-          await loadCommunity();
+      // Send directly to the community update endpoint
+      const updateRes = await api.put(
+        `/communities/${encodeURIComponent(name)}`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
         }
+      );
 
-        setAvatarModalOpen(false);
-        setTempAvatar(null);
-        if (avatarInputRef.current) avatarInputRef.current.value = "";
-      } catch (err) {
-        console.error("Failed to update community:", err);
-        setAvatarError(err.response?.data?.message || "Failed to update community profile");
+      const updatedCommunity = updateRes.data || null;
+      if (updatedCommunity && typeof updatedCommunity === "object") {
+        setCommunity(updatedCommunity);
+        setBannerImage(updatedCommunity.coverPictureUrl || updatedCommunity.profilePictureUrl || bannerImage);
+      } else {
+        await loadCommunity();
       }
+
+      setAvatarModalOpen(false);
+      setTempAvatar(null);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
     } catch (err) {
-      console.error("Avatar upload failed", err);
-      setAvatarError(err.response?.data?.message || err.message || "Upload failed");
+      console.error("Failed to update community avatar:", err);
+      setAvatarError(err.response?.data?.message || "Failed to update community profile");
     } finally {
       setAvatarUploading(false);
     }
@@ -557,12 +566,16 @@ useEffect(() => {
               <h3>Community Icon</h3>
               <div className="upload-dropbox">
                 <p className="drop-text">Preview</p>
-                {tempAvatar && <img src={tempAvatar} alt="preview" className="preview-img" />}
+                {tempAvatar ? (
+                  <img src={tempAvatar} alt="preview" className="preview-img" />
+                ) : (
+                  <p className="upload-error">No file uploaded</p>
+                )}
               </div>
               {avatarError && <p className="upload-error">{avatarError}</p>}
               <div className="upload-actions">
                 <button className="cancel-btn" onClick={handleAvatarCancel} disabled={avatarUploading}>Cancel</button>
-                <button className="save-btn" onClick={handleAvatarSave} disabled={avatarUploading}>
+                <button className="save-btn" onClick={handleAvatarSave} disabled={avatarUploading || !tempAvatar}>
                   {avatarUploading ? "Saving..." : "Save"}
                 </button>
               </div>
