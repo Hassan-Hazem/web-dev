@@ -29,8 +29,8 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
   };
 
   // Prepare Data
-  const communityIcon = post.community?.profilePictureUrl 
-    ? formatUrl(post.community.profilePictureUrl) 
+  const communityIcon = post.community?.profilePictureUrl
+    ? formatUrl(post.community.profilePictureUrl)
     : null; // Fallback to default CSS background if null
     
   const subredditName = post.community ? `r/${post.community.name}` : "r/unknown";
@@ -131,19 +131,49 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
       <div className="post-content">
         <div className="post-header">
           {/* Community Icon */}
-          <div className="post-community-icon">
+          <div
+            className="post-community-icon"
+            onClick={() => post.community?.name && navigate(`/community/${post.community.name}`)}
+            style={{ cursor: "pointer" }}
+          >
             {communityIcon ? (
-              <img src={communityIcon} alt="Community" />
-            ) : (
-              // Fallback placeholder circle if no image
+              <img
+                src={communityIcon}
+                alt={post.community?.name || "Community"}
+                loading="lazy"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                  const placeholder = e.currentTarget.nextElementSibling;
+                  if (placeholder && placeholder.classList.contains("post-community-fallback")) {
+                    placeholder.style.display = "inline-block";
+                  }
+                }}
+              />
+            ) : null}
+            <div className="post-community-fallback" style={{ display: communityIcon ? "none" : "inline-block" }}>
               <div className="post-community-placeholder" />
-            )}
+            </div>
           </div>
 
           <div className="post-header-text">
-            <span className="post-subreddit">{subredditName}</span>
+            <span
+              className="post-subreddit"
+              onClick={() => post.community?.name && navigate(`/community/${post.community.name}`)}
+              style={{ cursor: "pointer" }}
+            >
+              {subredditName}
+            </span>
             <span className="post-dot">•</span>
-            <span className="post-author">Posted by {authorName}</span>
+            <span className="post-author">
+              Posted by
+              <span
+                onClick={() => post.author?.username && navigate(`/user/${post.author.username}`)}
+                style={{ cursor: "pointer", marginLeft: 4 }}
+              >
+                {authorName}
+              </span>
+            </span>
           </div>
 
           {/* Three Dots Menu */}

@@ -5,7 +5,7 @@ import api from "../../api/axios";
 import "../css/ProfileRightSidebar.css";
 
 
-export default function ProfileRightSidebar({ username, joinDate, karma, redditAgeYears }) {
+export default function ProfileRightSidebar({ username, joinDate, karma, redditAgeYears, isSelf = false }) {
   const [bannerImage, setBannerImage] = useState(null);
   const [tempImage, setTempImage] = useState(null); 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,15 +30,22 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
     const fetchProfileData = async () => {
       setLoadingProfile(true);
       try {
-        const data = await getMyProfile();
+        const url = isSelf ? "/users/me/info" : `/users/${username}`;
+        const data = isSelf ? await getMyProfile() : (await api.get(url)).data;
         setProfileData(data);
         if (data.coverPictureUrl) {
-          setBannerImage(data.coverPictureUrl);
+          const coverUrl = data.coverPictureUrl.startsWith("http")
+            ? data.coverPictureUrl
+            : `http://localhost:5000/${data.coverPictureUrl.replace(/\\/g, "/")}`;
+          setBannerImage(coverUrl);
           try {
-            localStorage.setItem(localStorageKey, data.coverPictureUrl);
+            localStorage.setItem(localStorageKey, coverUrl);
           } catch {
             // Ignore storage errors
           }
+        } else {
+          // Clear banner if no cover picture
+          setBannerImage(null);
         }
       } catch (err) {
         console.error("Failed to load profile stats:", err);
@@ -47,8 +54,10 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
       }
     };
 
-    fetchProfileData();
-  }, [localStorageKey]);
+    if (username) {
+      fetchProfileData();
+    }
+  }, [localStorageKey, username, isSelf]);
 
   function openFileDialog() {
     // Clear input to allow selecting same file multiple times
@@ -189,32 +198,36 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
         {/* COVER */}
         <div
           className="rs-cover large"
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={handleDrop}
+          onDragOver={isSelf ? (e) => e.preventDefault() : undefined}
+          onDrop={isSelf ? handleDrop : undefined}
           style={{
             backgroundImage: bannerImage
               ? `url(${bannerImage})`
               : "linear-gradient(135deg, #0f214a 0%, #0b1533 100%)",
           }}
         >
-          <div className="rs-cover-actions">
-            <button
-              className="rs-add-btn"
-              onClick={handleOpenUploader}
-              aria-label="Add banner image"
-              title="Add banner image"
-            >
-              {bannerUploading ? "Uploading..." : "Add banner"}
-            </button>
-          </div>
+          {isSelf && (
+            <div className="rs-cover-actions">
+              <button
+                className="rs-add-btn"
+                onClick={handleOpenUploader}
+                aria-label="Add banner image"
+                title="Add banner image"
+              >
+                {bannerUploading ? "Uploading..." : "Add banner"}
+              </button>
+            </div>
+          )}
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/png,image/jpeg,image/webp,image/gif"
-            style={{ display: "none" }}
-            onChange={handleFileSelect}
-          />
+          {isSelf && (
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              style={{ display: "none" }}
+              onChange={handleFileSelect}
+            />
+          )}
           <div className="rs-avatar-wrapper">
             {profileData?.profilePictureUrl ? (
               <img
@@ -238,7 +251,7 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
               <p className="rs-identity-label">Joined</p>
               <p className="rs-identity-value">{createdDate}</p>
             </div>
-            <button className="rs-button inline">Share</button>
+            {isSelf && <button className="rs-button inline">Share</button>}
           </div>
         </div>
 
@@ -299,31 +312,35 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
         <hr />
 
         {/* SETTINGS */}
-        <div className="rs-section">
-          <h4 className="rs-section-title">Settings</h4>
-          <div className="rs-setting-row">
-            <span>Profile</span>
-            <button>Update</button>
-          </div>
-          <div className="rs-setting-row">
-            <span>Avatar</span>
-            <button>Update</button>
-          </div>
-          <div className="rs-setting-row">
-            <span>Mod Tools</span>
-            <button>Update</button>
-          </div>
-        </div>
+        {isSelf && (
+          <>
+            <div className="rs-section">
+              <h4 className="rs-section-title">Settings</h4>
+              <div className="rs-setting-row">
+                <span>Profile</span>
+                <button>Update</button>
+              </div>
+              <div className="rs-setting-row">
+                <span>Avatar</span>
+                <button>Update</button>
+              </div>
+              <div className="rs-setting-row">
+                <span>Mod Tools</span>
+                <button>Update</button>
+              </div>
+            </div>
 
-        <hr />
+            <hr />
 
-        {/* SOCIAL LINKS */}
-        <div className="rs-section">
-          <h4 className="rs-section-title">Social Links</h4>
-          <button className="rs-button">Add Social Link</button>
-        </div>
+            {/* SOCIAL LINKS */}
+            <div className="rs-section">
+              <h4 className="rs-section-title">Social Links</h4>
+              <button className="rs-button">Add Social Link</button>
+            </div>
 
-        <hr />
+            <hr />
+          </>
+        )}
 
         {/* TROPHY CASE */}
         <div className="rs-section">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
 
 import { useAuth } from "../context/authContext";
 import api from "../api/axios";
@@ -11,6 +12,8 @@ import "./UserProfilePage.css";
 
 export default function UserProfilePage() {
   const { user, updateUserProfile: updateAuthUser } = useAuth();
+  const { username: routeUsername } = useParams();
+  const isSelf = !routeUsername || routeUsername === user?.username;
   
   const [activeTab, setActiveTab] = useState("Overview");
   const [profileData, setProfileData] = useState(null);
@@ -33,7 +36,8 @@ export default function UserProfilePage() {
       setLoadingProfile(true);
       setError(null);
       try {
-        const response = await api.get("/users/me/info");
+        const url = isSelf ? "/users/me/info" : `/users/${routeUsername}`;
+        const response = await api.get(url);
         setProfileData(response.data);
       } catch (err) {
         console.error("Error fetching profile:", err);
@@ -43,10 +47,11 @@ export default function UserProfilePage() {
       }
     };
 
-    if (user) {
+    // For self view, require auth; for other users, fetch regardless
+    if (isSelf ? !!user : true) {
       fetchProfileData();
     }
-  }, [user]);
+  }, [user, routeUsername, isSelf]);
 
   useEffect(() => {
     const fetchUserPosts = async () => {
@@ -90,14 +95,13 @@ export default function UserProfilePage() {
     fetchUpvotedPosts();
   }, [activeTab]);
 
-  // Reset pagination when tab changes to Posts or Overview
+  // Reset posts and tab when profile/user changes
   useEffect(() => {
-    if (activeTab === "Posts" || activeTab === "Overview") {
-      setPostsPage(1);
-      setUserPosts([]);
-      setPostsHasMore(true);
-    }
-  }, [activeTab]);
+    setPostsPage(1);
+    setUserPosts([]);
+    setPostsHasMore(true);
+    setActiveTab("Overview");
+  }, [profileData?.username]);
 
   useEffect(() => {
     const fetchDownvotedPosts = async () => {
@@ -115,11 +119,12 @@ export default function UserProfilePage() {
   }, [activeTab]);
 
 
-  if (!user) {
+  // If viewing own profile without being logged in, prompt login.
+  if (!user && isSelf) {
     return (
       <div className="login-message">
         <h2>You are not logged in!</h2>
-        <p>Please log in to view this profile.</p>
+        <p>Please log in to view your profile.</p>
       </div>
     );
   }
@@ -149,7 +154,7 @@ export default function UserProfilePage() {
     );
   }
 
-  const username = profileData.username || user.username;
+  const username = profileData.username || user?.username || routeUsername;
   const karma = profileData.karma || 0;
   const joinDate = profileData.createdAt
     ? new Date(profileData.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short" })
@@ -157,10 +162,9 @@ export default function UserProfilePage() {
   const redditAgeYears = profileData.createdAt
     ? `${Math.max(1, Math.floor((Date.now() - new Date(profileData.createdAt).getTime()) / (1000 * 60 * 60 * 24 * 365)))}y`
     : "--";
-  const tabs = [
-    "Overview", "Posts", "Comments", "Saved",
-    "History", "Hidden", "Upvoted", "Downvoted"
-  ];
+  const tabs = isSelf
+    ? ["Overview", "Posts", "Comments", "Saved", "History", "Hidden", "Upvoted", "Downvoted"]
+    : ["Overview", "Posts", "Comments"];
 
   const tabContent = {
     "Overview": { title: "Showing all content", heading: "You don't have any posts yet", text: "Once you post to a community, it'll show up here. If you'd rather hide your posts, update your settings." },
@@ -177,7 +181,7 @@ export default function UserProfilePage() {
     <div className="overview-box">
       <div className="overview-header">
         <h3>{tabContent[tab].title}</h3>
-        {(tab === "Overview" || tab === "Posts") && (
+        {isSelf && (tab === "Overview" || tab === "Posts") && (
           <div className="overview-actions">
             <button className="create-post-btn" onClick={() => setIsCreatePostOpen(true)}>Create Post</button>
           </div>
@@ -263,16 +267,18 @@ export default function UserProfilePage() {
               ) : (
                 <div className="profile-avatar-fallback">{username.charAt(0).toUpperCase()}</div>
               )}
-              <button
-                type="button"
-                className="profile-avatar-upload-btn"
-                onClick={() => avatarInputRef.current?.click()}
-                disabled={avatarUploading}
-                title="Update profile picture"
-                aria-label="Update profile picture"
-              >
-                {avatarUploading ? "…" : "+"}
-              </button>
+              {isSelf && (
+                <button
+                  type="button"
+                  className="profile-avatar-upload-btn"
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={avatarUploading}
+                  title="Update profile picture"
+                  aria-label="Update profile picture"
+                >
+                  {avatarUploading ? "…" : "+"}
+                </button>
+              )}
               <input
                 ref={avatarInputRef}
                 type="file"
@@ -294,7 +300,7 @@ export default function UserProfilePage() {
               <button className="profile-share-btn" aria-label="Share profile">Share</button>
             </div>
           </div>
-          {avatarError && <p className="profile-avatar-error" role="alert">{avatarError}</p>}
+          {isSelf && avatarError && <p className="profile-avatar-error" role="alert">{avatarError}</p>}
 
           <div className="profile-tabs">
             {tabs.map(tab => (
@@ -309,9 +315,9 @@ export default function UserProfilePage() {
           </div>
 
           <div className="profile-content">
-            {activeTab === "Upvoted" && upvotedPosts.length > 0
+            {isSelf && activeTab === "Upvoted" && upvotedPosts.length > 0
               ? upvotedPosts.map(post => <PostCard key={post._id} post={post} />)
-              : activeTab === "Downvoted" && downvotedPosts.length > 0
+              : isSelf && activeTab === "Downvoted" && downvotedPosts.length > 0
               ? downvotedPosts.map(post => <PostCard key={post._id} post={post} />)
               : (activeTab === "Posts" || activeTab === "Overview") && userPosts.length > 0
               ? (
@@ -340,7 +346,7 @@ export default function UserProfilePage() {
           </div>
         </div>
 
-        <ProfileRightSidebar username={username} joinDate={joinDate} karma={karma} redditAgeYears={redditAgeYears} />
+        <ProfileRightSidebar username={username} joinDate={joinDate} karma={karma} redditAgeYears={redditAgeYears} isSelf={isSelf} />
       </div>
     </div>
   );
