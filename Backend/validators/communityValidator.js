@@ -7,6 +7,7 @@ export const createCommunitySchema = Joi.object({
   }),
   description: Joi.string().max(500).required(),
   topics: Joi.array().items(Joi.string()).optional(),
+  isPublic: Joi.boolean().optional().default(true),
 });
 
 export const updateCommunitySchema = Joi.object({
@@ -15,4 +16,5 @@ export const updateCommunitySchema = Joi.object({
   coverPictureUrl: Joi.string().uri().allow("").optional(),
   profilePictureUrl: Joi.string().uri().allow("").optional(),
   topics: Joi.array().items(Joi.string()).optional(),
+  isPublic: Joi.boolean().optional(),
 });

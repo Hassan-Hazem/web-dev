@@ -2,7 +2,8 @@ import {
   createCommunity, 
   findCommunityByName, 
   getAllCommunities, 
-  updateCommunity 
+  updateCommunity,
+  getAvailableCommunitiesForPosting
 } from "../repositories/communityRepository.js";
 import Subscription from "../models/subscriptionModel.js"; 
 import { createCommunitySchema, updateCommunitySchema } from "../validators/communityValidator.js";
@@ -24,10 +25,12 @@ export const createCommunityController = async (req, res) => {
     }
 
     // 2. Create Community
+    const isPublic = req.body.isPublic !== undefined ? req.body.isPublic : true;
     const newCommunity = await createCommunity({
       name,
       description,
       topics,
+      isPublic,
       creator: req.user._id,
       memberCount: 1, 
     });
@@ -134,7 +137,25 @@ export const getCommunities = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const communities = await getAllCommunities(skip, limit, topic);
-    res.status(200).json(communities);
+    
+    const communitiesWithJoinStatus = await Promise.all(
+      communities.map(async (community) => {
+        let isJoined = false;
+        if (req.user) {
+          const subscription = await Subscription.findOne({
+            user: req.user._id,
+            community: community._id
+          });
+          if (subscription) isJoined = true;
+        }
+        return {
+          ...community.toObject(),
+          isJoined
+        };
+      })
+    );
+
+    res.status(200).json(communitiesWithJoinStatus);
   } catch (error) {
     res.status(500).json({ message: "Error fetching communities", error: error.message });
   }
@@ -214,5 +235,13 @@ export const updateCommunityController = async (req, res) => {
   } catch (err) {
     console.error("Error updating community", err);
     res.status(500).json({ message: "Error updating community", error: err.message });
+// --- GET AVAILABLE COMMUNITIES FOR POSTING (For dropdown in create post modal) ---
+export const getAvailableCommunitiesForPostingController = async (req, res) => {
+  try {
+    const userId = req.user ? req.user._id : null;
+    const communities = await getAvailableCommunitiesForPosting(userId);
+    res.status(200).json(communities);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching communities", error: error.message });
   }
 };
