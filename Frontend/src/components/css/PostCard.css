@@ -170,16 +170,23 @@
   position: relative;
 }
 
-.post-community-icon img, 
+.post-community-icon img,
 .post-community-placeholder {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   object-fit: cover;
 }
 
 .post-community-placeholder {
   background-color: #0079D3; /* Default Reddit Blue */
+}
+
+.post-community-fallback {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  overflow: hidden;
 }
 
 .post-header-text {
