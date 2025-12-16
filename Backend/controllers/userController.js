@@ -2,7 +2,8 @@
 import { 
   findUserByUsername, 
   findUserById, 
-  updateUser 
+  updateUser,
+  searchUsers 
 } from '../repositories/userRepository.js';
 
 
@@ -106,3 +107,20 @@ export const getMe = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 }
+export const searchUsersController = async (req, res) => {
+  try {
+    const { q } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    if (!q) {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+
+    const users = await searchUsers(q, skip, limit);
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Error searching users', error: error.message });
+  }
+}; 

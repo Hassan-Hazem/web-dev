@@ -5,6 +5,7 @@ import {
   updateCommunity,
   getAvailableCommunitiesForPosting,
   getCommunityContributorsCount,
+  searchCommunities
 } from "../repositories/communityRepository.js";
 import Subscription from "../models/subscriptionModel.js";
 import {
@@ -245,5 +246,41 @@ export const getAvailableCommunitiesForPostingController = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error fetching communities", error: error.message });
+  }
+};
+export const searchCommunitiesController = async (req, res) => {
+  try {
+    const { q } = req.query; // Get search query ?q=keyword
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    if (!q) {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+
+    const communities = await searchCommunities(q, skip, limit);
+
+    // Add 'isJoined' status for the logged-in user
+    const communitiesWithJoinStatus = await Promise.all(
+      communities.map(async (community) => {
+        let isJoined = false;
+        if (req.user) {
+          const subscription = await Subscription.findOne({
+            user: req.user._id,
+            community: community._id,
+          });
+          if (subscription) isJoined = true;
+        }
+        return {
+          ...community.toObject(),
+          isJoined,
+        };
+      })
+    );
+
+    res.status(200).json(communitiesWithJoinStatus);
+  } catch (error) {
+    res.status(500).json({ message: "Error searching communities", error: error.message });
   }
 };

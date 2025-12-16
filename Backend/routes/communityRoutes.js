@@ -6,16 +6,20 @@ import {
   joinCommunity,
   leaveCommunity,
   updateCommunityController,
-  getAvailableCommunitiesForPostingController
+  getAvailableCommunitiesForPostingController,
+  searchCommunitiesController, // <--- Import this
 } from "../controllers/communityController.js";
 import { protect } from "../middlewares/authMiddleware.js";
 import { optionalProtect } from "../middlewares/optionalAuthMiddleware.js";
 
 const router = express.Router();
 
-
 router.get("/", optionalProtect, getCommunities); 
 router.get("/available/for-posting", protect, getAvailableCommunitiesForPostingController);
+
+
+router.get("/search", optionalProtect, searchCommunitiesController); 
+
 router.get("/:name", optionalProtect, getCommunity); 
 
 router.post("/", protect, createCommunityController);

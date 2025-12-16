@@ -68,7 +68,14 @@ export const getAvailableCommunitiesForPosting = async (userId) => {
 
   return [...publicCommunities, ...restrictedCommunities];
 };
-
+export const searchCommunities = async (query, skip = 0, limit = 10) => {
+  return await Community.find({
+    name: { $regex: query, $options: "i" }, // Case-insensitive partial match
+  })
+    .sort({ memberCount: -1 }) // Show most popular results first
+    .skip(skip)
+    .limit(limit);
+};
 export const getCommunityContributorsCount = async (communityId) => {
   const postAuthors = await Post.distinct("author", {
     community: communityId,
