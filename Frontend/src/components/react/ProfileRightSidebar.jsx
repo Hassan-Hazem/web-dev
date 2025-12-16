@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { getMyProfile, updateUserProfile } from "../../api/userApi";
 import api from "../../api/axios";
 import "../css/ProfileRightSidebar.css";
+import Interests from "./Interests";
 
 
 export default function ProfileRightSidebar({ username, joinDate, karma, redditAgeYears, isSelf = false }) {
@@ -14,6 +15,15 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
   const [bannerUploading, setBannerUploading] = useState(false);
   const [bannerError, setBannerError] = useState("");
   const fileInputRef = useRef(null);
+  const [isBioModalOpen, setIsBioModalOpen] = useState(false);
+  const [bioText, setBioText] = useState("");
+  const [bioSaving, setBioSaving] = useState(false);
+  const [bioError, setBioError] = useState("");
+  const [isUsernameModalOpen, setIsUsernameModalOpen] = useState(false);
+  const [usernameText, setUsernameText] = useState("");
+  const [usernameSaving, setUsernameSaving] = useState(false);
+  const [usernameError, setUsernameError] = useState("");
+  const [isInterestsModalOpen, setIsInterestsModalOpen] = useState(false);
 
   const localStorageKey = `profile_banner_${username || "anonymous"}`;
 
@@ -33,10 +43,16 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
         const url = isSelf ? "/users/me/info" : `/users/${username}`;
         const data = isSelf ? await getMyProfile() : (await api.get(url)).data;
         setProfileData(data);
+        if (data.bio) {
+          setBioText(data.bio);
+        }
+        if (data.username) {
+          setUsernameText(data.username);
+        }
         if (data.coverPictureUrl) {
           const coverUrl = data.coverPictureUrl.startsWith("http")
             ? data.coverPictureUrl
-            : `http://localhost:5000/${data.coverPictureUrl.replace(/\\/g, "/")}`;
+            : `http://localhost:5001/${data.coverPictureUrl.replace(/\\/g, "/")}`;
           setBannerImage(coverUrl);
           try {
             localStorage.setItem(localStorageKey, coverUrl);
@@ -182,6 +198,112 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
     openFileDialog();
   }
 
+  function handleOpenBioModal() {
+    setBioText(profileData?.bio || "");
+    setBioError("");
+    setIsBioModalOpen(true);
+  }
+
+  function handleBioModalCancel() {
+    setIsBioModalOpen(false);
+    setBioText(profileData?.bio || "");
+    setBioError("");
+  }
+
+  async function handleBioSave() {
+    if (bioText.length > 500) {
+      setBioError("Bio cannot exceed 500 characters");
+      return;
+    }
+
+    setBioError("");
+    setBioSaving(true);
+
+    try {
+      const updateResponse = await updateUserProfile({ bio: bioText });
+      
+      // Refresh profile data
+      const refreshedProfile = await getMyProfile();
+      setProfileData(refreshedProfile);
+      setBioText(refreshedProfile?.bio || "");
+
+      setIsBioModalOpen(false);
+    } catch (err) {
+      console.error("Bio update error:", err);
+      setBioError(err.response?.data?.message || err.message || "Failed to update bio");
+    } finally {
+      setBioSaving(false);
+    }
+  }
+
+  function handleOpenUsernameModal() {
+    setUsernameText(profileData?.username || username || "");
+    setUsernameError("");
+    setIsUsernameModalOpen(true);
+  }
+
+  function handleUsernameModalCancel() {
+    setIsUsernameModalOpen(false);
+    setUsernameText(profileData?.username || username || "");
+    setUsernameError("");
+  }
+
+  async function handleUsernameSave() {
+    const trimmedUsername = usernameText.trim();
+    
+    if (trimmedUsername.length < 3) {
+      setUsernameError("Username must be at least 3 characters long");
+      return;
+    }
+    
+    if (trimmedUsername.length > 30) {
+      setUsernameError("Username cannot exceed 30 characters");
+      return;
+    }
+
+    if (trimmedUsername === (profileData?.username || username)) {
+      setIsUsernameModalOpen(false);
+      return;
+    }
+
+    setUsernameError("");
+    setUsernameSaving(true);
+
+    try {
+      const updateResponse = await updateUserProfile({ username: trimmedUsername });
+      
+      // Refresh profile data
+      const refreshedProfile = await getMyProfile();
+      setProfileData(refreshedProfile);
+      setUsernameText(refreshedProfile?.username || "");
+
+      setIsUsernameModalOpen(false);
+      
+      // Reload the page to update the username in the URL and throughout the app
+      window.location.reload();
+    } catch (err) {
+      console.error("Username update error:", err);
+      setUsernameError(err.response?.data?.message || err.message || "Failed to update username");
+    } finally {
+      setUsernameSaving(false);
+    }
+  }
+
+  function handleOpenInterestsModal() {
+    setIsInterestsModalOpen(true);
+  }
+
+  function handleInterestsModalClose() {
+    setIsInterestsModalOpen(false);
+  }
+
+  async function handleInterestsComplete() {
+    // Refresh profile data after interests are saved
+    const refreshedProfile = await getMyProfile();
+    setProfileData(refreshedProfile);
+    setIsInterestsModalOpen(false);
+  }
+
   const redditAge = profileData?.createdAt
     ? Math.floor((Date.now() - new Date(profileData.createdAt).getTime()) / (1000 * 60 * 60 * 24))
     : 0;
@@ -192,7 +314,7 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
   const ageLabel = redditAgeYears || `${redditAge} d`;
 
   return (
-    <div className={`right-sidebar ${isModalOpen ? "rs-modal-open" : ""}`}>
+    <div className={`right-sidebar ${isModalOpen || isBioModalOpen || isUsernameModalOpen || isInterestsModalOpen ? "rs-modal-open" : ""}`}>
       <div className="rs-card">
 
         {/* COVER */}
@@ -240,8 +362,8 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
             )}
           </div>
           <div className="rs-identity">
-            <h3 className="rs-username">{username}</h3>
-            <p className="rs-username-sub">u/{username}</p>
+            <h3 className="rs-username">{profileData?.username || username}</h3>
+            <p className="rs-username-sub">u/{profileData?.username || username}</p>
           </div>
         </div>
 
@@ -253,6 +375,27 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
             </div>
             {isSelf && <button className="rs-button inline">Share</button>}
           </div>
+        </div>
+
+        <hr />
+
+        {/* BIO SECTION */}
+        <div className="rs-section">
+          <div className="rs-bio-header">
+            <h4 className="rs-section-title">Bio</h4>
+            {isSelf && (
+              <button className="rs-button inline" onClick={handleOpenBioModal}>
+                {profileData?.bio ? "Edit" : "Add bio"}
+              </button>
+            )}
+          </div>
+          {loadingProfile ? (
+            <p style={{ fontSize: "13px", color: "#888" }}>Loading...</p>
+          ) : (
+            <p className="rs-bio-text">
+              {profileData?.bio || (isSelf ? "No bio yet. Add one to tell others about yourself!" : "No bio available.")}
+            </p>
+          )}
         </div>
 
         <hr />
@@ -317,16 +460,8 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
             <div className="rs-section">
               <h4 className="rs-section-title">Settings</h4>
               <div className="rs-setting-row">
-                <span>Profile</span>
-                <button>Update</button>
-              </div>
-              <div className="rs-setting-row">
-                <span>Avatar</span>
-                <button>Update</button>
-              </div>
-              <div className="rs-setting-row">
-                <span>Mod Tools</span>
-                <button>Update</button>
+                <span>Username</span>
+                <button onClick={handleOpenUsernameModal}>Update</button>
               </div>
             </div>
 
@@ -336,6 +471,29 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
             <div className="rs-section">
               <h4 className="rs-section-title">Social Links</h4>
               <button className="rs-button">Add Social Link</button>
+            </div>
+
+            <hr />
+
+            {/* INTERESTS */}
+            <div className="rs-section">
+              <div className="rs-bio-header">
+                <h4 className="rs-section-title">Interests</h4>
+                <button className="rs-button inline" onClick={handleOpenInterestsModal}>
+                  {profileData?.interests?.length > 0 ? "Edit" : "Add interests"}
+                </button>
+              </div>
+              {loadingProfile ? (
+                <p style={{ fontSize: "13px", color: "#888" }}>Loading...</p>
+              ) : profileData?.interests?.length > 0 ? (
+                <div className="rs-interests-list">
+                  {profileData.interests.map((interest, index) => (
+                    <span key={index} className="rs-interest-chip">{interest}</span>
+                  ))}
+                </div>
+              ) : (
+                <p className="rs-bio-text">No interests selected. Add some to personalize your feed!</p>
+              )}
             </div>
 
             <hr />
@@ -375,6 +533,103 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
                 {bannerUploading ? "Saving..." : "Save"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* BIO MODAL */}
+      {isBioModalOpen && (
+        <div className="upload-modal-overlay" onClick={handleBioModalCancel}>
+          <div className="upload-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Edit bio</h3>
+            
+            <div style={{ marginBottom: "4px" }}>
+              <label style={{ 
+                display: "block", 
+                fontSize: "12px", 
+                fontWeight: "600", 
+                color: "#1c1c1c",
+                marginBottom: "8px"
+              }}>
+                Bio
+              </label>
+              <textarea
+                className="rs-bio-textarea"
+                value={bioText}
+                onChange={(e) => setBioText(e.target.value)}
+                placeholder="Tell others about yourself..."
+                maxLength={500}
+                rows={6}
+              />
+            </div>
+            
+            <p className="formats" style={{ textAlign: "right", marginTop: "0", marginBottom: "16px" }}>
+              {bioText.length}/500 characters
+            </p>
+
+            {bioError && <p className="upload-error" role="alert">{bioError}</p>}
+
+            <div className="upload-actions">
+              <button className="cancel-btn" onClick={handleBioModalCancel} disabled={bioSaving}>Cancel</button>
+              <button className="save-btn" onClick={handleBioSave} disabled={bioSaving}>
+                {bioSaving ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* USERNAME MODAL */}
+      {isUsernameModalOpen && (
+        <div className="upload-modal-overlay" onClick={handleUsernameModalCancel}>
+          <div className="upload-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Change username</h3>
+            
+            <div style={{ marginBottom: "4px" }}>
+              <label style={{ 
+                display: "block", 
+                fontSize: "12px", 
+                fontWeight: "600", 
+                color: "#1c1c1c",
+                marginBottom: "8px"
+              }}>
+                Username
+              </label>
+              <input
+                type="text"
+                className="rs-username-input"
+                value={usernameText}
+                onChange={(e) => setUsernameText(e.target.value)}
+                placeholder="Enter new username"
+                maxLength={30}
+              />
+            </div>
+            
+            <p className="formats" style={{ textAlign: "right", marginTop: "0", marginBottom: "16px" }}>
+              {usernameText.length}/30 characters (minimum 3)
+            </p>
+
+            {usernameError && <p className="upload-error" role="alert">{usernameError}</p>}
+
+            <div className="upload-actions">
+              <button className="cancel-btn" onClick={handleUsernameModalCancel} disabled={usernameSaving}>Cancel</button>
+              <button className="save-btn" onClick={handleUsernameSave} disabled={usernameSaving}>
+                {usernameSaving ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* INTERESTS MODAL */}
+      {isInterestsModalOpen && (
+        <div className="upload-modal-overlay" onClick={handleInterestsModalClose}>
+          <div className="interests-modal" onClick={(e) => e.stopPropagation()}>
+            <Interests 
+              onComplete={handleInterestsComplete}
+              onSkip={handleInterestsModalClose}
+              initialInterests={profileData?.interests || []}
+            />
           </div>
         </div>
       )}
