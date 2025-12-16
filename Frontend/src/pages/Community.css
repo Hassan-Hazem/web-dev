@@ -4,12 +4,13 @@
 .comm-page {
   background: #dae0e6; /* Standard Reddit gray */
   min-height: 100vh;
+  padding: 28px 16px 40px;
 }
 
 /* Content Container */
 .comm-content-wrap {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
   box-sizing: border-box;
 }
@@ -216,9 +217,12 @@
 /* Main Layout Grid */
 .comm-grid {
   display: flex;
-  justify-content: center;
-  gap: 48px; /* increased spacing to prevent posts/sidebar overlap */
-  padding: 0 24px;
+  gap: 28px;
+  padding: 0 12px;
+  max-width: 1240px;
+  width: 100%;
+  max-width: none;
+  align-items: flex-start
 }
 
 .comm-main-col {
@@ -241,8 +245,7 @@
   align-items: center;
   box-sizing: border-box;
   overflow-x: auto;
-  /* smaller, align with post column */
-  width: 680px;
+  width: 100%;
   align-self: flex-start;
 }
 .comm-sort-btn {
@@ -529,9 +532,6 @@
 }
 .comm-create-input::placeholder { color: #9ca3af; }
 .comm-create-input:focus { outline: none; box-shadow: none; }
-
-/* Banner content overlay: align with page content area */
-/* banner description removed */
 
 /* Mods List */
 .comm-mod-list {
