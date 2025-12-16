@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { getMyProfile, updateUserProfile } from "../../api/userApi";
 import api from "../../api/axios";
 import "../css/ProfileRightSidebar.css";
+import Interests from "./Interests";
 
 
 export default function ProfileRightSidebar({ username, joinDate, karma, redditAgeYears, isSelf = false }) {
@@ -23,21 +24,6 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
   const [usernameSaving, setUsernameSaving] = useState(false);
   const [usernameError, setUsernameError] = useState("");
   const [isInterestsModalOpen, setIsInterestsModalOpen] = useState(false);
-  const [selectedInterests, setSelectedInterests] = useState([]);
-  const [interestsSaving, setInterestsSaving] = useState(false);
-  const [interestsError, setInterestsError] = useState("");
-  const [activeCategoryId, setActiveCategoryId] = useState("all");
-
-  // Interest categories (synced with Interests component)
-  const CATEGORIES = [
-    { id: 'technology', name: 'Technology', emoji: '💻', topics: ['AI & ML','Web Development','Mobile Development','DevOps','Cybersecurity','Blockchain','Cloud Computing'] },
-    { id: 'science', name: 'Science', emoji: '🔬', topics: ['Physics','Biology','Chemistry','Astronomy','Earth Science','Neuroscience','Environmental Science'] },
-    { id: 'arts', name: 'Arts & Media', emoji: '🎨', topics: ['Photography','Music','Film & TV','Painting','Graphic Design','Literature','Theater'] },
-    { id: 'gaming', name: 'Gaming', emoji: '🎮', topics: ['PC Gaming','Console Gaming','Mobile Gaming','Esports','Game Development','Retro Games','VR/AR'] },
-    { id: 'lifestyle', name: 'Lifestyle', emoji: '✨', topics: ['Health & Fitness','Food & Cooking','Travel','Personal Finance','Home & Garden','Fashion','Relationships'] },
-    { id: 'education', name: 'Education', emoji: '📚', topics: ['STEM Education','Language Learning','Study Tips','Educational Tech','Research','Teaching Resources','Remote Learning'] },
-    { id: 'business', name: 'Business & Entrepreneurship', emoji: '💼', topics: ['Startups','Marketing','Product Management','Finance','E-commerce','Freelancing','HR & People Ops'] }
-  ];
 
   const localStorageKey = `profile_banner_${username || "anonymous"}`;
 
@@ -62,9 +48,6 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
         }
         if (data.username) {
           setUsernameText(data.username);
-        }
-        if (data.interests && data.interests.length > 0) {
-          setSelectedInterests(data.interests);
         }
         if (data.coverPictureUrl) {
           const coverUrl = data.coverPictureUrl.startsWith("http")
@@ -307,50 +290,18 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
   }
 
   function handleOpenInterestsModal() {
-    setSelectedInterests(profileData?.interests || []);
-    setActiveCategoryId("all");
-    setInterestsError("");
     setIsInterestsModalOpen(true);
   }
 
-  function handleInterestsModalCancel() {
+  function handleInterestsModalClose() {
     setIsInterestsModalOpen(false);
-    setSelectedInterests(profileData?.interests || []);
-    setInterestsError("");
   }
 
-  function toggleInterest(interest) {
-    setSelectedInterests(prev =>
-      prev.includes(interest)
-        ? prev.filter(i => i !== interest)
-        : [...prev, interest]
-    );
-  }
-
-  async function handleInterestsSave() {
-    if (selectedInterests.length < 1) {
-      setInterestsError("Please select at least 1 interest");
-      return;
-    }
-
-    setInterestsError("");
-    setInterestsSaving(true);
-
-    try {
-      await updateUserProfile({ interests: selectedInterests });
-      
-      // Refresh profile data
-      const refreshedProfile = await getMyProfile();
-      setProfileData(refreshedProfile);
-      setSelectedInterests(refreshedProfile?.interests || []);
-
-      setIsInterestsModalOpen(false);
-    } catch (err) {
-      console.error("Interests update error:", err);
-      setInterestsError(err.response?.data?.message || err.message || "Failed to update interests");
-    } finally {
-      setInterestsSaving(false);
-    }
+  async function handleInterestsComplete() {
+    // Refresh profile data after interests are saved
+    const refreshedProfile = await getMyProfile();
+    setProfileData(refreshedProfile);
+    setIsInterestsModalOpen(false);
   }
 
   const redditAge = profileData?.createdAt
@@ -672,58 +623,14 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
 
       {/* INTERESTS MODAL */}
       {isInterestsModalOpen && (
-        <div className="upload-modal-overlay" onClick={handleInterestsModalCancel}>
+        <div className="upload-modal-overlay" onClick={handleInterestsModalClose}>
           <div className="interests-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Edit interests</h3>
-            <p className="interests-modal-subtitle">Pick things you'd like to see in your home feed.</p>
-            
-            {/* Category Tabs */}
-            <div className="interests-modal-tabs">
-              <button
-                onClick={() => setActiveCategoryId("all")}
-                className={`interests-modal-tab ${activeCategoryId === "all" ? "active" : ""}`}
-              >
-                All
-              </button>
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setActiveCategoryId(cat.id)}
-                  className={`interests-modal-tab ${activeCategoryId === cat.id ? "active" : ""}`}
-                >
-                  {cat.emoji} {cat.name}
-                </button>
-              ))}
-            </div>
-
-            {/* Interests Grid */}
-            <div className="interests-modal-grid">
-              {(activeCategoryId === "all"
-                ? Array.from(new Set(CATEGORIES.flatMap((c) => c.topics)))
-                : (CATEGORIES.find((c) => c.id === activeCategoryId)?.topics || [])
-              ).map((topic) => (
-                <button
-                  key={topic}
-                  onClick={() => toggleInterest(topic)}
-                  className={`interests-modal-chip ${selectedInterests.includes(topic) ? "selected" : ""}`}
-                >
-                  {topic}
-                </button>
-              ))}
-            </div>
-
-            <p className="formats" style={{ textAlign: "right", marginTop: "8px", marginBottom: "8px" }}>
-              {selectedInterests.length} selected
-            </p>
-
-            {interestsError && <p className="upload-error" role="alert">{interestsError}</p>}
-
-            <div className="upload-actions">
-              <button className="cancel-btn" onClick={handleInterestsModalCancel} disabled={interestsSaving}>Cancel</button>
-              <button className="save-btn" onClick={handleInterestsSave} disabled={interestsSaving || selectedInterests.length < 1}>
-                {interestsSaving ? "Saving..." : "Save"}
-              </button>
-            </div>
+            <Interests 
+              onComplete={handleInterestsComplete}
+              onSkip={handleInterestsModalClose}
+              initialInterests={profileData?.interests || []}
+              isEditing={true}
+            />
           </div>
         </div>
       )}
