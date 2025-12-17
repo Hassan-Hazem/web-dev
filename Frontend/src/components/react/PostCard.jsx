@@ -27,7 +27,7 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
     if (!url) return null;
     return url.startsWith("http") 
       ? url 
-      : `https://reddit-t5xs.onrender.com/${url.replace(/\\/g, "/")}`;
+      : `${import.meta.env.VITE_BACKEND_URL.replace('/api', '')}/${url.replace(/\\/g, "/")}`;
   };
 
   // Prepare Data

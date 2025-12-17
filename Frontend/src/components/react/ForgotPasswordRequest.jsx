@@ -17,7 +17,7 @@ export default function ForgotPasswordRequest({ onSuccess }) {
         try {
             // NOTE: Using a single field for 'email or username' means your 
             // backend /forgotPassword must be able to handle both fields.
-            await axios.post('https://reddit-t5xs.onrender.com/api/auth/forgotpassword', { 
+            await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/forgotpassword`, { 
                 identifier: input // Using 'identifier' to represent either email or username
             });
             

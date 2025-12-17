@@ -27,7 +27,7 @@ export default function Signup({
     setLoading(true);
     
     try {
-      const response = await fetch("https://reddit-t5xs.onrender.com/api/auth/register", {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -63,7 +63,7 @@ export default function Signup({
         </p>
 
         <button className="google-btn" type="button" disabled={loading} onClick={() => {
-          const googleAuthUrl = `https://reddit-t5xs.onrender.com/api/auth/google`;
+          const googleAuthUrl = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
           window.open(googleAuthUrl, "_self"); 
       }}>
           <svg className="google-icon" viewBox="0 0 24 24" width="20" height="20">
