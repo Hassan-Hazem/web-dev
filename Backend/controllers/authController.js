@@ -152,7 +152,7 @@ export const login = async (req, res) => {
 // `--- GOOGLE AUTH CALLBACK ---
 export const googleAuthCallback = (req, res) => {
     const token = generateToken(req.user._id); 
-    res.redirect(`http://localhost:5173/auth/success?token=${token}`);//edit here
+    res.redirect(`https://redditfront.onrender.com/auth/success?token=${token}`);//edit here
 };
 
 export const getMe = (req, res) => {
@@ -191,7 +191,7 @@ export const forgotPassword = async (req, res) => {
         passwordResetExpires: tokenExpiry,
     });
 
-    const resetUrl = `http://localhost:5173/resetpassword?token=${resetToken}&email=${user.email}`; //edit here
+    const resetUrl = `https://redditfront.onrender.com/resetpassword?token=${resetToken}&email=${user.email}`; //edit here
 
     try {
         await sendPasswordResetEmail(user.email, resetUrl);
