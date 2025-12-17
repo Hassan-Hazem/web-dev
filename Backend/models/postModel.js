@@ -44,6 +44,11 @@ const postSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    embedding: {
+      type: [Number],  // Array of 768 floats
+      required: false,
+      select: false,   // Don't include in normal queries (optimization)
+    },
   },
   { timestamps: true }
 );

@@ -8,6 +8,14 @@ import postRoutes from "./routes/postRoutes.js";
 import corsOptions from "./config/corsConfig.js";
 import connectDB from "./config/database.js";
 import communityRoutes from "./routes/communityRoutes.js";
+<<<<<<< Updated upstream
+=======
+import voteRoutes from "./routes/voteRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
+import commentRoutes from "./routes/commentRoutes.js";
+import searchRoutes from "./routes/searchRoutes.js";
+
+>>>>>>> Stashed changes
 // --- Swagger Imports ---
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
@@ -51,6 +59,12 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes); 
 app.use("/api/communities", communityRoutes);
+<<<<<<< Updated upstream
+=======
+app.use("/api/votes", voteRoutes);
+app.use("/api/ai", aiRoutes);
+app.use("/api/search", searchRoutes);
+>>>>>>> Stashed changes
 // --- Server Startup ---
 const PORT = process.env.PORT || 5000;
 

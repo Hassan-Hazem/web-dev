@@ -11,6 +11,7 @@ import Community from "../models/communityModel.js";
 import Vote from "../models/voteModel.js";
 import Post from "../models/postModel.js";
 import { createPostSchema, voteSchema } from "../validators/postValidator.js";
+import { generatePostEmbedding } from "../services/aiEmbeddingService.js";
 
 // --- CREATE POST ---
 export const createPostController = async (req, res) => {
@@ -47,6 +48,19 @@ export const createPostController = async (req, res) => {
       author: userId,
       community: community._id,
     });
+
+    // 5. Generate and store embedding asynchronously (don't block response)
+    generatePostEmbedding({
+      title,
+      content,
+      communityName: community.name
+    }).then(embedding => {
+      if (embedding) {
+        Post.findByIdAndUpdate(newPost._id, { embedding }).catch(err => 
+          console.error('Failed to update post embedding:', err)
+        );
+      }
+    }).catch(err => console.error('Embedding generation failed:', err));
 
     const populatedPost = await findPostById(newPost._id);
     res.status(201).json(populatedPost);
