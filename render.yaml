@@ -3,12 +3,12 @@ services:
   - type: web
     name: reddit
     runtime: node
-    region: oregon
+    region: Frankfurt (EU Central)
     plan: free
     branch: main
     rootDir: Backend
-    buildCommand: npm install
-    startCommand: npm start
+    buildCommand: npm install --legacy-peer-deps
+    startCommand: node server.js
     autoDeploy: true
     envVars:
       - key: NODE_ENV
@@ -30,11 +30,11 @@ services:
   - type: web
     name: Reddit
     runtime: static
-    region: oregon
+    region: Frankfurt (EU Central)
     plan: free
     branch: main
     rootDir: Frontend
-    buildCommand: npm install && npm run build
+    buildCommand:  npm run build
     staticPublishPath: ./dist
     autoDeploy: true
     # SPA routing - all routes redirect to index.html
