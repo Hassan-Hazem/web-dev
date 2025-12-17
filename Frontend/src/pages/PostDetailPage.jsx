@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/authContext";
@@ -17,7 +17,7 @@ export default function PostDetailPage() {
   const [newComment, setNewComment] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
 
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       const commentsRes = await api.get(`/comments/post/${postId}`);
       setComments(commentsRes.data || []);
@@ -25,7 +25,7 @@ export default function PostDetailPage() {
       console.log("Comments endpoint error", commentErr);
       setComments([]);
     }
-  };
+  }, [postId]);
 
   useEffect(() => {
     const fetchPostData = async () => {
@@ -47,7 +47,7 @@ export default function PostDetailPage() {
     };
 
     fetchPostData();
-  }, [postId]);
+  }, [postId, fetchComments]);
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
@@ -80,7 +80,7 @@ export default function PostDetailPage() {
     }
   };
 
-  const handleCommentDeleted = async (commentId) => {
+  const handleCommentDeleted = async () => {
     await fetchComments();
     // Refetch post to update comment count
     const postRes = await api.get(`/posts/${postId}`);
