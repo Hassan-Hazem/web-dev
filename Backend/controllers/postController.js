@@ -16,6 +16,9 @@ import PostEmbedding from "../models/postEmbeddingModel.js";
 import { generateEmbedding } from "../services/aiService.js";
 import { createPostSchema, voteSchema } from "../validators/postValidator.js";
 
+// Floor for cosine similarity; below this we treat results as unrelated noise
+const MIN_SIMILARITY = 0.39;
+
 // --- Helper: Cosine Similarity for Vector Search ---
 // Calculates how similar two vectors are (returns -1 to 1)
 const cosineSimilarity = (vecA, vecB) => {
@@ -32,7 +35,7 @@ const checkCommunityAccess = async (community, userId) => {
   if (userId) {
     const subscription = await Subscription.findOne({
       user: userId,
-      community: community._id
+      community: community._id,
     });
     return !!subscription;
   }
@@ -62,8 +65,8 @@ export const createPostController = async (req, res) => {
 
     const hasAccess = await checkCommunityAccess(community, userId);
     if (!hasAccess) {
-      return res.status(403).json({ 
-        message: "You must join this restricted community to post" 
+      return res.status(403).json({
+        message: "You must join this restricted community to post",
       });
     }
 
@@ -89,7 +92,10 @@ export const createPostController = async (req, res) => {
         });
       }
     } catch (aiError) {
-      console.error(`Failed to generate embedding for post ${newPost._id}:`, aiError.message);
+      console.error(
+        `Failed to generate embedding for post ${newPost._id}:`,
+        aiError.message
+      );
       // We continue success response even if AI fails
     }
     // --------------------------------------------------
@@ -98,7 +104,9 @@ export const createPostController = async (req, res) => {
     res.status(201).json(populatedPost);
   } catch (error) {
     console.error("Create Post Error:", error);
-    res.status(500).json({ message: "Error creating post", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error creating post", error: error.message });
   }
 };
 
@@ -109,6 +117,8 @@ export const searchPosts = async (req, res) => {
     if (!query) {
       return res.status(400).json({ message: "Search query is required" });
     }
+
+    const limit = Math.min(parseInt(req.query.limit, 10) || 10, 50);
 
     // 1. Generate embedding for the search query
     // task_type='query' ensures the model optimizes for retrieval
@@ -123,27 +133,31 @@ export const searchPosts = async (req, res) => {
       score: cosineSimilarity(queryEmbedding, doc.embedding),
     }));
 
-    // 4. Sort by score (descending) and take top 10
+    // 4. Sort by score (descending) and drop weak matches
     results.sort((a, b) => b.score - a.score);
-    const topResults = results.slice(0, 10);
-    
+    const topResults = results
+      .filter((r) => r.score >= MIN_SIMILARITY)
+      .slice(0, limit);
+
     // 5. Fetch full post details for the top results
     const topPostIds = topResults.map((r) => r.post);
-    
+
     // Fetch posts and preserve the order of relevance
     const posts = await Post.find({ _id: { $in: topPostIds } })
       .populate("author", "username profilePictureUrl")
       .populate("community", "name profilePictureUrl");
 
     // Re-order posts to match the similarity ranking
-    const orderedPosts = topPostIds.map(id => 
-      posts.find(p => p._id.toString() === id.toString())
-    ).filter(p => p !== undefined); // Filter out any nulls (e.g. if a post was deleted but embedding remained)
+    const orderedPosts = topPostIds
+      .map((id) => posts.find((p) => p._id.toString() === id.toString()))
+      .filter((p) => p !== undefined); // Filter out any nulls (e.g. if a post was deleted but embedding remained)
 
     res.status(200).json(orderedPosts);
   } catch (error) {
     console.error("Search Error:", error);
-    res.status(500).json({ message: "Error searching posts", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error searching posts", error: error.message });
   }
 };
 
@@ -155,7 +169,9 @@ export const getAllPosts = async (req, res) => {
     const posts = await findAllPosts(skip, limit);
     res.status(200).json(posts);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching posts", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching posts", error: error.message });
   }
 };
 
@@ -167,7 +183,9 @@ export const getPost = async (req, res) => {
     }
     res.status(200).json(post);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching post", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching post", error: error.message });
   }
 };
 
@@ -186,7 +204,12 @@ export const getCommunityPosts = async (req, res) => {
     const posts = await findPostsByCommunity(community._id, skip, limit);
     res.status(200).json(posts);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching community posts", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Error fetching community posts",
+        error: error.message,
+      });
   }
 };
 
@@ -203,7 +226,9 @@ export const getUserPosts = async (req, res) => {
     const posts = await findPostsByUser(user._id, skip, limit);
     res.status(200).json(posts);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching user posts", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching user posts", error: error.message });
   }
 };
 
@@ -221,7 +246,9 @@ export const votePost = async (req, res) => {
 
     const hasAccess = await checkCommunityAccess(post.community, userId);
     if (!hasAccess) {
-      return res.status(403).json({ message: "You must join this restricted community to vote" });
+      return res
+        .status(403)
+        .json({ message: "You must join this restricted community to vote" });
     }
 
     const existingVote = await Vote.findOne({
@@ -299,7 +326,9 @@ export const deletePost = async (req, res) => {
 
     // Authorization
     if (post.author._id.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Not authorized to delete this post" });
+      return res
+        .status(403)
+        .json({ message: "Not authorized to delete this post" });
     }
 
     await deletePostById(req.params.id);
@@ -311,6 +340,8 @@ export const deletePost = async (req, res) => {
 
     res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting post", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error deleting post", error: error.message });
   }
 };

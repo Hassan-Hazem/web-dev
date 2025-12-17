@@ -1053,8 +1053,9 @@ paths:
       description: |
         Search for posts using AI-powered semantic search. This endpoint uses embeddings to find posts
         that are conceptually similar to your search query, not just keyword matches.
-        
-        Returns the top 10 most relevant posts ranked by semantic similarity.
+
+        Returns up to `limit` posts ranked by semantic similarity. Low-relevance matches are filtered
+        out using a similarity threshold, so the response may contain fewer items than requested.
       tags: [Posts, AI]
       parameters:
         - in: query
@@ -1064,9 +1065,18 @@ paths:
           required: true
           description: Search query text
           example: "how to learn javascript"
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+          required: false
+          description: Maximum number of top matches to return (capped at 50)
       responses:
         "200":
-          description: List of posts ranked by relevance
+          description: List of posts ranked by relevance (may be fewer than limit if low-similarity results are filtered)
           content:
             application/json:
               schema:
