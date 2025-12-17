@@ -221,6 +221,14 @@
   padding: 0 24px;
 }
 
+/* When the left sidebar is open, shift only the feed to the right
+   so the right sidebar keeps its space */
+@media (min-width: 1024px) {
+  .main-content.sidebar-open .comm-main-col {
+    margin-left: 56px;
+  }
+}
+
 .comm-main-col {
   width: 100%;
   max-width: 640px;
@@ -242,7 +250,8 @@
   box-sizing: border-box;
   overflow-x: auto;
   /* smaller, align with post column */
-  width: 680px;
+  width: 100%;
+  max-width: 720px;
   align-self: flex-start;
 }
 .comm-sort-btn {
