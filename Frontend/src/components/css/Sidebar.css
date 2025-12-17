@@ -8,9 +8,8 @@
   background: #fff;
   border-right: 1px solid #eaeaea;
   box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-  transform: translateX(0);
-  transition: transform 200ms cubic-bezier(.4,0,.2,1);
-  z-index: 90;
+  transition: left 200ms cubic-bezier(.4,0,.2,1);
+  z-index: 900;
   overflow-y: auto;
   overflow-x: visible;
   display: flex;
@@ -19,7 +18,7 @@
 
 /* Hidden (collapsed) state */
 .sidebar.collapsed {
-  transform: translateX(-100%);
+  left: -264px;
   pointer-events: none;
 }
 
@@ -235,7 +234,7 @@
   right: 0;
   bottom: 0;
   background: rgba(0,0,0,0.25);
-  z-index: 80;
+  z-index: 800;
 }
 
 /* On desktop sizes keep site interactive: hide the dim backdrop */
@@ -249,13 +248,12 @@
     position: fixed;
     top: 64px;
     left: 0;
-    transform: translateX(0);
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     z-index: 900;
   }
 
   .sidebar.collapsed {
-    transform: translateX(-100%);
+    left: -264px;
     pointer-events: none;
   }
 }

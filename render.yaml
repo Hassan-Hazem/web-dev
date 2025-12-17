@@ -34,7 +34,7 @@ services:
     plan: free
     branch: main
     rootDir: Frontend
-    buildCommand:  npm run build
+    buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     autoDeploy: true
     # SPA routing - all routes redirect to index.html
