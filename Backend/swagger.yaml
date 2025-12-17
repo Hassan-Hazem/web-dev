@@ -426,6 +426,25 @@ components:
           type: string
           example: "A concise summary of the post content."
 
+    PostEmbedding:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "654321abcdef1234567890"
+        post:
+          type: string
+          description: "Reference to the Post ID"
+          example: "654321abcdef1234567890"
+        embedding:
+          type: array
+          items:
+            type: number
+          description: "High-dimensional vector representation of the post (768 dimensions)"
+        createdAt:
+          type: string
+          format: date-time
+
 tags:
   - name: Auth
     description: Authentication endpoints (Login, Register, Verification, Password Reset)
@@ -440,7 +459,9 @@ tags:
   - name: Upload
     description: File upload handling
   - name: AI
-    description: AI-powered features (Post summarization)
+    description: AI-powered features (Post summarization, Semantic search with embeddings)
+  - name: Comments
+    description: Comment management (Create, Read, Update, Delete, Vote)
 
 paths:
   # --- AUTH ROUTES ---
@@ -982,7 +1003,11 @@ paths:
 
     post:
       summary: Create a new post
-      description: Create a new post in a community. If the community is restricted (isPublic=false), the user must be a member.
+      description: |
+        Create a new post in a community. If the community is restricted (isPublic=false), the user must be a member.
+        
+        **AI Integration:** When a post is created, an embedding vector is automatically generated using the AI service.
+        This embedding enables semantic search functionality across posts.
       tags: [Posts]
       security:
         - bearerAuth: []
@@ -1010,7 +1035,7 @@ paths:
                   description: Optional image file upload
       responses:
         "201":
-          description: Post created successfully
+          description: Post created successfully (embedding generated in background)
           content:
             application/json:
               schema:
@@ -1021,6 +1046,45 @@ paths:
           description: Access denied - must join restricted community to post
         "404":
           description: Community not found
+
+  /api/posts/search:
+    get:
+      summary: Search posts using semantic similarity
+      description: |
+        Search for posts using AI-powered semantic search. This endpoint uses embeddings to find posts
+        that are conceptually similar to your search query, not just keyword matches.
+        
+        Returns the top 10 most relevant posts ranked by semantic similarity.
+      tags: [Posts, AI]
+      parameters:
+        - in: query
+          name: query
+          schema:
+            type: string
+          required: true
+          description: Search query text
+          example: "how to learn javascript"
+      responses:
+        "200":
+          description: List of posts ranked by relevance
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+        "400":
+          description: Search query is required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Search error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /api/posts/{id}:
     get:
@@ -1045,6 +1109,10 @@ paths:
 
     delete:
       summary: Delete a post
+      description: |
+        Delete a post. Only the post author can delete their own post.
+        
+        **AI Integration:** When a post is deleted, its associated embedding is also removed from the database.
       tags: [Posts]
       security:
         - bearerAuth: []
@@ -1057,7 +1125,7 @@ paths:
           description: Post ID
       responses:
         "200":
-          description: Post deleted successfully
+          description: Post and associated embedding deleted successfully
           content:
             application/json:
               schema:

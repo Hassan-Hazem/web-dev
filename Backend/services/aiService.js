@@ -1,11 +1,15 @@
 import axios from "axios";
 
-
-export const generateEmbedding = async (text) => {
+/**
+ * Calls the AI Service to generate an embedding for the given text.
+ * @param {string} text - The text to embed.
+ * @param {string} taskType - 'document' for storing posts, 'query' for search inputs.
+ * @returns {Promise<number[]>} - The embedding vector.
+ */
+export const generateEmbedding = async (text, taskType = "document") => {
   try {
-    // Ensure AI_SERVICE_URL is defined in your .env file
     const aiServiceUrl = process.env.AI_SERVICE_URL; 
-    
+
     if (!aiServiceUrl) {
         throw new Error("AI_SERVICE_URL environment variable is not defined");
     }
@@ -13,7 +17,7 @@ export const generateEmbedding = async (text) => {
     // Call the Python FastAPI endpoint
     const response = await axios.post(`${aiServiceUrl}/api/embed`, {
       text: text,
-      task_type: "document", // 'document' for storage, 'query' for search
+      task_type: taskType, 
     });
 
     if (response.data && response.data.embedding) {
@@ -23,7 +27,6 @@ export const generateEmbedding = async (text) => {
     throw new Error("Invalid response format from AI Service");
   } catch (error) {
     console.error("AI Service Embedding Error:", error.message);
-    // Re-throw to let the caller decide how to handle the failure
     throw error;
   }
 };
