@@ -6,12 +6,14 @@ import {
   findPostsByUser,
   deletePostById,
 } from "../repositories/postRepository.js";
-import { findUserByUsername } from "../repositories/userRepository.js"; // Import the helper here
+import { findUserByUsername } from "../repositories/userRepository.js";
 import Community from "../models/communityModel.js";
 import Subscription from "../models/subscriptionModel.js";
 import Vote from "../models/voteModel.js";
 import Post from "../models/postModel.js";
 import User from "../models/userModel.js";
+import PostEmbedding from "../models/postEmbeddingModel.js"; // [NEW IMPORT]
+import { generateEmbedding } from "../services/aiService.js"; // [NEW IMPORT]
 import { createPostSchema, voteSchema } from "../validators/postValidator.js";
 
 // --- Helper function to check if user can perform actions in community ---
@@ -73,6 +75,28 @@ export const createPostController = async (req, res) => {
       author: userId,
       community: community._id,
     });
+
+    // --- AI INTEGRATION: Generate and Save Embedding ---
+    try {
+      // Combine title and content for a richer embedding
+      const textToEmbed = title + (content ? "\n" + content : "");
+      
+      console.log(`Generating embedding for post: ${newPost._id}`);
+      const embeddingVector = await generateEmbedding(textToEmbed);
+
+      if (embeddingVector) {
+        await PostEmbedding.create({
+          post: newPost._id,
+          embedding: embeddingVector,
+        });
+        console.log(`Embedding saved successfully for post: ${newPost._id}`);
+      }
+    } catch (aiError) {
+      // Log error but DO NOT fail the request. The post was created successfully.
+      // We don't want to block the user if the AI service is temporarily down.
+      console.error(`Failed to generate embedding for post ${newPost._id}:`, aiError.message);
+    }
+    // --------------------------------------------------
 
     const populatedPost = await findPostById(newPost._id);
     res.status(201).json(populatedPost);
