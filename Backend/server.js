@@ -58,7 +58,11 @@ app.use("/api/comments", commentRoutes);
 app.use("/api/communities", communityRoutes);
 app.use("/api/votes", voteRoutes);
 app.use("/api/ai", aiRoutes);
+
 // --- Server Startup ---
+app.get("/health", (req, res) => {
+  res.status(200).send("Server is healthy");
+});
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
