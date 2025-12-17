@@ -10,7 +10,7 @@ const postSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      required: false, // Content might be optional if it's an image post
+      required: false,
     },
     postType: {
       type: String,
@@ -50,3 +50,4 @@ const postSchema = new mongoose.Schema(
 
 const Post = mongoose.model("Post", postSchema);
 export default Post;
+

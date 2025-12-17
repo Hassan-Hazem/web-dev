@@ -1,32 +1,45 @@
-# AIService/.gitignore
+# Notebooks
+.ipynb_checkpoints/
 
-# --- Python Environment ---
-# Virtual environment directory
+# Local environment files
+.env
+.env.*
+
+# Logs
+*.log
+
+# Editors/IDE (local project-level settings)
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Virtual environments
+.venv/
 venv/
+env/
+ENV/
 
-# Byte-compiled / optimized / shared objects
-__pycache__/
-*.pyc
-*.pyd
-*.so
-
-# Installer logs
+# Packaging / build
+build/
+dist/
+.eggs/
 *.egg-info/
 
-# --- Environment Files ---
-# NEVER commit API keys or sensitive configurations
-# This hides the file containing your GEMINI_API_KEY
-.env
-
-# --- Testing / Debugging ---
-# Coverage reports
-.coverage
+# Test, typing, tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
 .tox/
-
-# Python-specific IDE/Tool directories (e.g., PyCharm, VS Code)
-.idea/
-.vscode/
-
-# Build artifacts
-dist/
-build/
+.nox/
+.coverage
+.coverage.*
+.cache/
+coverage.xml
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
