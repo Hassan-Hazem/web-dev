@@ -1,12 +1,12 @@
-
 import React, { useState, useRef, useEffect } from "react";
-import { getMyProfile, updateUserProfile } from "../../api/userApi";
+import { getMyProfile, updateUserProfile as updateUserProfileApi } from "../../api/userApi";
 import api from "../../api/axios";
 import "../css/ProfileRightSidebar.css";
 import Interests from "./Interests";
-
+import { useAuth } from "../../context/authContext";
 
 export default function ProfileRightSidebar({ username, joinDate, karma, redditAgeYears, isSelf = false }) {
+  const { updateUserProfile: updateAuthUser } = useAuth();
   const [bannerImage, setBannerImage] = useState(null);
   const [tempImage, setTempImage] = useState(null); 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,7 +24,6 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
   const [usernameSaving, setUsernameSaving] = useState(false);
   const [usernameError, setUsernameError] = useState("");
   const [isInterestsModalOpen, setIsInterestsModalOpen] = useState(false);
-
   const localStorageKey = `profile_banner_${username || "anonymous"}`;
 
   useEffect(() => {
@@ -151,7 +150,7 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
       const coverUrl = uploadResponse.data.filePath;
 
       // Step 2: Update user profile with cover URL
-      const updateResponse = await updateUserProfile({ coverPictureUrl: coverUrl });
+      const updateResponse = await updateUserProfileApi({ coverPictureUrl: coverUrl });
 
       // Step 3: Force refresh profile to get latest from database
       const refreshedProfile = await getMyProfile();
@@ -220,7 +219,7 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
     setBioSaving(true);
 
     try {
-      const updateResponse = await updateUserProfile({ bio: bioText });
+      const updateResponse = await updateUserProfileApi({ bio: bioText });
       
       // Refresh profile data
       const refreshedProfile = await getMyProfile();
@@ -248,46 +247,55 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
     setUsernameError("");
   }
 
-  async function handleUsernameSave() {
-    const trimmedUsername = usernameText.trim();
-    
-    if (trimmedUsername.length < 3) {
-      setUsernameError("Username must be at least 3 characters long");
-      return;
-    }
-    
-    if (trimmedUsername.length > 30) {
-      setUsernameError("Username cannot exceed 30 characters");
-      return;
-    }
-
-    if (trimmedUsername === (profileData?.username || username)) {
-      setIsUsernameModalOpen(false);
-      return;
-    }
-
-    setUsernameError("");
-    setUsernameSaving(true);
-
-    try {
-      const updateResponse = await updateUserProfile({ username: trimmedUsername });
-      
-      // Refresh profile data
-      const refreshedProfile = await getMyProfile();
-      setProfileData(refreshedProfile);
-      setUsernameText(refreshedProfile?.username || "");
-
-      setIsUsernameModalOpen(false);
-      
-      // Reload the page to update the username in the URL and throughout the app
-      window.location.reload();
-    } catch (err) {
-      console.error("Username update error:", err);
-      setUsernameError(err.response?.data?.message || err.message || "Failed to update username");
-    } finally {
-      setUsernameSaving(false);
-    }
+async function handleUsernameSave() {
+  const trimmedUsername = usernameText.trim();
+  
+  if (trimmedUsername.length < 3) {
+    setUsernameError("Username must be at least 3 characters long");
+    return;
   }
+  
+  if (trimmedUsername.length > 30) {
+    setUsernameError("Username cannot exceed 30 characters");
+    return;
+  }
+
+  if (trimmedUsername === (profileData?.username || username)) {
+    setIsUsernameModalOpen(false);
+    return;
+  }
+
+  setUsernameError("");
+  setUsernameSaving(true);
+
+  try {
+    // 2. API Update
+    const updateResponse = await updateUserProfileApi({ username: trimmedUsername });
+    
+    // 3. Refresh Local Data
+    const refreshedProfile = await getMyProfile();
+    setProfileData(refreshedProfile);
+    setUsernameText(refreshedProfile?.username || "");
+
+    // 4. Update Auth Context (Navbar etc.)
+    if (refreshedProfile?.username) {
+      updateAuthUser({ username: refreshedProfile.username });
+    } else {
+      updateAuthUser({ username: trimmedUsername });
+    }
+
+    setIsUsernameModalOpen(false);
+    
+    const newPath = `/user/${trimmedUsername}`;
+    window.location.replace(newPath);
+
+  } catch (err) {
+    console.error("Username update error:", err);
+    setUsernameError(err.response?.data?.message || err.message || "Failed to update username");
+  } finally {
+    setUsernameSaving(false);
+  }
+}
 
   function handleOpenInterestsModal() {
     setIsInterestsModalOpen(true);
