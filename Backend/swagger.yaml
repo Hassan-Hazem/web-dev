@@ -307,6 +307,66 @@ components:
           type: string
           format: date-time
 
+    Comment:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "654321abcdef1234567890"
+        content:
+          type: string
+          example: "Great post! I agree with this."
+        author:
+          type: object
+          properties:
+            _id: { type: string }
+            username: { type: string }
+            profilePictureUrl: { type: string }
+        post:
+          type: object
+          properties:
+            _id: { type: string }
+            title: { type: string }
+        parentComment:
+          type: object
+          nullable: true
+          properties:
+            _id: { type: string }
+            content: { type: string }
+            author:
+              type: object
+              properties:
+                _id: { type: string }
+                username: { type: string }
+                profilePictureUrl: { type: string }
+        upvotes:
+          type: number
+          default: 0
+        downvotes:
+          type: number
+          default: 0
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateCommentRequest:
+      type: object
+      required: [content, postId]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 5000
+          example: "This is a great post!"
+        postId:
+          type: string
+          example: "654321abcdef1234567890"
+        parentCommentId:
+          type: string
+          nullable: true
+          description: "Optional - if replying to another comment"
+          example: "654321abcdef1234567891"
+
     VoteRequest:
       type: object
       required: [voteType]
@@ -1105,6 +1165,264 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Post"
+        "404":
+          description: User not found
+
+  # --- COMMENT ROUTES ---
+  /api/comments:
+    post:
+      summary: Create a new comment
+      description: Create a comment on a post. If the community is restricted (isPublic=false), the user must be a member.
+      tags: [Comments]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommentRequest"
+      responses:
+        "201":
+          description: Comment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        "400":
+          description: Validation error
+        "403":
+          description: Access denied - must join restricted community to comment
+        "404":
+          description: Post or parent comment not found
+
+  /api/comments/{id}:
+    get:
+      summary: Get a single comment by ID
+      tags: [Comments]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Comment ID
+      responses:
+        "200":
+          description: Comment details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        "404":
+          description: Comment not found
+
+    put:
+      summary: Update a comment
+      description: Edit the content of your own comment
+      tags: [Comments]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Comment ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+                  minLength: 1
+                  maxLength: 5000
+                  example: "Updated comment content"
+      responses:
+        "200":
+          description: Comment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        "403":
+          description: Not authorized to edit this comment
+        "404":
+          description: Comment not found
+
+    delete:
+      summary: Delete a comment
+      description: Delete a comment. You can delete your own comments or comments on your posts.
+      tags: [Comments]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Comment ID
+      responses:
+        "200":
+          description: Comment deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Comment deleted successfully"
+        "403":
+          description: Not authorized to delete this comment
+        "404":
+          description: Comment not found
+
+  /api/comments/{id}/vote:
+    post:
+      summary: Vote on a comment (Upvote/Downvote)
+      description: Vote on a comment. If the community is restricted (isPublic=false), the user must be a member.
+      tags: [Comments]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Comment ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoteRequest"
+      responses:
+        "200":
+          description: Vote registered or updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comment:
+                    $ref: "#/components/schemas/Comment"
+                  message:
+                    type: string
+                    example: "Vote registered"
+                  voteRemoved:
+                    type: boolean
+                    example: false
+        "400":
+          description: Invalid vote type
+        "403":
+          description: Access denied - must join restricted community to vote
+        "404":
+          description: Comment not found
+
+  /api/comments/post/{postId}:
+    get:
+      summary: Get all comments for a post
+      tags: [Comments]
+      parameters:
+        - in: path
+          name: postId
+          schema:
+            type: string
+          required: true
+          description: Post ID
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: List of comments on the post (top-level only)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
+        "404":
+          description: Post not found
+
+  /api/comments/{commentId}/replies:
+    get:
+      summary: Get replies to a comment
+      tags: [Comments]
+      parameters:
+        - in: path
+          name: commentId
+          schema:
+            type: string
+          required: true
+          description: Parent comment ID
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: List of replies to the comment
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
+        "404":
+          description: Parent comment not found
+
+  /api/comments/user/{username}:
+    get:
+      summary: Get all comments by a user
+      tags: [Comments]
+      parameters:
+        - in: path
+          name: username
+          schema:
+            type: string
+          required: true
+          description: Username
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: List of user's comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
         "404":
           description: User not found
 

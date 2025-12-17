@@ -10,6 +10,7 @@ import connectDB from "./config/database.js";
 import communityRoutes from "./routes/communityRoutes.js";
 import voteRoutes from "./routes/voteRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import commentRoutes from "./routes/commentRoutes.js";
 
 // --- Swagger Imports ---
 import swaggerUi from "swagger-ui-express";
@@ -53,6 +54,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/comments", commentRoutes);
 app.use("/api/communities", communityRoutes);
 app.use("/api/votes", voteRoutes);
 app.use("/api/ai", aiRoutes);

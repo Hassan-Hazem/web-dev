@@ -8,7 +8,7 @@ import uvicorn
 
 # Load environment variables from .env file
 load_dotenv()
-
+  
 # --- API Setup ---
 app = FastAPI(
     title="Post Summarization Service", 
