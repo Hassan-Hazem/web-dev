@@ -232,8 +232,7 @@ export default function PostDetailPage() {
     if (!target) return;
 
     const isCommentAuthor = target.author?._id === user._id;
-    const isPostAuthor = post?.author?._id === user._id;
-    if (!isCommentAuthor && !isPostAuthor) {
+    if (!isCommentAuthor) {
       setCommentError("You can only delete your own comments.");
       return;
     }
@@ -460,10 +459,7 @@ export default function PostDetailPage() {
                   key={comment._id}
                   comment={comment}
                   onVote={handleCommentVote}
-                  canDelete={
-                    user &&
-                    (comment.author?._id === user._id || post?.author?._id === user._id)
-                  }
+                  canDelete={user && comment.author?._id === user._id}
                   canEdit={user && comment.author?._id === user._id}
                   onDelete={handleDeleteComment}
                   onReply={() => handleStartReply(comment._id)}
@@ -533,10 +529,7 @@ export default function PostDetailPage() {
                       <CommentCard
                         comment={reply}
                         onVote={handleCommentVote}
-                        canDelete={
-                          user &&
-                          (reply.author?._id === user._id || post?.author?._id === user._id)
-                        }
+                        canDelete={user && reply.author?._id === user._id}
                         canEdit={user && reply.author?._id === user._id}
                         onDelete={handleDeleteComment}
                         onReply={() => handleStartReply(reply._id)}
@@ -569,10 +562,7 @@ export default function PostDetailPage() {
                               key={nestedReply._id}
                               comment={nestedReply}
                               onVote={handleCommentVote}
-                              canDelete={
-                                user &&
-                                (nestedReply.author?._id === user._id || post?.author?._id === user._id)
-                              }
+                              canDelete={user && nestedReply.author?._id === user._id}
                               canEdit={user && nestedReply.author?._id === user._id}
                               onDelete={handleDeleteComment}
                               onReply={() => handleStartReply(nestedReply._id)}
