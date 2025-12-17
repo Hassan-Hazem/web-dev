@@ -24,18 +24,17 @@ function App() {
   // Initialize sidebar state based on screen size (desktop starts open)
   React.useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1024) {
-        setIsSidebarOpen(true);
-      } else {
-        setIsSidebarOpen(false);
-      }
+      const isDesktop = window.innerWidth >= 1024;
+      setIsSidebarOpen(isDesktop);
     };
 
     // Set initial state
     handleResize();
 
-    // Listen for resize
-    window.addEventListener('resize', handleResize);
+    // Only listen for resize on desktop to avoid scroll-triggered closes on mobile
+    if (window.innerWidth >= 1024) {
+      window.addEventListener('resize', handleResize);
+    }
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 

@@ -80,7 +80,9 @@
 
 .search-bar-container {
   position: relative;
-  width: 340px;
+  width: 100%;
+  max-width: 340px;
+  margin: 0 10px;
 }
 
 .search-bar {
@@ -143,6 +145,18 @@
 .plus-icon {
   font-size: 1.2rem;
   font-weight: 600;
+}
+
+.get-app-btn {
+  background: #eaeaea;
+  color: #333;
+}
+
+/* Hide Get App button on mobile to save space */
+@media (max-width: 600px) {
+  .get-app-btn {
+    display: none;
+  }
 }
 
 .get-app-btn {

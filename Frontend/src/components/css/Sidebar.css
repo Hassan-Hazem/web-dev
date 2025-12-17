@@ -75,22 +75,33 @@
 .sidebar-edge-toggle .hamburger-fallback::before { top: -6px; }
 .sidebar-edge-toggle .hamburger-fallback::after { top: 6px; }
 
-/* If for any reason the SVG is not visible, show fallback */
-.sidebar-edge-toggle .hamburger-svg { display: none; }
-.sidebar-edge-toggle svg[width="0"],
-.sidebar-edge-toggle svg[height="0"],
-.sidebar-edge-toggle svg[hidden] {
+/* Show the SVG by default */
+.sidebar-edge-toggle .hamburger-svg { 
+  display: block;
+}
+
+/* Hide fallback by default since SVG works */
+.sidebar-edge-toggle .hamburger-fallback {
   display: none;
 }
+
+/* Only show fallback if SVG fails */
+.sidebar-edge-toggle svg[width="0"] + .hamburger-fallback,
+.sidebar-edge-toggle svg[height="0"] + .hamburger-fallback,
 .sidebar-edge-toggle svg[hidden] + .hamburger-fallback,
 .sidebar-edge-toggle svg[style*="display: none"] + .hamburger-fallback {
   display: block;
 }
+.sidebar-edge-toggle svg[width="0"],
+.sidebar-edge-toggle svg[height="0"],
+.sidebar-edge-toggle svg[hidden],
+.sidebar-edge-toggle svg[style*="display: none"] {
+  display: none;
+}
 
-
-/* When sidebar is collapsed, move button to left edge */
+/* When sidebar is collapsed, move button inside screen so it's fully visible */
 .sidebar-edge-toggle[data-sidebar-open="false"] {
-  left: -20px;
+  left: 10px;
 }
 
 .sidebar-edge-toggle:hover {

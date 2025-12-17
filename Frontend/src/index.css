@@ -40,19 +40,12 @@ html {
   text-size-adjust: 100%;
   box-sizing: border-box;
   overflow-x: hidden;
+  height: 100%;
+  width: 100%;
 }
 
 *, *::before, *::after {
   box-sizing: inherit;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
 }
 
 body {
@@ -63,6 +56,25 @@ body {
   background-color: #f6f7f8;
   overflow-x: hidden;
   overflow-y: auto;
+  height: 100%;
+  width: 100%;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
 }
 
 h1 {
@@ -88,7 +100,13 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
-
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* Prevents unwanted horizontal scrolling */
+}
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
