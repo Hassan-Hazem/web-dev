@@ -17,7 +17,7 @@ import { generateEmbedding } from "../services/aiService.js";
 import { createPostSchema, voteSchema } from "../validators/postValidator.js";
 
 // Floor for cosine similarity; below this we treat results as unrelated noise
-const MIN_SIMILARITY = 0.39;
+const MIN_SIMILARITY = 0.4;
 
 // --- Helper: Cosine Similarity for Vector Search ---
 // Calculates how similar two vectors are (returns -1 to 1)

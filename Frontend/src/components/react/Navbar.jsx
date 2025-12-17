@@ -7,7 +7,6 @@ import { useAuth } from "../../context/authContext";
 import { useNavigate } from "react-router-dom"; 
 import { getMyProfile, searchUsers } from "../../api/userApi";
 import { searchCommunities } from "../../api/communityApi";
-import { searchPosts } from "../../api/postApi";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -25,6 +24,7 @@ export default function Navbar() {
   });
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [isOmAhmedActive, setIsOmAhmedActive] = useState(false);
   const searchRef = useRef(null);
   const debounceTimer = useRef(null);
 
@@ -69,6 +69,8 @@ export default function Navbar() {
 
   // Perform search with debounce
   const performSearch = async (query) => {
+    if (isOmAhmedActive) return; // Standard mode only
+
     if (!query.trim()) {
       setSearchResults({ posts: [], communities: [], users: [] });
       setShowResults(false);
@@ -77,14 +79,12 @@ export default function Navbar() {
 
     setIsSearching(true);
     try {
-      const [postsData, communitiesData, usersData] = await Promise.all([
-        searchPosts(query).catch(() => ({ posts: [] })),
+      const [communitiesData, usersData] = await Promise.all([
         searchCommunities(query).catch(() => ({ communities: [] })),
         searchUsers(query).catch(() => ({ users: [] }))
       ]);
 
       setSearchResults({
-        posts: postsData.posts || postsData || [],
         communities: communitiesData.communities || communitiesData || [],
         users: usersData.users || usersData || []
       });
@@ -102,6 +102,11 @@ export default function Navbar() {
     const query = e.target.value;
     setSearchQuery(query);
 
+    if (isOmAhmedActive) {
+      setShowResults(false);
+      return;
+    }
+
     // Clear existing timer
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
@@ -111,6 +116,17 @@ export default function Navbar() {
     debounceTimer.current = setTimeout(() => {
       performSearch(query);
     }, 400);
+  };
+
+  // Handle Enter key in Om Ahmed mode
+  const handleSearchKeyDown = (e) => {
+    if (isOmAhmedActive && e.key === "Enter") {
+      e.preventDefault();
+      const query = searchQuery.trim();
+      if (!query) return;
+      setShowResults(false);
+      navigate(`/search-results?q=${encodeURIComponent(query)}`);
+    }
   };
 
   // Navigate to result and close dropdown
@@ -153,9 +169,22 @@ export default function Navbar() {
     navigate("/");
   };
 
-  const hasResults = searchResults.posts.length > 0 || 
-                     searchResults.communities.length > 0 || 
-                     searchResults.users.length > 0;
+  const toggleOmAhmedMode = () => {
+    setIsOmAhmedActive((prev) => {
+      const next = !prev;
+      if (next) {
+        setShowResults(false);
+      } else if (searchQuery.trim()) {
+        performSearch(searchQuery);
+      }
+      return next;
+    });
+  };
+
+  const hasResults = !isOmAhmedActive && (
+    searchResults.communities.length > 0 || 
+    searchResults.users.length > 0
+  );
   return (
     <>
       <nav className="navbar">
@@ -167,7 +196,10 @@ export default function Navbar() {
         </div>
 
         <div className="navbar-center">
-          <div className="search-bar-container" ref={searchRef}>
+          <div
+            className={`search-bar-container ${isOmAhmedActive ? "om-ahmed-active" : ""}`}
+            ref={searchRef}
+          >
             <div className="search-bar">
               <span className="search-icon" />
               <input
@@ -176,40 +208,25 @@ export default function Navbar() {
                 className="search-input"
                 value={searchQuery}
                 onChange={handleSearchChange}
-                onFocus={() => searchQuery && hasResults && setShowResults(true)}
+                onKeyDown={handleSearchKeyDown}
+                onFocus={() => !isOmAhmedActive && searchQuery && hasResults && setShowResults(true)}
               />
+              <button
+                type="button"
+                className={`om-ahmed-btn ${isOmAhmedActive ? "active" : ""}`}
+                onClick={toggleOmAhmedMode}
+              >
+                Om Ahmed ™
+              </button>
             </div>
 
-            {/* Search Results Dropdown */}
-            {showResults && searchQuery && (
+            {/* Search Results Dropdown (Standard mode only) */}
+            {!isOmAhmedActive && showResults && searchQuery && (
               <div className="search-results-dropdown">
                 {isSearching ? (
                   <div className="search-loading">Searching...</div>
                 ) : hasResults ? (
                   <>
-                    {/* Posts Section */}
-                    {searchResults.posts.length > 0 && (
-                      <div className="search-section">
-                        <div className="search-section-items">
-                          {searchResults.posts.slice(0, 5).map((post) => (
-                            <div
-                              key={post._id}
-                              className="search-result-item"
-                              onClick={() => handleResultClick("post", post._id)}
-                            >
-                              <div className="search-result-icon">📄</div>
-                              <div className="search-result-content">
-                                <div className="search-result-title">{post.title}</div>
-                                <div className="search-result-meta">
-                                  r/{post.communityName} • Posted by u/{post.author?.username || "unknown"}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
                     {/* Communities Section */}
                     {searchResults.communities.length > 0 && (
                       <div className="search-section">

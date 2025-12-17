@@ -88,8 +88,10 @@
   align-items: center;
   background: #f6f7f8;
   border-radius: 24px;
-  padding: 6px 16px;
+  padding: 6px 12px 6px 16px;
   width: 100%;
+  border: 1px solid transparent;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .search-icon {
@@ -105,6 +107,7 @@
   outline: none;
   font-size: 1rem;
   width: 100%;
+  flex: 1;
   color: #1c1c1c;
 }
 
@@ -343,4 +346,33 @@
 
 .search-results-dropdown::-webkit-scrollbar-thumb:hover {
   background: #a0a0a0;
+}
+
+/* Om Ahmed toggle */
+.search-bar-container.om-ahmed-active .search-bar {
+  border-color: #1e90ff;
+  box-shadow: 0 0 0 2px rgba(30, 144, 255, 0.15);
+}
+
+.om-ahmed-btn {
+  margin-left: 10px;
+  padding: 6px 12px;
+  border: 1px solid #dcdcdc;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #1c1c1c;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.om-ahmed-btn:hover {
+  background: #f6f7f8;
+}
+
+.om-ahmed-btn.active {
+  background: #1e90ff;
+  color: #ffffff;
+  border-color: #1e90ff;
+  box-shadow: 0 2px 6px rgba(30, 144, 255, 0.3);
 }

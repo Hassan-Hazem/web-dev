@@ -1,7 +1,9 @@
 import api from './axios';
 
 export const searchPosts = async (query) => {
-  const response = await api.get(`/posts/search?q=${encodeURIComponent(query)}`);
+  const response = await api.get(`/posts/search`, {
+    params: { query: query, limit: 15 },
+  });
   return response.data;
 };
 
