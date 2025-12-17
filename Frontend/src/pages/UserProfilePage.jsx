@@ -1,18 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/authContext";
 import api from "../api/axios";
 import { updateUserProfile } from "../api/userApi";
+import { getUserComments } from "../api/commentApi";
 import CreatePostModal from "../components/react/CreatePostModal";
 import ProfileRightSidebar from "../components/react/ProfileRightSidebar";
 import PostCard from "../components/react/PostCard";
+import CommentCard from "../components/react/CommentCard";
 import snooImg from "../assets/images/Snoo_Expression_NoMouth.png";
 import "./UserProfilePage.css";
 
 export default function UserProfilePage() {
   const { user, updateUserProfile: updateAuthUser } = useAuth();
   const { username: routeUsername } = useParams();
+  const navigate = useNavigate();
   const isSelf = !routeUsername || routeUsername === user?.username;
   
   const [activeTab, setActiveTab] = useState("Overview");
@@ -25,6 +28,9 @@ export default function UserProfilePage() {
   const [postsError, setPostsError] = useState(null);
   const [postsPage, setPostsPage] = useState(1);
   const [postsHasMore, setPostsHasMore] = useState(true);
+  const [userComments, setUserComments] = useState([]);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [commentsError, setCommentsError] = useState(null);
   const [upvotedPosts, setUpvotedPosts] = useState([]);
   const [downvotedPosts, setDownvotedPosts] = useState([]);
   const [avatarUploading, setAvatarUploading] = useState(false);
@@ -118,6 +124,27 @@ export default function UserProfilePage() {
     fetchDownvotedPosts();
   }, [activeTab]);
 
+  useEffect(() => {
+    const fetchUserComments = async () => {
+      if (activeTab !== "Comments" && activeTab !== "Overview") return;
+      if (!profileData?.username) return;
+      
+      setLoadingComments(true);
+      setCommentsError(null);
+      try {
+        const comments = await getUserComments(profileData.username, { limit: 50 });
+        setUserComments(comments || []);
+      } catch (err) {
+        console.error("Error fetching user comments:", err);
+        setCommentsError(err.response?.data?.message || "Failed to load comments");
+      } finally {
+        setLoadingComments(false);
+      }
+    };
+
+    fetchUserComments();
+  }, [activeTab, profileData?.username]);
+
 
   // If viewing own profile without being logged in, prompt login.
   if (!user && isSelf) {
@@ -188,10 +215,10 @@ export default function UserProfilePage() {
         )}
       </div>
       <div className="overview-feed">
-        {loadingPosts ? (
-          <p>Loading posts...</p>
-        ) : postsError ? (
-          <p style={{ color: "red" }}>{postsError}</p>
+        {(tab === "Comments" && loadingComments) || (tab !== "Comments" && loadingPosts) ? (
+          <p>Loading...</p>
+        ) : (tab === "Comments" && commentsError) || (tab !== "Comments" && postsError) ? (
+          <p style={{ color: "red" }}>{tab === "Comments" ? commentsError : postsError}</p>
         ) : (
           <>
             <img src={snooImg} alt="Snoo" className="snoo-img" />
@@ -319,6 +346,26 @@ export default function UserProfilePage() {
               ? upvotedPosts.map(post => <PostCard key={post._id} post={post} />)
               : isSelf && activeTab === "Downvoted" && downvotedPosts.length > 0
               ? downvotedPosts.map(post => <PostCard key={post._id} post={post} />)
+              : activeTab === "Comments" && userComments.length > 0
+              ? (
+                <>
+                  {userComments.map(comment => (
+                    <div 
+                      key={comment._id} 
+                      className="user-comment-item"
+                      onClick={() => navigate(`/post/${comment.post?._id}`)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="comment-post-context">
+                        <span className="comment-post-title">
+                          {comment.post?.title || "Post"}
+                        </span>
+                      </div>
+                      <CommentCard comment={comment} />
+                    </div>
+                  ))}
+                </>
+              )
               : (activeTab === "Posts" || activeTab === "Overview") && userPosts.length > 0
               ? (
                 <>

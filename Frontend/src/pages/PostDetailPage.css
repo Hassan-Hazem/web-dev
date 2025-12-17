@@ -119,6 +119,7 @@
   box-sizing: border-box;
   transition: all 0.2s ease;
   background: white;
+  color: #000;
 }
 
 .comment-textarea:focus {
@@ -161,6 +162,45 @@
   background: #ccc;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+.comment-submit-btn.secondary {
+  background: #eaeaea;
+  color: #1c1c1c;
+  box-shadow: none;
+}
+
+.comment-error {
+  color: #d93a00;
+  margin: 8px 0 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.reply-block {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.reply-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.reply-thread {
+  margin-left: 28px;
+  padding-left: 12px;
+  border-left: 2px solid #e6e6e6;
+  margin-top: 8px;
+}
+
+.reply-loading {
+  color: #6a6d70;
+  font-size: 12px;
 }
 
 .comments-list {

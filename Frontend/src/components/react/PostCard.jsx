@@ -38,6 +38,8 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
   const subredditName = post.community ? `r/${post.community.name}` : "r/unknown";
   const authorName = post.author ? `u/${post.author.username}` : "u/deleted";
   const postImageUrl = formatUrl(post.imageUrl);
+  // Use backend comment count directly (includes all comments and replies)
+  const commentCount = post.commentCount ?? 0;
 
   const handleVote = async (type) => {
     if (!user) {
@@ -245,7 +247,7 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
             onClick={() => navigate(`/post/${post._id}`)}
           >
             <span className="action-icon comment" />
-            {post.commentCount || 0} Comments
+            {commentCount} Comments
           </button>
           <button className="action-btn">
             <span className="action-icon share" />

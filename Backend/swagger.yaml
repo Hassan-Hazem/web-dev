@@ -303,6 +303,7 @@ components:
         commentCount:
           type: number
           default: 0
+          description: Total number of comments (including replies) for this post
         createdAt:
           type: string
           format: date-time

@@ -12,6 +12,7 @@ import Subscription from "../models/subscriptionModel.js";
 import Vote from "../models/voteModel.js";
 import Post from "../models/postModel.js";
 import User from "../models/userModel.js";
+import Comment from "../models/commentModel.js";
 import PostEmbedding from "../models/postEmbeddingModel.js";
 import { generateEmbedding } from "../services/aiService.js";
 import { createPostSchema, voteSchema } from "../validators/postValidator.js";
@@ -147,9 +148,19 @@ export const searchPosts = async (req, res) => {
       .populate("author", "username profilePictureUrl")
       .populate("community", "name profilePictureUrl");
 
+    // Add comment counts to each post
+    const postsWithCounts = await Promise.all(
+      posts.map(async (post) => {
+        const commentCount = await Comment.countDocuments({ post: post._id });
+        return { ...post.toObject(), commentCount };
+      })
+    );
+
     // Re-order posts to match the similarity ranking
     const orderedPosts = topPostIds
-      .map((id) => posts.find((p) => p._id.toString() === id.toString()))
+      .map((id) =>
+        postsWithCounts.find((p) => p._id.toString() === id.toString())
+      )
       .filter((p) => p !== undefined); // Filter out any nulls (e.g. if a post was deleted but embedding remained)
 
     res.status(200).json(orderedPosts);
@@ -204,12 +215,10 @@ export const getCommunityPosts = async (req, res) => {
     const posts = await findPostsByCommunity(community._id, skip, limit);
     res.status(200).json(posts);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Error fetching community posts",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error fetching community posts",
+      error: error.message,
+    });
   }
 };
 

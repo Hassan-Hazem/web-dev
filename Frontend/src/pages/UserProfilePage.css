@@ -278,6 +278,36 @@
 .update-settings-btn:hover {
   background: #e1e3e6;
 }
+
+.user-comment-item {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #edeff1;
+  transition: box-shadow 0.2s ease;
+}
+
+.user-comment-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.comment-post-context {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #edeff1;
+}
+
+.comment-post-title {
+  font-size: 13px;
+  color: #1c1c1c;
+  font-weight: 600;
+}
+
+.comment-post-title::before {
+  content: "💬 ";
+  color: #0079d3;
+}
   
   .filter-dropdown-wrapper {
   position: relative;
