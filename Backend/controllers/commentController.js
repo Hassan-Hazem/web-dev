@@ -85,6 +85,11 @@ export const createCommentController = async (req, res) => {
       parentComment: parentCommentId || null,
     });
 
+    // Increment post's comment count (only for top-level comments)
+    if (!parentCommentId) {
+      await Post.findByIdAndUpdate(postId, { $inc: { commentCount: 1 } });
+    }
+
     const populatedComment = await findCommentById(newComment._id);
     res.status(201).json(populatedComment);
   } catch (error) {
@@ -253,6 +258,11 @@ export const deleteCommentController = async (req, res) => {
 
     // Delete the comment
     await deleteCommentById(id);
+
+    // Decrement post's comment count (only for top-level comments)
+    if (!comment.parentComment) {
+      await Post.findByIdAndUpdate(comment.post, { $inc: { commentCount: -1 } });
+    }
 
     res.status(200).json({ message: "Comment deleted successfully" });
   } catch (error) {

@@ -119,6 +119,7 @@
   box-sizing: border-box;
   transition: all 0.2s ease;
   background: white;
+  color: #1c1c1c;
 }
 
 .comment-textarea:focus {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import { useAuth } from "../context/authContext";
 import PostCard from "../components/react/PostCard";
 import CommentCard from "../components/react/CommentCard";
 import "./PostDetailPage.css";
@@ -8,12 +9,23 @@ import "./PostDetailPage.css";
 export default function PostDetailPage() {
   const { postId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [newComment, setNewComment] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
+
+  const fetchComments = async () => {
+    try {
+      const commentsRes = await api.get(`/comments/post/${postId}`);
+      setComments(commentsRes.data || []);
+    } catch (commentErr) {
+      console.log("Comments endpoint error", commentErr);
+      setComments([]);
+    }
+  };
 
   useEffect(() => {
     const fetchPostData = async () => {
@@ -24,14 +36,8 @@ export default function PostDetailPage() {
         const postRes = await api.get(`/posts/${postId}`);
         setPost(postRes.data);
 
-        // Try to fetch comments for this post
-        try {
-          const commentsRes = await api.get(`/posts/${postId}/comments`);
-          setComments(commentsRes.data || []);
-        } catch (commentErr) {
-          console.log("Comments endpoint not available or empty", commentErr);
-          setComments([]);
-        }
+        // Fetch comments for this post
+        await fetchComments();
       } catch (err) {
         console.error("Error fetching post:", err);
         setError(err.response?.data?.message || "Failed to load post");
@@ -43,9 +49,42 @@ export default function PostDetailPage() {
     fetchPostData();
   }, [postId]);
 
-  const handleCommentSubmit = (e) => {
+  const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    alert("Comments feature is coming soon!");
+    
+    if (!user) {
+      alert("Please login to comment");
+      return;
+    }
+
+    if (!newComment.trim()) {
+      return;
+    }
+
+    setSubmittingComment(true);
+    try {
+      await api.post("/comments", {
+        content: newComment,
+        postId: postId,
+      });
+      setNewComment("");
+      await fetchComments();
+      // Refetch post to update comment count
+      const postRes = await api.get(`/posts/${postId}`);
+      setPost(postRes.data);
+    } catch (err) {
+      console.error("Error creating comment:", err);
+      alert(err.response?.data?.message || "Failed to post comment");
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  const handleCommentDeleted = async (commentId) => {
+    await fetchComments();
+    // Refetch post to update comment count
+    const postRes = await api.get(`/posts/${postId}`);
+    setPost(postRes.data);
   };
 
   const handlePostDelete = (deletedPostId) => {
@@ -90,21 +129,21 @@ export default function PostDetailPage() {
         <div className="comments-section">
           <h3>Comments</h3>
 
-          {/* Comment Form - Disabled for now */}
+          {/* Comment Form */}
           <form className="comment-form" onSubmit={handleCommentSubmit}>
             <textarea
               className="comment-textarea"
-              placeholder="What are your thoughts? (Coming soon)"
+              placeholder={user ? "What are your thoughts?" : "Login to comment"}
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               rows={4}
-              disabled={true}
+              disabled={!user || submittingComment}
             />
             <button
               type="submit"
               className="comment-submit-btn"
-              disabled={true}
-              title="Comments feature coming soon"
+              disabled={!user || submittingComment || !newComment.trim()}
+              title={!user ? "Login to comment" : ""}
             >
               {submittingComment ? "Posting..." : "Post Comment"}
             </button>
@@ -113,10 +152,14 @@ export default function PostDetailPage() {
           {/* Comments List */}
           <div className="comments-list">
             {comments.length === 0 ? (
-              <p className="no-comments">No comments yet. Comments feature coming soon!</p>
+              <p className="no-comments">No comments yet. Be the first to comment!</p>
             ) : (
               comments.map((comment) => (
-                <CommentCard key={comment._id} comment={comment} />
+                <CommentCard 
+                  key={comment._id} 
+                  comment={comment}
+                  onCommentDeleted={handleCommentDeleted}
+                />
               ))
             )}
           </div>

@@ -11,8 +11,19 @@ import Community from "../models/communityModel.js";
 import Subscription from "../models/subscriptionModel.js";
 import Vote from "../models/voteModel.js";
 import Post from "../models/postModel.js";
+import Comment from "../models/commentModel.js";
 import User from "../models/userModel.js";
 import { createPostSchema, voteSchema } from "../validators/postValidator.js";
+
+// --- Helper function to update comment count for a post ---
+const updatePostCommentCount = async (postId) => {
+  try {
+    const count = await Comment.countDocuments({ post: postId, parentComment: null });
+    await Post.findByIdAndUpdate(postId, { commentCount: count });
+  } catch (error) {
+    console.error("Error updating comment count:", error);
+  }
+};
 
 // --- Helper function to check if user can perform actions in community ---
 const checkCommunityAccess = async (community, userId) => {
@@ -91,7 +102,15 @@ export const getAllPosts = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const posts = await findAllPosts(skip, limit);
-    res.status(200).json(posts);
+    
+    // Update comment count for all posts to ensure accuracy
+    for (const post of posts) {
+      await updatePostCommentCount(post._id);
+    }
+    
+    // Fetch posts again with updated comment counts
+    const updatedPosts = await findAllPosts(skip, limit);
+    res.status(200).json(updatedPosts);
   } catch (error) {
     res
       .status(500)
@@ -105,7 +124,11 @@ export const getPost = async (req, res) => {
     if (!post) {
       return res.status(404).json({ message: "Post not found" });
     }
-    res.status(200).json(post);
+    // Update comment count to ensure it's accurate
+    await updatePostCommentCount(req.params.id);
+    // Fetch the post again with updated comment count
+    const updatedPost = await findPostById(req.params.id);
+    res.status(200).json(updatedPost);
   } catch (error) {
     res
       .status(500)

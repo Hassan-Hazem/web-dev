@@ -70,7 +70,15 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
       console.error("Voting error:", error);
       setUserVote(previousVote);
       setScore(previousScore);
-      if (error.response?.status === 401) setShowLoginModal(true);
+      if (error.response?.status === 401) {
+        setShowLoginModal(true);
+      } else if (error.response?.status === 403) {
+        // Backend blocks voting in restricted communities unless joined
+        const msg = error.response?.data?.message || "You must join this community to vote.";
+        alert(msg);
+      } else {
+        alert(error.response?.data?.message || "Failed to vote on post");
+      }
     }
   };
 

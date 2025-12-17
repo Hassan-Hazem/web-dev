@@ -1,10 +1,10 @@
 .comment-card {
     display: flex;
-    background: #1a1a1b;
+    background: #f8f9fa;
     padding: 12px;
     border-radius: 8px;
     margin-bottom: 12px;
-    border: 1px solid #2c2c2c;
+    border: 1px solid #e0e0e0;
   }
   
   .comment-votes {
@@ -18,17 +18,28 @@
   .arrow {
     width: 20px;
     height: 20px;
-    background: url('/icons/up-arrow.png') center/contain no-repeat;
+    background: none;
     border: none;
     cursor: pointer;
+    font-size: 16px;
+    color: #818384;
+    padding: 0;
   }
-  
+
+  .arrow.up {
+    color: #818384;
+  }
+
   .arrow.down {
-    transform: rotate(180deg);
+    color: #818384;
+  }
+
+  .arrow.active {
+    color: #0079d3;
   }
   
   .vote-count {
-    color: #d7dadc;
+    color: #787c7e;
     font-size: 12px;
     margin: 4px 0;
   }
@@ -44,13 +55,14 @@
   }
   
   .comment-author {
-    color: #d7dadc;
+    color: #1c1c1c;
     font-weight: 600;
   }
   
   .comment-text {
-    color: #d7dadc;
+    color: #1c1c1c;
     margin-bottom: 8px;
+    word-break: break-word;
   }
   
   .comment-actions {
@@ -64,5 +76,86 @@
     color: #818384;
     font-size: 12px;
     cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .comment-btn:hover:not(:disabled) {
+    color: #0079d3;
+  }
+
+  .comment-btn.delete {
+    color: #ea0027;
+  }
+
+  .comment-btn.delete:hover:not(:disabled) {
+    color: #c70014;
+  }
+
+  .comment-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .comment-edit {
+    margin-top: 8px;
+  }
+
+  .comment-edit-textarea {
+    width: 100%;
+    padding: 10px;
+    background: white;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    color: #1c1c1c;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .comment-edit-textarea:focus {
+    outline: none;
+    border-color: #0079d3;
+    box-shadow: 0 0 0 3px rgba(0, 121, 211, 0.1);
+  }
+
+  .comment-edit-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .edit-save-btn,
+  .edit-cancel-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .edit-save-btn {
+    background: #0079d3;
+    color: white;
+  }
+
+  .edit-save-btn:hover:not(:disabled) {
+    background: #0066a1;
+  }
+
+  .edit-cancel-btn {
+    background: #e0e0e0;
+    color: #1c1c1c;
+  }
+
+  .edit-cancel-btn:hover:not(:disabled) {
+    background: #d0d0d0;
+  }
+
+  .edit-save-btn:disabled,
+  .edit-cancel-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
   
