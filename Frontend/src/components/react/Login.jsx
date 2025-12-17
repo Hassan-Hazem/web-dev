@@ -38,7 +38,7 @@ export default function Login({ onSwitchToSignup, closeModal }) {
       )}
 
       <button className="google-btn" type="button" disabled={loading} onClick={() => {
-        const googleAuthUrl = `http://localhost:5000/api/auth/google`;
+        const googleAuthUrl = `https://reddit-t5xs.onrender.com/api/auth/google`;
         window.open(googleAuthUrl, "_self"); 
     }}>
         <svg className="google-icon" viewBox="0 0 24 24" width="20" height="20">

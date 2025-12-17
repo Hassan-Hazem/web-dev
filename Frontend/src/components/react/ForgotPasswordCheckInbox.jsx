@@ -24,7 +24,7 @@ export default function ForgotPasswordCheckInbox({ email, setStage }) {
         setResendLoading(true);
         try {
             // Re-send the request using the stored email/identifier
-            await axios.post('http://localhost:5000/api/auth/forgotpassword', { 
+            await axios.post('https://reddit-t5xs.onrender.com/api/auth/forgotpassword', { 
                 identifier: email 
             });
             setTimer(RESEND_TIME_SECONDS); // Reset timer on success

@@ -27,7 +27,7 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
     if (!url) return null;
     return url.startsWith("http") 
       ? url 
-      : `http://localhost:5000/${url.replace(/\\/g, "/")}`;
+      : `https://reddit-t5xs.onrender.com/${url.replace(/\\/g, "/")}`;
   };
 
   // Prepare Data

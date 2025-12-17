@@ -29,7 +29,7 @@ export default function ResetPasswordPage() {
         }
 
         try {
-            await axios.patch(`http://localhost:5000/api/auth/resetPassword/${token}`, { 
+            await axios.patch(`https://reddit-t5xs.onrender.com/api/auth/resetPassword/${token}`, { 
                 email,
                 password // Send the new password to the backend
             });
