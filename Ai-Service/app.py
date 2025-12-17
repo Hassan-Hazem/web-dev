@@ -46,4 +46,11 @@ def root():
 
 # Run the application
 if __name__ == "__main__":
+    print("\n" + "="*60)
+    print("🚀 AI Service is starting...")
+    print("="*60)
+    print("📖 Swagger Docs: http://localhost:8000/docs")
+    print("🔧 ReDoc:       http://localhost:8000/redoc")
+    print("✅ Health:      http://localhost:8000/health")
+    print("="*60 + "\n")
     uvicorn.run(app, host="0.0.0.0", port=8000)
