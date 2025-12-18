@@ -1,17 +1,6 @@
-import nodemailer from "nodemailer";
+import sgMail from "@sendgrid/mail";
 
 const SENDGRID_FROM = process.env.SENDGRID_FROM_EMAIL || process.env.EMAIL_USER;
-
-// Create transporter up front; only reads env vars so it works in serverless too
-const transporter = nodemailer.createTransport({
-  host: "smtp.sendgrid.net",
-  port: 587,
-  secure: false, // Use STARTTLS
-  auth: {
-    user: "apikey", // This is literally the string 'apikey'
-    pass: process.env.SENDGRID_API_KEY,
-  },
-});
 
 const ensureEmailConfig = () => {
   if (!process.env.SENDGRID_API_KEY) {
@@ -26,8 +15,15 @@ const ensureEmailConfig = () => {
 
 const sendMail = async (options) => {
   ensureEmailConfig();
-  const mailOptions = { ...options, from: `Reddit Clone <${SENDGRID_FROM}>` };
-  await transporter.sendMail(mailOptions);
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  const msg = {
+    ...options,
+    from: {
+      email: SENDGRID_FROM,
+      name: "Reddit Clone",
+    },
+  };
+  await sgMail.send(msg);
 };
 
 export const generateVerificationCode = () => {
