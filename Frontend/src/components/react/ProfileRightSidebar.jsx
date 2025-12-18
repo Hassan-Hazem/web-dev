@@ -49,17 +49,13 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
           setUsernameText(data.username);
         }
         if (data.coverPictureUrl) {
-          const coverUrl = data.coverPictureUrl.startsWith("http")
-            ? data.coverPictureUrl
-            : `http://localhost:5001/${data.coverPictureUrl.replace(/\\/g, "/")}`;
-          setBannerImage(coverUrl);
+          setBannerImage(data.coverPictureUrl);
           try {
-            localStorage.setItem(localStorageKey, coverUrl);
+            localStorage.setItem(localStorageKey, data.coverPictureUrl);
           } catch {
             // Ignore storage errors
           }
         } else {
-          // Clear banner if no cover picture
           setBannerImage(null);
         }
       } catch (err) {
@@ -75,7 +71,6 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
   }, [localStorageKey, username, isSelf]);
 
   function openFileDialog() {
-    // Clear input to allow selecting same file multiple times
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
       fileInputRef.current.click();
@@ -135,7 +130,6 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
     setBannerUploading(true);
 
     try {
-      // Step 1: Upload file to cloudinary
       const formData = new FormData();
       formData.append("file", file);
 
@@ -149,10 +143,8 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
 
       const coverUrl = uploadResponse.data.filePath;
 
-      // Step 2: Update user profile with cover URL
       const updateResponse = await updateUserProfileApi({ coverPictureUrl: coverUrl });
 
-      // Step 3: Force refresh profile to get latest from database
       const refreshedProfile = await getMyProfile();
       
       if (refreshedProfile?.coverPictureUrl) {
@@ -173,7 +165,6 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
         }
       }
 
-      // Success
       setIsModalOpen(false);
       setTempImage(null);
       resetFileInput();
@@ -221,7 +212,6 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
     try {
       const updateResponse = await updateUserProfileApi({ bio: bioText });
       
-      // Refresh profile data
       const refreshedProfile = await getMyProfile();
       setProfileData(refreshedProfile);
       setBioText(refreshedProfile?.bio || "");
@@ -269,15 +259,12 @@ async function handleUsernameSave() {
   setUsernameSaving(true);
 
   try {
-    // 2. API Update
     const updateResponse = await updateUserProfileApi({ username: trimmedUsername });
     
-    // 3. Refresh Local Data
     const refreshedProfile = await getMyProfile();
     setProfileData(refreshedProfile);
     setUsernameText(refreshedProfile?.username || "");
 
-    // 4. Update Auth Context (Navbar etc.)
     if (refreshedProfile?.username) {
       updateAuthUser({ username: refreshedProfile.username });
     } else {
@@ -306,7 +293,6 @@ async function handleUsernameSave() {
   }
 
   async function handleInterestsComplete() {
-    // Refresh profile data after interests are saved
     const refreshedProfile = await getMyProfile();
     setProfileData(refreshedProfile);
     setIsInterestsModalOpen(false);
