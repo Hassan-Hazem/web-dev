@@ -1,5 +1,4 @@
-/* CRITICAL FIX: Sidebar.css */
-
+/* Overlay drawer container (matches Reddit header height) */
 .sidebar {
   position: fixed;
   top: 64px;
@@ -13,52 +12,14 @@
   transition: transform 200ms cubic-bezier(.4,0,.2,1);
   z-index: 90;
   overflow-y: auto;
+  overflow-x: visible;
   display: flex;
   flex-direction: column;
 }
 
+/* Hidden (collapsed) state */
 .sidebar.collapsed {
-  transform: translateX(-264px);
-  pointer-events: none;
-}
-
-/* Desktop behavior */
-@media (min-width: 1024px) {
-  .sidebar {
-    position: fixed;
-  }
-}
-
-/* Mobile behavior */
-@media (max-width: 1023px) {
-  .sidebar {
-    position: fixed;
-    z-index: 999;
-  }
-  
-  .sidebar.collapsed {
-    transform: translateX(-100%);
-  }
-}/* Overlay drawer container (matches Reddit header height) */
-.sidebar {
-  position: fixed;
-  top: 64px;
-  left: 0;
-  height: calc(100vh - 64px);
-  width: 264px;
-  background: #fff;
-  border-right: 1px solid #eaeaea;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-  transform: translateX(0);
-  transition: transform 200ms cubic-bezier(.4,0,.2,1);
-  z-index: 90;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar.collapsed {
-  transform: translateX(-264px);
+  transform: translateX(-264px); /* Changed from -100% to exact width */
   pointer-events: none;
 }
 
@@ -78,7 +39,7 @@
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transition: left 200ms cubic-bezier(.4,0,.2,1), background 0.15s, border-color 0.15s, box-shadow 0.15s;
-  z-index: 101; /* above navbar and everything */
+  z-index: 101;
 }
 
 .sidebar-edge-toggle svg {
@@ -92,41 +53,6 @@
   stroke: currentColor;
   stroke-width: 2;
 }
-
-/* Fallback CSS hamburger: shows if SVG fails (hidden normally) */
-.sidebar-edge-toggle .hamburger-fallback {
-  position: absolute;
-  width: 18px;
-  height: 12px;
-  display: block;
-}
-.sidebar-edge-toggle .hamburger-fallback,
-.sidebar-edge-toggle .hamburger-fallback::before,
-.sidebar-edge-toggle .hamburger-fallback::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: #000;
-  border-radius: 2px;
-}
-.sidebar-edge-toggle .hamburger-fallback { top: 50%; left: 50%; transform: translate(-50%, -50%); }
-.sidebar-edge-toggle .hamburger-fallback::before { top: -6px; }
-.sidebar-edge-toggle .hamburger-fallback::after { top: 6px; }
-
-/* If for any reason the SVG is not visible, show fallback */
-.sidebar-edge-toggle .hamburger-svg { display: none; }
-.sidebar-edge-toggle svg[width="0"],
-.sidebar-edge-toggle svg[height="0"],
-.sidebar-edge-toggle svg[hidden] {
-  display: none;
-}
-.sidebar-edge-toggle svg[hidden] + .hamburger-fallback,
-.sidebar-edge-toggle svg[style*="display: none"] + .hamburger-fallback {
-  display: block;
-}
-
 
 /* When sidebar is collapsed, move button to left edge */
 .sidebar-edge-toggle[data-sidebar-open="false"] {
@@ -255,16 +181,16 @@
   text-decoration: none;
   margin: 0 4px;
 }
+
 .sidebar-icon.create {
   background: url("data:image/svg+xml,%3Csvg fill='gray' viewBox='0 0 24 24' width='22' height='22' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'/%3E%3C/svg%3E") 
     no-repeat center;
 }
+
 .sidebar-link.active .sidebar-icon.create {
   background: url("data:image/svg+xml,%3Csvg fill='white' viewBox='0 0 24 24' width='22' height='22' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'/%3E%3C/svg%3E") 
     no-repeat center;
 }
-
-
 
 /* Clickable backdrop shown when sidebar is open */
 .sidebar-backdrop {
@@ -283,7 +209,6 @@
     display: none;
   }
 
-  /* Keep sidebar fixed on desktop to avoid overlap; content naturally fills space */
   .sidebar {
     position: fixed;
     top: 64px;
@@ -294,7 +219,18 @@
   }
 
   .sidebar.collapsed {
-    transform: translateX(-100%);
+    transform: translateX(-264px);
     pointer-events: none;
+  }
+}
+
+/* Mobile overlay behavior */
+@media (max-width: 1023px) {
+  .sidebar {
+    z-index: 999;
+  }
+  
+  .sidebar.collapsed {
+    transform: translateX(-100%);
   }
 }
