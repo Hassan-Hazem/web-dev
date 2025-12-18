@@ -17,26 +17,9 @@ import "./App.css";
 import Interests from "./components/react/Interests";
 
 function App() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
   const closeSidebar = () => setIsSidebarOpen(false);
-
-  // Initialize sidebar state based on screen size (desktop starts open)
-  React.useEffect(() => {
-    const handleResize = () => {
-      const isDesktop = window.innerWidth >= 1024;
-      setIsSidebarOpen(isDesktop);
-    };
-
-    // Set initial state
-    handleResize();
-
-    // Only listen for resize on desktop to avoid scroll-triggered closes on mobile
-    if (window.innerWidth >= 1024) {
-      window.addEventListener('resize', handleResize);
-    }
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   return (
     <Router>

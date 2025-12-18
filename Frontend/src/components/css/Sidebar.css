@@ -8,8 +8,9 @@
   background: #fff;
   border-right: 1px solid #eaeaea;
   box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-  transition: left 200ms cubic-bezier(.4,0,.2,1);
-  z-index: 900;
+  transform: translateX(0);
+  transition: transform 200ms cubic-bezier(.4,0,.2,1);
+  z-index: 90;
   overflow-y: auto;
   overflow-x: visible;
   display: flex;
@@ -18,7 +19,7 @@
 
 /* Hidden (collapsed) state */
 .sidebar.collapsed {
-  left: -264px;
+  transform: translateX(-100%);
   pointer-events: none;
 }
 
@@ -38,7 +39,7 @@
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transition: left 200ms cubic-bezier(.4,0,.2,1), background 0.15s, border-color 0.15s, box-shadow 0.15s;
-  z-index: 1000; /* ensure above all app layers in production */
+  z-index: 101; /* above navbar and everything */
 }
 
 .sidebar-edge-toggle svg {
@@ -75,33 +76,22 @@
 .sidebar-edge-toggle .hamburger-fallback::before { top: -6px; }
 .sidebar-edge-toggle .hamburger-fallback::after { top: 6px; }
 
-/* Show the SVG by default */
-.sidebar-edge-toggle .hamburger-svg { 
-  display: block;
-}
-
-/* Hide fallback by default since SVG works */
-.sidebar-edge-toggle .hamburger-fallback {
+/* If for any reason the SVG is not visible, show fallback */
+.sidebar-edge-toggle .hamburger-svg { display: none; }
+.sidebar-edge-toggle svg[width="0"],
+.sidebar-edge-toggle svg[height="0"],
+.sidebar-edge-toggle svg[hidden] {
   display: none;
 }
-
-/* Only show fallback if SVG fails */
-.sidebar-edge-toggle svg[width="0"] + .hamburger-fallback,
-.sidebar-edge-toggle svg[height="0"] + .hamburger-fallback,
 .sidebar-edge-toggle svg[hidden] + .hamburger-fallback,
 .sidebar-edge-toggle svg[style*="display: none"] + .hamburger-fallback {
   display: block;
 }
-.sidebar-edge-toggle svg[width="0"],
-.sidebar-edge-toggle svg[height="0"],
-.sidebar-edge-toggle svg[hidden],
-.sidebar-edge-toggle svg[style*="display: none"] {
-  display: none;
-}
 
-/* When sidebar is collapsed, move button inside screen so it's fully visible */
+
+/* When sidebar is collapsed, move button to left edge */
 .sidebar-edge-toggle[data-sidebar-open="false"] {
-  left: 10px;
+  left: -20px;
 }
 
 .sidebar-edge-toggle:hover {
@@ -245,7 +235,7 @@
   right: 0;
   bottom: 0;
   background: rgba(0,0,0,0.25);
-  z-index: 800;
+  z-index: 80;
 }
 
 /* On desktop sizes keep site interactive: hide the dim backdrop */
@@ -259,12 +249,13 @@
     position: fixed;
     top: 64px;
     left: 0;
+    transform: translateX(0);
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    z-index: 900;
+    z-index: 90;
   }
 
   .sidebar.collapsed {
-    left: -264px;
+    transform: translateX(-100%);
     pointer-events: none;
   }
 }
