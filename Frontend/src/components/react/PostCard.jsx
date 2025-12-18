@@ -30,15 +30,20 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
       : `${import.meta.env.VITE_BACKEND_URL.replace('/api', '')}/${url.replace(/\\/g, "/")}`;
   };
 
+  // Helper to detect if a URL is a video
+  const isVideoUrl = (url) => {
+    if (!url) return false;
+    return /\.(mp4|webm|ogg|mov|mpeg)$/i.test(url);
+  };
+
   // Prepare Data
   const communityIcon = post.community?.profilePictureUrl
     ? formatUrl(post.community.profilePictureUrl)
-    : null; // Fallback to default CSS background if null
+    : null; 
     
   const subredditName = post.community ? `r/${post.community.name}` : "r/unknown";
   const authorName = post.author ? `u/${post.author.username}` : "u/deleted";
-  const postImageUrl = formatUrl(post.imageUrl);
-  // Use backend comment count directly (includes all comments and replies)
+  const postMediaUrl = formatUrl(post.imageUrl);
   const commentCount = post.commentCount ?? 0;
 
   const handleVote = async (type) => {
@@ -47,13 +52,10 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
       return;
     }
 
-    // Optimistic update: adjust UI immediately, then reconcile with server
     const previousVote = userVote;
     const previousScore = score;
-
     const nextVote = previousVote === type ? null : type;
 
-    // Calculate score delta based on vote transition
     let delta = 0;
     if (previousVote === 'up') delta -= 1;
     if (previousVote === 'down') delta += 1;
@@ -114,14 +116,12 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
         onClose={() => setShowSummarizeModal(false)}
       />
       <div className="post-card">
-      {/* Back Button - if in detail view */}
       {showBackButton && (
         <button className="post-back-btn" onClick={onBack} aria-label="Go back">
           ←
         </button>
       )}
 
-      {/* Vote Section */}
       <div className="vote-section">
         <button 
           className={`arrow up ${userVote === 'up' ? 'active-up' : ''}`} 
@@ -136,10 +136,8 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
         />
       </div>
 
-      {/* Content Section */}
       <div className="post-content">
         <div className="post-header">
-          {/* Community Icon */}
           <div
             className="post-community-icon"
             onClick={() => post.community?.name && navigate(`/community/${post.community.name}`)}
@@ -185,7 +183,6 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
             </span>
           </div>
 
-          {/* Three Dots Menu */}
           <div className="post-menu-container">
             <button 
               className="post-menu-btn" 
@@ -223,24 +220,32 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
           {post.title}
         </h3>
 
-        {/* Content Render */}
-        {postImageUrl && (
-          <div className="post-image">
-            <img 
-              src={postImageUrl} 
-              alt={post.title}
-              loading="lazy"
-              onLoad={() => setImageLoaded(true)}
-              className={imageLoaded ? 'loaded' : 'loading'}
-            />
+        {/* Updated Media Render Logic */}
+        {postMediaUrl && (
+          <div className="post-media">
+            {isVideoUrl(postMediaUrl) ? (
+              <video 
+                src={postMediaUrl} 
+                controls 
+                className="post-video"
+                style={{ width: "100%", maxHeight: "512px", borderRadius: "8px" }}
+              />
+            ) : (
+              <img 
+                src={postMediaUrl} 
+                alt={post.title}
+                loading="lazy"
+                onLoad={() => setImageLoaded(true)}
+                className={imageLoaded ? 'loaded' : 'loading'}
+              />
+            )}
           </div>
         )}
         
-        {post.content && !postImageUrl && (
+        {post.content && !postMediaUrl && (
             <div className="post-text-body">{post.content}</div>
         )}
         
-        {/* Actions */}
         <div className="post-actions">
           <button 
             className="action-btn"
