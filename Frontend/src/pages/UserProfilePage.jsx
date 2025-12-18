@@ -194,9 +194,21 @@ export default function UserProfilePage() {
     : ["Overview", "Posts", "Comments"];
 
   const tabContent = {
-    "Overview": { title: "Showing all content", heading: "You don't have any posts yet", text: "Once you post to a community, it'll show up here. If you'd rather hide your posts, update your settings." },
-    "Posts": { title: `Posts by u/${username}`, heading: "You don't have any posts yet", text: "Once you post to a community, it'll show up here. If you'd rather hide your posts, update your settings." },
-    "Comments": { title: "Showing all comments", heading: "You don't have any comments yet", text: "Once you comment in a community, it'll show up here. If you'd rather hide your comments, update your settings." },
+    "Overview": { 
+      title: "Showing all content", 
+      heading: isSelf ? "You don't have any posts yet" : `u/${username} doesn't have any posts yet`, 
+      text: isSelf ? "Once you post to a community, it'll show up here. If you'd rather hide your posts, update your settings." : "" 
+    },
+    "Posts": { 
+      title: `Posts by u/${username}`, 
+      heading: isSelf ? "You don't have any posts yet" : `u/${username} doesn't have any posts yet`, 
+      text: isSelf ? "Once you post to a community, it'll show up here. If you'd rather hide your posts, update your settings." : "" 
+    },
+    "Comments": { 
+      title: "Showing all comments", 
+      heading: isSelf ? "You don't have any comments yet" : `u/${username} doesn't have any comments yet`, 
+      text: isSelf ? "Once you comment in a community, it'll show up here. If you'd rather hide your comments, update your settings." : "" 
+    },
     "Saved": { title: "Saved content", heading: "Looks like you haven't saved anything yet", text: "" },
     "History": { title: "History", heading: "Looks like you haven't visited any posts yet", text: "" },
     "Hidden": { title: "Hidden content", heading: "Looks like you haven't hidden anything yet", text: "" },
