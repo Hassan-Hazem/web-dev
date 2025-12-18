@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
+import '../css/AuthModal.css';
 
 
 export default function ForgotPasswordRequest({ onSuccess }) {
@@ -32,25 +33,43 @@ export default function ForgotPasswordRequest({ onSuccess }) {
     };
 
 return (
-        <div className="auth-modal-container"> 
-            <div className="auth-modal-box"> {/* Inner Box for centering content */}
-                <h2 className="modal-title">Reset your password</h2>
-                <p className="modal-description">Enter your email address or username and we'll send you a link to reset your password</p>
-                
-                {/* ... error display ... */}
+        <div className="forgot-password-container">
+            <div className="forgot-password-card">
+                <div className="forgot-password-header">
+                    <h2 className="forgot-password-title">Reset your password</h2>
+                    <p className="forgot-password-description">
+                        Enter your email address or username and we'll send you a link to reset your password.
+                    </p>
+                </div>
 
-                <form onSubmit={handleSubmit}>
-                    <div className="input-group">
+                {error && (
+                    <div className="forgot-password-error">
+                        {error}
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="forgot-password-form">
+                    <div className="forgot-password-input-group">
+                        <label htmlFor="identifier" className="forgot-password-label">
+                            Email or username
+                        </label>
                         <input
+                            id="identifier"
                             type="text"
-                            placeholder="Email or username *"
+                            className="forgot-password-input"
+                            placeholder="Enter your email or username"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
+                            required
                         />
                     </div>
-                    {/* ... (Need help link if desired) ... */}
-                    <button type="submit" disabled={loading} className="full-width-button">
-                        {loading ? 'Sending...' : 'Reset password'}
+
+                    <button 
+                        type="submit" 
+                        disabled={loading || !input.trim()} 
+                        className="forgot-password-submit-btn"
+                    >
+                        {loading ? 'Sending...' : 'Send reset link'}
                     </button>
                 </form>
             </div>
