@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 import api from "../api/axios";
 import { updateUserProfile } from "../api/userApi";
-import { getUserComments } from "../api/commentApi";
+import { getUserComments, voteOnComment } from "../api/commentApi";
 import CreatePostModal from "../components/react/CreatePostModal";
 import ProfileRightSidebar from "../components/react/ProfileRightSidebar";
 import PostCard from "../components/react/PostCard";
@@ -144,6 +144,56 @@ export default function UserProfilePage() {
 
     fetchUserComments();
   }, [activeTab, profileData?.username]);
+
+  const handleCommentVote = async (commentId, voteType) => {
+    // Require auth to vote
+    if (!user) {
+      // No modal on profile page; simply ignore if logged out
+      return;
+    }
+
+    const target = userComments.find((c) => c._id === commentId);
+    if (!target) return;
+
+    const prevVote = target.userVote || null;
+    const prevScore = typeof target.score === "number"
+      ? target.score
+      : (target.upvotes || 0) - (target.downvotes || 0);
+
+    const nextVote = prevVote === voteType ? null : voteType;
+
+    let delta = 0;
+    if (prevVote === "up") delta -= 1;
+    if (prevVote === "down") delta += 1;
+    if (nextVote === "up") delta += 1;
+    if (nextVote === "down") delta -= 1;
+
+    // Optimistic update
+    setUserComments((prev) => prev.map((c) => (
+      c._id === commentId ? { ...c, userVote: nextVote, score: prevScore + delta } : c
+    )));
+
+    try {
+      const res = await voteOnComment(commentId, voteType);
+      const updated = res.comment || res;
+      setUserComments((prev) => prev.map((c) => (
+        c._id === commentId
+          ? {
+              ...c,
+              ...updated,
+              userVote: nextVote,
+              score: (updated?.upvotes || 0) - (updated?.downvotes || 0),
+            }
+          : c
+      )));
+    } catch (err) {
+      console.error("Vote error (profile page):", err);
+      // Revert on failure
+      setUserComments((prev) => prev.map((c) => (
+        c._id === commentId ? { ...c, userVote: prevVote, score: prevScore } : c
+      )));
+    }
+  };
 
 
   // If viewing own profile without being logged in, prompt login.
@@ -365,15 +415,17 @@ export default function UserProfilePage() {
                     <div 
                       key={comment._id} 
                       className="user-comment-item"
-                      onClick={() => navigate(`/post/${comment.post?._id}`)}
-                      style={{ cursor: 'pointer' }}
                     >
-                      <div className="comment-post-context">
+                      <div
+                        className="comment-post-context"
+                        onClick={() => navigate(`/post/${comment.post?._id}`)}
+                        style={{ cursor: 'pointer' }}
+                      >
                         <span className="comment-post-title">
                           {comment.post?.title || "Post"}
                         </span>
                       </div>
-                      <CommentCard comment={comment} />
+                      <CommentCard comment={comment} onVote={handleCommentVote} />
                     </div>
                   ))}
                 </>

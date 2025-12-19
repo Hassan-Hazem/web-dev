@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "../css/CommentCard.css";
 
 const formatTimeAgo = (isoDate) => {
@@ -84,7 +85,13 @@ export default function CommentCard({
 
       <div className="comment-body">
         <div className="comment-header">
-          <span className="comment-author">u/{authorName}</span>
+          {authorName && authorName !== "deleted" ? (
+            <Link to={`/user/${encodeURIComponent(authorName)}`} className="comment-author">
+              u/{authorName}
+            </Link>
+          ) : (
+            <span className="comment-author">u/{authorName}</span>
+          )}
           <span className="comment-meta">• {createdLabel}</span>
         </div>
 

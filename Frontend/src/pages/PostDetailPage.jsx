@@ -455,136 +455,247 @@ export default function PostDetailPage() {
               <p className="no-comments">No comments yet. Be the first to share your thoughts.</p>
             ) : (
               comments.map((comment) => (
-                <CommentCard
-                  key={comment._id}
-                  comment={comment}
-                  onVote={handleCommentVote}
-                  canDelete={user && comment.author?._id === user._id}
-                  canEdit={user && comment.author?._id === user._id}
-                  onDelete={handleDeleteComment}
-                  onReply={() => handleStartReply(comment._id)}
-                  onEdit={() => handleStartEdit(comment)}
-                  isEditing={editingId === comment._id}
-                  editValue={editText}
-                  onEditChange={setEditText}
-                  onEditSubmit={() => handleEditSubmit(comment._id)}
-                  onCancelEdit={() => {
-                    setEditingId(null);
-                    setEditText("");
-                  }}
-                  showReplies
-                  onToggleReplies={() => toggleReplies(comment._id)}
-                  repliesOpen={!!replyState[comment._id]?.open}
-                  repliesLoading={!!replyState[comment._id]?.loading}
-                  repliesError={replyState[comment._id]?.error}
-                />
+                <div key={comment._id} className="comment-thread">
+                  <CommentCard
+                    comment={comment}
+                    onVote={handleCommentVote}
+                    canDelete={user && comment.author?._id === user._id}
+                    canEdit={user && comment.author?._id === user._id}
+                    onDelete={handleDeleteComment}
+                    onReply={() => handleStartReply(comment._id)}
+                    onEdit={() => handleStartEdit(comment)}
+                    isEditing={editingId === comment._id}
+                    editValue={editText}
+                    onEditChange={setEditText}
+                    onEditSubmit={() => handleEditSubmit(comment._id)}
+                    onCancelEdit={() => {
+                      setEditingId(null);
+                      setEditText("");
+                    }}
+                    showReplies
+                    onToggleReplies={() => toggleReplies(comment._id)}
+                    repliesOpen={!!replyState[comment._id]?.open}
+                    repliesLoading={!!replyState[comment._id]?.loading}
+                    repliesError={replyState[comment._id]?.error}
+                  />
+                  
+                  {/* Reply form directly under parent comment */}
+                  {activeReply === comment._id && (
+                    <div className="reply-block">
+                      <textarea
+                        className="comment-textarea"
+                        placeholder="Write your reply"
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        rows={3}
+                        disabled={replying}
+                      />
+                      <div className="reply-actions">
+                        <button
+                          type="button"
+                          className="comment-submit-btn secondary"
+                          onClick={() => {
+                            setActiveReply(null);
+                            setReplyText("");
+                          }}
+                          disabled={replying}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          className="comment-submit-btn"
+                          onClick={() => handleReplySubmit(activeReply)}
+                          disabled={replying || !replyText.trim()}
+                        >
+                          {replying ? "Posting..." : "Post Reply"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Replies directly under parent comment */}
+                  {replyState[comment._id]?.open && (
+                    <div className="reply-thread">
+                      {replyState[comment._id]?.error && (
+                        <p className="comment-error">{replyState[comment._id].error}</p>
+                      )}
+                      {replyState[comment._id]?.loading && (
+                        <p className="reply-loading">Loading replies...</p>
+                      )}
+                      {(replyState[comment._id]?.items || []).map((reply) => (
+                        <div key={reply._id}>
+                          <CommentCard
+                            comment={reply}
+                            onVote={handleCommentVote}
+                            canDelete={user && reply.author?._id === user._id}
+                            canEdit={user && reply.author?._id === user._id}
+                            onDelete={handleDeleteComment}
+                            onReply={() => handleStartReply(reply._id)}
+                            onEdit={() => handleStartEdit(reply)}
+                            isEditing={editingId === reply._id}
+                            editValue={editText}
+                            onEditChange={setEditText}
+                            onEditSubmit={() => handleEditSubmit(reply._id)}
+                            onCancelEdit={() => {
+                              setEditingId(null);
+                              setEditText("");
+                            }}
+                            isReply
+                            showReplies
+                            onToggleReplies={() => toggleReplies(reply._id)}
+                            repliesOpen={!!replyState[reply._id]?.open}
+                            repliesLoading={!!replyState[reply._id]?.loading}
+                            repliesError={replyState[reply._id]?.error}
+                          />
+                          
+                          {/* Reply form for nested replies */}
+                          {activeReply === reply._id && (
+                            <div className="reply-block">
+                              <textarea
+                                className="comment-textarea"
+                                placeholder="Write your reply"
+                                value={replyText}
+                                onChange={(e) => setReplyText(e.target.value)}
+                                rows={3}
+                                disabled={replying}
+                              />
+                              <div className="reply-actions">
+                                <button
+                                  type="button"
+                                  className="comment-submit-btn secondary"
+                                  onClick={() => {
+                                    setActiveReply(null);
+                                    setReplyText("");
+                                  }}
+                                  disabled={replying}
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  type="button"
+                                  className="comment-submit-btn"
+                                  onClick={() => handleReplySubmit(activeReply)}
+                                  disabled={replying || !replyText.trim()}
+                                >
+                                  {replying ? "Posting..." : "Post Reply"}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Nested replies */}
+                          {replyState[reply._id]?.open && (
+                            <div className="reply-thread">
+                              {replyState[reply._id]?.error && (
+                                <p className="comment-error">{replyState[reply._id].error}</p>
+                              )}
+                              {replyState[reply._id]?.loading && (
+                                <p className="reply-loading">Loading replies...</p>
+                              )}
+                              {(replyState[reply._id]?.items || []).map((nestedReply) => (
+                                <div key={nestedReply._id}>
+                                  <CommentCard
+                                    comment={nestedReply}
+                                    onVote={handleCommentVote}
+                                    canDelete={user && nestedReply.author?._id === user._id}
+                                    canEdit={user && nestedReply.author?._id === user._id}
+                                    onDelete={handleDeleteComment}
+                                    onReply={() => handleStartReply(nestedReply._id)}
+                                    onEdit={() => handleStartEdit(nestedReply)}
+                                    isEditing={editingId === nestedReply._id}
+                                    editValue={editText}
+                                    onEditChange={setEditText}
+                                    onEditSubmit={() => handleEditSubmit(nestedReply._id)}
+                                    onCancelEdit={() => {
+                                      setEditingId(null);
+                                      setEditText("");
+                                    }}
+                                    isReply
+                                    showReplies
+                                    onToggleReplies={() => toggleReplies(nestedReply._id)}
+                                    repliesOpen={!!replyState[nestedReply._id]?.open}
+                                    repliesLoading={!!replyState[nestedReply._id]?.loading}
+                                    repliesError={replyState[nestedReply._id]?.error}
+                                  />
+                                  
+                                  {/* Reply form for third level */}
+                                  {activeReply === nestedReply._id && (
+                                    <div className="reply-block">
+                                      <textarea
+                                        className="comment-textarea"
+                                        placeholder="Write your reply"
+                                        value={replyText}
+                                        onChange={(e) => setReplyText(e.target.value)}
+                                        rows={3}
+                                        disabled={replying}
+                                      />
+                                      <div className="reply-actions">
+                                        <button
+                                          type="button"
+                                          className="comment-submit-btn secondary"
+                                          onClick={() => {
+                                            setActiveReply(null);
+                                            setReplyText("");
+                                          }}
+                                          disabled={replying}
+                                        >
+                                          Cancel
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="comment-submit-btn"
+                                          onClick={() => handleReplySubmit(activeReply)}
+                                          disabled={replying || !replyText.trim()}
+                                        >
+                                          {replying ? "Posting..." : "Post Reply"}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {/* Third level nested replies */}
+                                  {replyState[nestedReply._id]?.open && (
+                                    <div className="reply-thread">
+                                      {replyState[nestedReply._id]?.error && (
+                                        <p className="comment-error">{replyState[nestedReply._id].error}</p>
+                                      )}
+                                      {replyState[nestedReply._id]?.loading && (
+                                        <p className="reply-loading">Loading replies...</p>
+                                      )}
+                                      {(replyState[nestedReply._id]?.items || []).map((deepReply) => (
+                                        <CommentCard
+                                          key={deepReply._id}
+                                          comment={deepReply}
+                                          onVote={handleCommentVote}
+                                          canDelete={user && deepReply.author?._id === user._id}
+                                          canEdit={user && deepReply.author?._id === user._id}
+                                          onDelete={handleDeleteComment}
+                                          onEdit={() => handleStartEdit(deepReply)}
+                                          isEditing={editingId === deepReply._id}
+                                          editValue={editText}
+                                          onEditChange={setEditText}
+                                          onEditSubmit={() => handleEditSubmit(deepReply._id)}
+                                          onCancelEdit={() => {
+                                            setEditingId(null);
+                                            setEditText("");
+                                          }}
+                                          isReply
+                                        />
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))
             )}
-
-            {activeReply && (
-              <div className="reply-block">
-                <textarea
-                  className="comment-textarea"
-                  placeholder="Write your reply"
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  rows={3}
-                  disabled={replying}
-                />
-                <div className="reply-actions">
-                  <button
-                    type="button"
-                    className="comment-submit-btn secondary"
-                    onClick={() => {
-                      setActiveReply(null);
-                      setReplyText("");
-                    }}
-                    disabled={replying}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    className="comment-submit-btn"
-                    onClick={() => handleReplySubmit(activeReply)}
-                    disabled={replying || !replyText.trim()}
-                  >
-                    {replying ? "Posting..." : "Post Reply"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {comments.map((comment) => (
-              replyState[comment._id]?.open ? (
-                <div className="reply-thread" key={`${comment._id}-replies`}>
-                  {replyState[comment._id]?.error && (
-                    <p className="comment-error">{replyState[comment._id].error}</p>
-                  )}
-                  {replyState[comment._id]?.loading && (
-                    <p className="reply-loading">Loading replies...</p>
-                  )}
-                  {(replyState[comment._id]?.items || []).map((reply) => (
-                    <div key={reply._id}>
-                      <CommentCard
-                        comment={reply}
-                        onVote={handleCommentVote}
-                        canDelete={user && reply.author?._id === user._id}
-                        canEdit={user && reply.author?._id === user._id}
-                        onDelete={handleDeleteComment}
-                        onReply={() => handleStartReply(reply._id)}
-                        onEdit={() => handleStartEdit(reply)}
-                        isEditing={editingId === reply._id}
-                        editValue={editText}
-                        onEditChange={setEditText}
-                        onEditSubmit={() => handleEditSubmit(reply._id)}
-                        onCancelEdit={() => {
-                          setEditingId(null);
-                          setEditText("");
-                        }}
-                        isReply
-                        showReplies
-                        onToggleReplies={() => toggleReplies(reply._id)}
-                        repliesOpen={!!replyState[reply._id]?.open}
-                        repliesLoading={!!replyState[reply._id]?.loading}
-                        repliesError={replyState[reply._id]?.error}
-                      />
-                      {replyState[reply._id]?.open && (
-                        <div className="reply-thread">
-                          {replyState[reply._id]?.error && (
-                            <p className="comment-error">{replyState[reply._id].error}</p>
-                          )}
-                          {replyState[reply._id]?.loading && (
-                            <p className="reply-loading">Loading replies...</p>
-                          )}
-                          {(replyState[reply._id]?.items || []).map((nestedReply) => (
-                            <CommentCard
-                              key={nestedReply._id}
-                              comment={nestedReply}
-                              onVote={handleCommentVote}
-                              canDelete={user && nestedReply.author?._id === user._id}
-                              canEdit={user && nestedReply.author?._id === user._id}
-                              onDelete={handleDeleteComment}
-                              onReply={() => handleStartReply(nestedReply._id)}
-                              onEdit={() => handleStartEdit(nestedReply)}
-                              isEditing={editingId === nestedReply._id}
-                              editValue={editText}
-                              onEditChange={setEditText}
-                              onEditSubmit={() => handleEditSubmit(nestedReply._id)}
-                              onCancelEdit={() => {
-                                setEditingId(null);
-                                setEditText("");
-                              }}
-                              isReply
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : null
-            ))}
           </div>
         </div>
       </div>

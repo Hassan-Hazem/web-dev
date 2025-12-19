@@ -40,27 +40,45 @@
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transition: left 200ms cubic-bezier(.4,0,.2,1), background 0.15s, border-color 0.15s, box-shadow 0.15s;
   z-index: 101;
+  /* Fallback background icon in case SVG doesn't render */
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg' fill='none'%3E%3Cpath d='M3 5 H17' stroke='%23333' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M3 10 H17' stroke='%23333' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M3 15 H17' stroke='%23333' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 20px 20px;
 }
 
 .sidebar-edge-toggle svg {
   display: block;
   width: 20px;
   height: 20px;
-  color: #000;
+  color: #333 !important;
+  pointer-events: none;
 }
 
-.sidebar-edge-toggle svg line {
-  stroke: currentColor;
-  stroke-width: 2;
+.sidebar-edge-toggle svg path {
+  /* Force visible lines regardless of any global overrides */
+  stroke: #333 !important;
+  fill: none !important;
+  stroke-width: 2.5 !important;
+  stroke-linecap: round !important;
+  pointer-events: none;
+}
+
+/* Extra specificity guard */
+.sidebar-edge-toggle .hamburger-svg path {
+  stroke: #333 !important;
+  fill: none !important;
 }
 
 /* When sidebar is collapsed, move button to left edge */
 .sidebar-edge-toggle[data-sidebar-open="false"] {
+  /* Half outside the screen on collapse (40px button -> -20px) */
   left: -20px;
 }
 
 .sidebar-edge-toggle:hover {
-  background: #f6f7f8;
+  /* Keep background-image; only adjust color on hover */
+  background-color: #f6f7f8;
   border-color: #dcdcdc;
   box-shadow: 0 3px 10px rgba(0,0,0,0.12);
 }
