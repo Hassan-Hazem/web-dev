@@ -1,33 +1,41 @@
-import e from 'express';
-import nodemailer from 'nodemailer';
+import sgMail from "@sendgrid/mail";
 
+const SENDGRID_FROM = process.env.SENDGRID_FROM_EMAIL || process.env.EMAIL_USER;
 
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true for 465, false for other ports
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-    // Adding timeouts helps prevent the request from hanging indefinitely
-    connectionTimeout: 10000, 
-    greetingTimeout: 10000,
-});
-
-
-export const generateVerificationCode = () => {
-   
-    return Math.floor(100000 + Math.random() * 900000).toString();
+const ensureEmailConfig = () => {
+  if (!process.env.SENDGRID_API_KEY) {
+    throw new Error("Missing SENDGRID_API_KEY environment variable");
+  }
+  if (!SENDGRID_FROM) {
+    throw new Error(
+      "Missing SENDGRID_FROM_EMAIL (or EMAIL_USER) environment variable"
+    );
+  }
 };
 
+const sendMail = async (options) => {
+  ensureEmailConfig();
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  const msg = {
+    ...options,
+    from: {
+      email: SENDGRID_FROM,
+      name: "Reddit Clone",
+    },
+  };
+  await sgMail.send(msg);
+};
+
+export const generateVerificationCode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
 export const sendVerificationEmail = async (email, code) => {
-    const mailOptions = {
-        from: `Reddit Clone <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: 'Verify Your Reddit  Account',
-        html: `
+  try {
+    await sendMail({
+      to: email,
+      subject: "Verify Your Reddit Account",
+      html: `
             <div style="font-family: Arial, sans-serif; line-height: 1.6;">
                 <h2>Welcome to Reddit Clone!</h2>
                 <p>Thank you for registering. Please use the following code to verify your email address:</p>
@@ -36,33 +44,28 @@ export const sendVerificationEmail = async (email, code) => {
                 <p>The Reddit Team</p>
             </div>
         `,
-    };
-
-    try {
-        await transporter.sendMail(mailOptions);
-        console.log(`Verification email sent to ${email}`);
-    } catch (error) {
-        console.error(`Error sending verification email to ${email}:`, error);
-        throw new Error('Failed to send verification email.');
-    }
+    });
+    console.log(`Verification email sent to ${email}`);
+  } catch (error) {
+    console.error(`Error sending verification email to ${email}:`, error);
+    throw new Error("Failed to send verification email.");
+  }
 };
 
 export const sendPasswordResetEmail = async (email, resetUrl) => {
-    const mailOptions = {
-        from: `Reddit Clone <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: 'Password Reset Request',
-        html: `
+  try {
+    await sendMail({
+      to: email,
+      subject: "Password Reset Request",
+      html: `
             <p>You requested a password reset. Click the link below to set a new password:</p>
             <p><a href="${resetUrl}">Reset Password</a></p>
             <p>This link is valid for 1 hour.</p>
         `,
-    };
-    try {
-        await transporter.sendMail(mailOptions);
-        console.log(`Reset Password email sent to ${email}`);
-    } catch (error) {
-        console.error(`Error sending Reset Password email to ${email}:`, error);
-        throw new Error('Failed to send Reset Password email.');
-    }
+    });
+    console.log(`Reset Password email sent to ${email}`);
+  } catch (error) {
+    console.error(`Error sending Reset Password email to ${email}:`, error);
+    throw new Error("Failed to send Reset Password email.");
+  }
 };
