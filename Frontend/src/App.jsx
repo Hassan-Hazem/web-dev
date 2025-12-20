@@ -25,17 +25,12 @@ function App() {
       <div>
         <Navbar />
         <div className="app-body">
-
-          
-          {/* Sidebar from main branch */}
           <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
-          {/* Overlay click to close sidebar (from main) */}
           {isSidebarOpen && (
             <div className="sidebar-backdrop" onClick={closeSidebar} />
           )}
 
-          {/* Main content wrapper (from main) */}
           <main className={`main-content ${isSidebarOpen ? "sidebar-open" : ""}`}>
             <Routes>
               <Route path="/auth/success" element={<AuthSuccess />} />

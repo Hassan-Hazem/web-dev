@@ -28,7 +28,8 @@ api.interceptors.response.use(
       if (!isLoginRequest && localStorage.getItem('token')) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        // Notify app about logout; let router handle navigation to login/home
+        // Handle session expiration: dispatch logout event to trigger AuthContext cleanup
+        // This allows the app to handle the expired session gracefully without a full page reload
         window.dispatchEvent(new Event('auth:logout'));
       }
     }
