@@ -40,7 +40,11 @@ This platform replicates core Reddit functionality while incorporating cutting-e
 - Email verification for new accounts
 - Password reset functionality with secure tokens
 - Google OAuth 2.0 integration for social login
-- User profiles with customizable avatars and bio
+- **Rich User Profiles** with customization options:
+  - Custom avatars and profile banners
+  - Editable bio and username
+  - User interests management
+  - Profile karma and statistics tracking
 
 ### 👥 Community Management
 
@@ -57,6 +61,8 @@ This platform replicates core Reddit functionality while incorporating cutting-e
   - Link posts with URL validation
 - **Nested Commenting System**: Multi-level threaded discussions
 - **Polymorphic Voting**: Upvote/downvote system for both posts and comments
+- **Share Functionality**: Share posts and comments via Web Share API or clipboard
+- **AI Summarization Modal**: Quick access to post summaries with dedicated UI
 - **Real-time Updates**: Dynamic content loading and interactions
 
 ### 🤖 AI-Powered Features
@@ -71,6 +77,11 @@ This platform replicates core Reddit functionality while incorporating cutting-e
 - Popular posts across all communities
 - Explore page for discovering new communities
 - Search functionality with filtering options
+- **User Activity Tracking**:
+  - Upvoted posts history
+  - Downvoted posts history
+  - User comments view
+  - Personal post archives
 
 ## 🗄️ Database Architecture
 
@@ -409,6 +420,5 @@ This project is deployed on [Render](https://render.com) with the following arch
 - Configure network access to allow connections from Render
 - Add connection string to Backend's `MONGO_URI`
 - Enable backups and monitoring
-
 
 **Built with ❤️ using modern web technologies**
