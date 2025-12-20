@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import { summarizePost } from "../../api/aiApi";
 import "../css/SummarizeModal.css";

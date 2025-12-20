@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../context/authContext";
@@ -46,7 +46,7 @@ export default function CommunityPage() {
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarError, setAvatarError] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const avatarInputRef = React.useRef(null);
+  const avatarInputRef = useRef(null);
   
 
   const loadCommunity = useCallback(async () => {
@@ -477,7 +477,9 @@ useEffect(() => {
                                   JSON.stringify(updatedRecents)
                                 );
                                  window.dispatchEvent(new Event("recentsUpdated"));
-                              } catch {}
+                              } catch {
+                                // Ignore localStorage errors
+                              }
                               navigate(
                                 `/community/${encodeURIComponent(updated.name)}`,
                                 { replace: true }

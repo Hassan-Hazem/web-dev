@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../api/axios"; 
 import "./PopularPage.css";
 import PostCard from "../components/react/PostCard";
@@ -37,7 +37,7 @@ export default function PopularPage() {
     };
 
     fetchPosts();
-  }, [page]);
+  }, [page, hasMore]);
 
   // Infinite Scroll Listener
   useEffect(() => {

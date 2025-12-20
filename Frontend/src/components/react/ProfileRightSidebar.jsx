@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { getMyProfile, updateUserProfile as updateUserProfileApi } from "../../api/userApi";
 import api from "../../api/axios";
 import "../css/ProfileRightSidebar.css";

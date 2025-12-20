@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "../css/AuthModal.css";
 import Login from "./Login";
 import Signup from "./Signup";
@@ -9,7 +9,6 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }) {
   const [view, setView] = useState(initialView);
   const [signupStep, setSignupStep] = useState(1);
   const [registrationEmail, setRegistrationEmail] = useState("");
-  const [userData, setUserData] = useState(null);
 
   if (!isOpen) return null;
 
@@ -34,8 +33,7 @@ export default function AuthModal({ isOpen, onClose, initialView = "login" }) {
     setView("verify");
   };
 
-  const handleVerificationComplete = (data) => {
-    setUserData(data);
+  const handleVerificationComplete = () => {
     setView("interests");
   };
 

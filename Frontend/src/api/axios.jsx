@@ -28,7 +28,8 @@ api.interceptors.response.use(
       if (!isLoginRequest && localStorage.getItem('token')) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '/';
+        // Notify app about logout; let router handle navigation to login/home
+        window.dispatchEvent(new Event('auth:logout'));
       }
     }
     return Promise.reject(error);

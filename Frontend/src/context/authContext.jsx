@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import { createContext, useState, useContext } from 'react';
 import { loginUser, fetchCurrentUser } from '../api/authApi';
 
 const AuthContext = createContext();
@@ -45,19 +45,26 @@ export const AuthProvider = ({ children }) => {
         };
       }
 
+      // Persist token first so fetchCurrentUser can use it
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify({
-        _id: data._id,
-        username: data.username,
-        email: data.email
-      }));
-
       setToken(data.token);
-      setUser({
-        _id: data._id,
-        username: data.username,
-        email: data.email
-      });
+
+      // Hydrate full user (includes profilePictureUrl)
+      try {
+        const fullUser = await fetchCurrentUser();
+        localStorage.setItem('user', JSON.stringify(fullUser));
+        setUser(fullUser);
+      } catch (fetchErr) {
+        console.error("Fetch current user after login failed, falling back to payload", fetchErr);
+        const fallbackUser = {
+          _id: data._id,
+          username: data.username,
+          email: data.email,
+          profilePictureUrl: data.profilePictureUrl,
+        };
+        localStorage.setItem('user', JSON.stringify(fallbackUser));
+        setUser(fallbackUser);
+      }
       
       setLoading(false);
       return { success: true };

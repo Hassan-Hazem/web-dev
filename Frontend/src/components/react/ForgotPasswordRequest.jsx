@@ -1,6 +1,6 @@
 // File: Frontend/components/auth/ForgotPasswordRequest.jsx
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import '../css/AuthModal.css';
 
@@ -25,7 +25,7 @@ export default function ForgotPasswordRequest({ onSuccess }) {
             // If the request succeeds (even if the user doesn't exist, for security)
             onSuccess(input); 
 
-        } catch (err) {
+        } catch {
             // On hard failure (e.g., server offline), display an error.
             setError('An error occurred. Please try again later.');
             setLoading(false);

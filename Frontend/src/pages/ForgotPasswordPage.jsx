@@ -1,6 +1,6 @@
 // File: Frontend/pages/ForgotPasswordPage.jsx
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import ForgotPasswordRequest from '../components/react/ForgotPasswordRequest.jsx';
 import ForgotPasswordCheckInbox from '../components/react/ForgotPasswordCheckInbox.jsx';
 // You may need to adjust the path to your components folder

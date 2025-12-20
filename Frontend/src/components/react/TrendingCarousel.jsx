@@ -1,4 +1,3 @@
-import React from "react";
 import "../css/TrendingCarousel.css";
 
 const trendingCarouselData = [

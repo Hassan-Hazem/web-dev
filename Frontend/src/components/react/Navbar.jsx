@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import "../css/Navbar.css";
 import redditLogo from "../../assets/images/reddit_logo.png";
 import AuthModal from "./AuthModal";
 import CreatePostModal from "./CreatePostModal";
 import { useAuth } from "../../context/authContext";
 import { useNavigate } from "react-router-dom"; 
-import { getMyProfile, searchUsers } from "../../api/userApi";
+import { searchUsers } from "../../api/userApi";
 import { searchCommunities } from "../../api/communityApi";
 
 export default function Navbar() {
@@ -13,7 +13,6 @@ export default function Navbar() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [authView, setAuthView] = useState("login");
-  const [profilePicUrl, setProfilePicUrl] = useState(null);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,28 +29,6 @@ export default function Navbar() {
 
   const navigate = useNavigate(); 
   
-  useEffect(() => {
-    // No user or already have avatar in auth context: nothing to do
-    if (!user || user.profilePictureUrl) return;
-
-    let isMounted = true;
-    const loadProfile = async () => {
-      try {
-        const data = await getMyProfile();
-        if (isMounted) setProfilePicUrl(data?.profilePictureUrl || null);
-      } catch (err) {
-        if (isMounted) {
-          console.error("Failed to load profile picture", err);
-          setProfilePicUrl(null);
-        }
-      }
-    };
-
-    loadProfile();
-    return () => {
-      isMounted = false;
-    };
-  }, [user]);
 
   // Handle click outside to close search results
   useEffect(() => {
@@ -143,7 +120,7 @@ export default function Navbar() {
     }
   };
 
-  const avatarUrl = user?.profilePictureUrl || profilePicUrl;
+  const avatarUrl = user?.profilePictureUrl;
 
   const openLoginModal = () => {
     setAuthView("login");
