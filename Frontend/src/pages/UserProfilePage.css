@@ -166,6 +166,18 @@
   white-space: nowrap;
 }
 
+/* Remove default focus outline/box on click */
+.profile-tab:focus,
+.profile-tab:active {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Keep keyboard accessibility without the heavy default ring */
+.profile-tab:focus-visible {
+  outline: none;
+}
+
 .profile-tab:hover {
   color: #1a1a1b;
 }

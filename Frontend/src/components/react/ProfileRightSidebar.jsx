@@ -143,7 +143,7 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
 
       const coverUrl = uploadResponse.data.filePath;
 
-      const updateResponse = await updateUserProfileApi({ coverPictureUrl: coverUrl });
+      const _updateResponse = await updateUserProfileApi({ coverPictureUrl: coverUrl });
 
       const refreshedProfile = await getMyProfile();
       
@@ -210,7 +210,7 @@ export default function ProfileRightSidebar({ username, joinDate, karma, redditA
     setBioSaving(true);
 
     try {
-      const updateResponse = await updateUserProfileApi({ bio: bioText });
+      const _updateResponse = await updateUserProfileApi({ bio: bioText });
       
       const refreshedProfile = await getMyProfile();
       setProfileData(refreshedProfile);
@@ -259,7 +259,7 @@ async function handleUsernameSave() {
   setUsernameSaving(true);
 
   try {
-    const updateResponse = await updateUserProfileApi({ username: trimmedUsername });
+    const _updateResponse = await updateUserProfileApi({ username: trimmedUsername });
     
     const refreshedProfile = await getMyProfile();
     setProfileData(refreshedProfile);
@@ -297,6 +297,38 @@ async function handleUsernameSave() {
     setProfileData(refreshedProfile);
     setIsInterestsModalOpen(false);
   }
+
+  const handleShareProfile = async () => {
+    const profileUrl = `https://redditfront.onrender.com/user/${username}`;
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${username}'s Profile`,
+          url: profileUrl
+        });
+        return;
+      }
+      
+      await navigator.clipboard.writeText(profileUrl);
+      alert("Profile link copied to clipboard!");
+    } catch (err) {
+      console.error("Share failed:", err);
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = profileUrl;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        alert("Profile link copied to clipboard!");
+      } catch (e) {
+        console.error("Clipboard fallback failed:", e);
+      }
+    }
+  };
 
   const redditAge = profileData?.createdAt
     ? Math.floor((Date.now() - new Date(profileData.createdAt).getTime()) / (1000 * 60 * 60 * 24))
@@ -367,7 +399,7 @@ async function handleUsernameSave() {
               <p className="rs-identity-label">Joined</p>
               <p className="rs-identity-value">{createdDate}</p>
             </div>
-            {isSelf && <button className="rs-button inline">Share</button>}
+            <button className="rs-button inline" onClick={handleShareProfile}>Share</button>
           </div>
         </div>
 

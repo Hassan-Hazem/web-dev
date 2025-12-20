@@ -100,6 +100,40 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
     setShowMenu(false);
   };
 
+  const handleShare = async () => {
+    const postUrl = `https://redditfront.onrender.com/post/${post._id}`;
+    
+    try {
+      // Try native Web Share API first (mobile/modern browsers)
+      if (navigator.share) {
+        await navigator.share({
+          title: post.title,
+          url: postUrl
+        });
+        return;
+      }
+      
+      // Fallback to clipboard
+      await navigator.clipboard.writeText(postUrl);
+     
+    } catch (err) {
+      console.error("Share failed:", err);
+      // Manual fallback for older browsers
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = postUrl;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      } catch (e) {
+        console.error("Clipboard fallback failed:", e);
+      }
+    }
+  };
+
   return (
     <>
       {showLoginModal && createPortal(
@@ -254,7 +288,7 @@ export default function PostCard({ post, onDelete, showBackButton, onBack }) {
             <span className="action-icon comment" />
             {commentCount} Comments
           </button>
-          <button className="action-btn">
+          <button className="action-btn" onClick={handleShare}>
             <span className="action-icon share" />
             Share
           </button>

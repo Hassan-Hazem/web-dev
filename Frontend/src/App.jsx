@@ -12,9 +12,8 @@ import AuthSuccess from "./pages/AuthSuccess";
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import SearchResultsPage from "./pages/SearchResultsPage";
-
 import "./App.css";
-import Interests from "./components/react/Interests";
+
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);

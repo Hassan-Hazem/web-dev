@@ -57,6 +57,38 @@ export default function CommentCard({
     onVote(comment._id, type);
   };
 
+  const handleShare = async () => {
+    const commentUrl = `https://redditfront.onrender.com/post/${comment.post?._id || comment.post}`;
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `Comment by ${authorName}`,
+          url: commentUrl
+        });
+        return;
+      }
+      
+      await navigator.clipboard.writeText(commentUrl);
+      alert("Comment link copied to clipboard!");
+    } catch (err) {
+      console.error("Share failed:", err);
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = commentUrl;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        alert("Comment link copied to clipboard!");
+      } catch (e) {
+        console.error("Clipboard fallback failed:", e);
+      }
+    }
+  };
+
   return (
     <div className={`comment-card ${isReply ? "is-reply" : ""}`}>
       <div className="comment-votes">
@@ -122,7 +154,7 @@ export default function CommentCard({
               Reply
             </button>
           )}
-          <button className="comment-btn">Share</button>
+          <button className="comment-btn" onClick={handleShare}>Share</button>
           {canEdit && onEdit && !isEditing && (
             <button className="comment-btn" onClick={onEdit}>
               Edit

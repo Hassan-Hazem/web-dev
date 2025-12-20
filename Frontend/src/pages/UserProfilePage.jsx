@@ -340,6 +340,38 @@ export default function UserProfilePage() {
     }
   };
 
+  const handleShareProfile = async () => {
+    const profileUrl = `https://redditfront.onrender.com/user/${username}`;
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${username}'s Profile`,
+          url: profileUrl
+        });
+        return;
+      }
+      
+      await navigator.clipboard.writeText(profileUrl);
+      alert("Profile link copied to clipboard!");
+    } catch (err) {
+      console.error("Share failed:", err);
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = profileUrl;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        alert("Profile link copied to clipboard!");
+      } catch (e) {
+        console.error("Clipboard fallback failed:", e);
+      }
+    }
+  };
+
   return (
     <div className="profile-wrapper">
       <CreatePostModal isOpen={isCreatePostOpen} onClose={() => setIsCreatePostOpen(false)} />
@@ -386,7 +418,7 @@ export default function UserProfilePage() {
               </div>
             </div>
             <div className="profile-actions">
-              <button className="profile-share-btn" aria-label="Share profile">Share</button>
+              <button className="profile-share-btn" onClick={handleShareProfile} aria-label="Share profile">Share</button>
             </div>
           </div>
           {isSelf && avatarError && <p className="profile-avatar-error" role="alert">{avatarError}</p>}
